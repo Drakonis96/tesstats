@@ -1,0 +1,16 @@
+{
+  "name": "tesstats-push",
+  "version": "1.0.0",
+  "description": "Optional MQTT → APNs push microservice for immediate Tesstats alerts (Sentry, security).",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "mqtt": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

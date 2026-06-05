@@ -1,0 +1,36 @@
+## macOS
+.DS_Store
+*.swp
+
+## Xcode build output & indexes
+build/
+build-mac/
+build-ios-device/
+DerivedData/
+*.xcuserstate
+**/xcuserdata/
+
+## Generated Xcode project — regenerate from project.yml with `xcodegen generate`
+*.xcodeproj/
+
+## Release artifacts (attached to GitHub Releases, not committed)
+*.ipa
+*.dmg
+Payload/
+export/
+
+## Dev screenshots may contain real data — only the curated demo set in docs/ is committed
+.screenshots/
+/screenshots/
+
+## Push microservice (Node)
+server/node_modules/
+server/.env
+server/tokens.json
+server/*.p8
+
+## Signing material / secrets
+*.p8
+*.pem
+*.mobileprovision
+*.cer
