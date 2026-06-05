@@ -52,7 +52,7 @@ Tesstats shows your car's live status, trips, charging sessions, battery health 
 
 ---
 
-## How it works (in plain English)
+## How it works
 
 TeslaMate is a self‑hosted app that quietly logs everything about your Tesla into its own database. It publishes the **live** values to a small message broker called **MQTT**, and (optionally) exposes the **history** through a companion API called **TeslaMateApi**.
 
