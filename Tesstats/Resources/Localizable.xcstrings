@@ -7808,6 +7808,54 @@
           }
         }
       }
+    },
+    "MQTT host (name only)": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Host MQTT (solo nombre)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MQTT host (name only)"
+          }
+        }
+      }
+    },
+    "Always encrypted (mqtts/wss). Enter the host as a plain name — no https:// and no path (the app builds the URL). Read-only subscription.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siempre cifrado (mqtts/wss). Pon el host como nombre simple — sin https:// ni ruta (la app construye la URL). Suscripción de solo lectura."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Always encrypted (mqtts/wss). Enter the host as a plain name — no https:// and no path (the app builds the URL). Read-only subscription."
+          }
+        }
+      }
+    },
+    "Optional but recommended. Here it IS a full URL — include https:// and the path (e.g. https://host/api). Provides drives, charges and battery history. Inherits Basic Auth.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcional pero recomendado. Aquí SÍ es una URL completa — incluye https:// y la ruta (p. ej. https://host/api). Proporciona viajes, cargas e histórico de batería. Hereda el Basic Auth."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optional but recommended. Here it IS a full URL — include https:// and the path (e.g. https://host/api). Provides drives, charges and battery history. Inherits Basic Auth."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

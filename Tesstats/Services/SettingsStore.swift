@@ -71,9 +71,21 @@ final class SettingsStore {
         return BasicAuth(user: config.basicAuthUsername, pass: basicAuthPassword)
     }
 
+    /// Accept a bare hostname even if the user pasted a scheme or path
+    /// (e.g. "https://host/" or "wss://host:443/mqtt" → "host"). The MQTT host is a
+    /// hostname, not a URL — a scheme there causes a DNS "NoSuchRecord" failure.
+    static func hostOnly(_ raw: String) -> String {
+        var h = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let r = h.range(of: "://") { h = String(h[r.upperBound...]) }
+        if let slash = h.firstIndex(of: "/") { h = String(h[..<slash]) }
+        // Strip an embedded :port (the port comes from the dedicated field).
+        if let colon = h.lastIndex(of: ":"), !h.contains("]") { h = String(h[..<colon]) }
+        return h
+    }
+
     func makeMQTTConfig() -> MQTTClient.Config {
         MQTTClient.Config(
-            host: config.mqttHost,
+            host: Self.hostOnly(config.mqttHost),
             port: config.mqttPort,
             transport: config.mqttTransport,
             websocketPath: config.mqttWebsocketPath,

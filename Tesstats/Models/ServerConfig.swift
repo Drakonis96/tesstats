@@ -83,6 +83,11 @@ struct ServerConfig: Codable, Equatable, Sendable {
     var normalizedAPIBaseURL: String {
         var s = apiBaseURL.trimmingCharacters(in: .whitespacesAndNewlines)
         while s.hasSuffix("/") { s.removeLast() }
+        // The API field is a URL — be forgiving and default to https:// if no scheme is given
+        // (unlike the MQTT host, which must be a bare hostname).
+        if !s.isEmpty, !s.lowercased().hasPrefix("http://"), !s.lowercased().hasPrefix("https://") {
+            s = "https://" + s
+        }
         return s
     }
 

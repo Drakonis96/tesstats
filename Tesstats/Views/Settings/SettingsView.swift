@@ -228,8 +228,8 @@ struct SettingsView: View {
 
     private func mqttSection(_ settings: Bindable<SettingsStore>) -> some View {
         Section {
-            LabeledTextField(title: L("MQTT host"), text: settings.config.mqttHost,
-                             prompt: "broker.example.com", keyboard: .URL)
+            LabeledTextField(title: L("MQTT host (name only)"), text: settings.config.mqttHost,
+                             prompt: "teslamate.example.com", keyboard: .URL)
             HStack {
                 Text(L("Port")).foregroundStyle(Brand.textSecondary)
                 Spacer()
@@ -252,7 +252,7 @@ struct SettingsView: View {
         } header: {
             Text(L("MQTT (real-time)"))
         } footer: {
-            Text(L("Always encrypted: mqtts over TLS, or wss behind a reverse proxy. Read-only subscription."))
+            Text(L("Always encrypted (mqtts/wss). Enter the host as a plain name — no https:// and no path (the app builds the URL). Read-only subscription."))
         }
     }
 
@@ -279,7 +279,7 @@ struct SettingsView: View {
         } header: {
             Text(L("History API (recommended)"))
         } footer: {
-            Text(L("Optional but recommended. Provides drives, charges and battery history over HTTPS. Inherits Basic Auth."))
+            Text(L("Optional but recommended. Here it IS a full URL — include https:// and the path (e.g. https://host/api). Provides drives, charges and battery history. Inherits Basic Auth."))
         }
     }
 

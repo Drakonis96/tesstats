@@ -25,6 +25,14 @@
       ],
       "versions": [
         {
+          "version": "0.1.1",
+          "date": "2026-06-05",
+          "localizedDescription": "Connection robustness and clarity:\n• MQTT host now accepts a plain hostname — any scheme or path you paste is stripped automatically (fixes a DNS resolution error).\n• History API URL completes https:// if you omit it.\n• Unique MQTT client-id per connection prevents a reconnect loop that made the status flicker.\n• Clearer hints on the Server settings fields (host vs full URL).\n• Full Spanish and English localization with an in-app language selector.",
+          "downloadURL": "https://github.com/Drakonis96/tesstats/releases/download/v0.1.1/Tesstats.ipa",
+          "size": 1697313,
+          "minOSVersion": "18.0"
+        },
+        {
           "version": "0.1.0",
           "date": "2026-06-05",
           "localizedDescription": "Initial public release.",
@@ -33,11 +41,11 @@
           "minOSVersion": "18.0"
         }
       ],
-      "version": "0.1.0",
+      "version": "0.1.1",
       "versionDate": "2026-06-05",
-      "versionDescription": "Initial public release.",
-      "downloadURL": "https://github.com/Drakonis96/tesstats/releases/download/v0.1.0/Tesstats.ipa",
-      "size": 1694649,
+      "versionDescription": "Connection robustness and clarity:\n• MQTT host now accepts a plain hostname — any scheme or path you paste is stripped automatically (fixes a DNS resolution error).\n• History API URL completes https:// if you omit it.\n• Unique MQTT client-id per connection prevents a reconnect loop that made the status flicker.\n• Clearer hints on the Server settings fields (host vs full URL).\n• Full Spanish and English localization with an in-app language selector.",
+      "downloadURL": "https://github.com/Drakonis96/tesstats/releases/download/v0.1.1/Tesstats.ipa",
+      "size": 1697313,
       "minOSVersion": "18.0",
       "appPermissions": {
         "entitlements": [],
