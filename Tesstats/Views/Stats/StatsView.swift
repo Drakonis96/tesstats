@@ -378,26 +378,36 @@ private struct HeatmapCard: View {
     let days: [CalendarDay]
     let units: Units
 
+    @State private var gridWidth: CGFloat = 0
+    private let cellSpacing: CGFloat = 3
+
     private var maxKm: Double { max(1, days.map(\.distanceKm).max() ?? 1) }
     private var weeks: [[CalendarDay]] { stride(from: 0, to: days.count, by: 7).map { Array(days[$0..<min($0 + 7, days.count)]) } }
+
+    /// Cell size derived so the whole grid spans the available width edge-to-edge — that keeps the
+    /// left and right margins identical (both equal to the card padding) on any screen size.
+    private var cellSize: CGFloat {
+        let cols = max(weeks.count, 1)
+        guard gridWidth > 0 else { return 13 }
+        return max(6, (gridWidth - CGFloat(cols - 1) * cellSpacing) / CGFloat(cols))
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(L("Activity"), systemImage: "calendar")
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(alignment: .top, spacing: 3) {
-                    ForEach(Array(weeks.enumerated()), id: \.offset) { _, week in
-                        VStack(spacing: 3) {
-                            ForEach(week) { day in
-                                RoundedRectangle(cornerRadius: 2, style: .continuous)
-                                    .fill(color(for: day.distanceKm))
-                                    .frame(width: 13, height: 13)
-                            }
+            HStack(alignment: .top, spacing: cellSpacing) {
+                ForEach(Array(weeks.enumerated()), id: \.offset) { _, week in
+                    VStack(spacing: cellSpacing) {
+                        ForEach(week) { day in
+                            RoundedRectangle(cornerRadius: 2, style: .continuous)
+                                .fill(color(for: day.distanceKm))
+                                .frame(width: cellSize, height: cellSize)
                         }
                     }
                 }
-                .padding(.vertical, 2)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { gridWidth = $0 }
             HStack(spacing: 6) {
                 Text(L("Less")).font(.caption2).foregroundStyle(Brand.textTertiary)
                 ForEach(0..<5) { i in

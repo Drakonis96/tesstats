@@ -181,3 +181,49 @@ enum RangeKind: String, Codable, Sendable, CaseIterable, Identifiable {
         }
     }
 }
+
+// MARK: - Appearance
+
+/// App color theme. Dark is the default; light gives a clean white-background theme.
+enum AppAppearance: String, Codable, Sendable, CaseIterable, Identifiable {
+    case dark, light
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .dark: L("Dark")
+        case .light: L("Light")
+        }
+    }
+    var colorScheme: ColorScheme {
+        switch self {
+        case .dark: .dark
+        case .light: .light
+        }
+    }
+}
+
+/// A selectable accent color. The hex (without `#`) is what gets persisted in `ServerConfig`.
+struct AccentChoice: Identifiable, Hashable, Sendable {
+    let name: String
+    let hex: String
+    var id: String { hex }
+    var color: Color { Color(hex: hex) }
+}
+
+enum AccentPalette {
+    static let defaultHex = "B30333"
+    static var options: [AccentChoice] {
+        [
+            AccentChoice(name: L("Crimson"), hex: "B30333"),
+            AccentChoice(name: L("Red"),     hex: "FF453A"),
+            AccentChoice(name: L("Orange"),  hex: "FF9F0A"),
+            AccentChoice(name: L("Amber"),   hex: "FFC60A"),
+            AccentChoice(name: L("Green"),   hex: "30D158"),
+            AccentChoice(name: L("Teal"),    hex: "40C8E0"),
+            AccentChoice(name: L("Blue"),    hex: "0A84FF"),
+            AccentChoice(name: L("Indigo"),  hex: "5E5CE6"),
+            AccentChoice(name: L("Purple"),  hex: "BF5AF2"),
+            AccentChoice(name: L("Pink"),    hex: "FF375F"),
+        ]
+    }
+}

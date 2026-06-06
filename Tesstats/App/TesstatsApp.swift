@@ -16,8 +16,6 @@ struct TesstatsApp: App {
         WindowGroup(id: "main") {
             RootContainerView()
                 .environment(env)
-                .preferredColorScheme(.dark)
-                .tint(Brand.crimson)
                 .lowercaseKeyboardStart()
                 .macTextScale()
         }
@@ -64,7 +62,13 @@ struct RootContainerView: View {
     @State private var showSplash = true
 
     var body: some View {
-        ZStack {
+        // Keep the global accent in sync with the user's choice. Reading the hex here makes the
+        // root observe it, and running before the children render guarantees the rebuilt subtree
+        // (keyed on the accent below) re-resolves every static `Brand.crimson` reference.
+        let config = env.settings.config
+        let _ = Brand.setAccent(config.accentColorHex)
+
+        return ZStack {
             Brand.background.ignoresSafeArea()
 
             Group {
@@ -78,7 +82,8 @@ struct RootContainerView: View {
                     OnboardingView()
                 }
             }
-            .id(env.settings.config.languageCode)   // rebuild the tree on language change
+            // Rebuild the tree on language OR accent change so static color reads re-resolve.
+            .id("\(config.languageCode)|\(config.accentColorHex)")
             .opacity(showSplash ? 0 : 1)
 
             if showSplash {
@@ -86,6 +91,8 @@ struct RootContainerView: View {
                     .transition(.opacity)
             }
         }
+        .preferredColorScheme(config.appearance.colorScheme)
+        .tint(Brand.crimson)
         .task {
             env.bootstrap()
             try? await Task.sleep(for: .seconds(1.1))

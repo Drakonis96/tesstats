@@ -67,6 +67,12 @@ struct ServerConfig: Codable, Equatable, Sendable {
     /// User-defined order of the Summary (dashboard) cards. Empty = default order.
     var dashboardCardOrder: [String] = []
 
+    // MARK: Appearance
+    /// Light or dark theme (dark by default).
+    var appearance: AppAppearance = .dark
+    /// Accent color as a 24-bit RGB hex string without `#` (default brand crimson).
+    var accentColorHex: String = AccentPalette.defaultHex
+
     // MARK: Derived
 
     var mqttScheme: String { mqttTransport == .websocket ? "wss" : "mqtts" }
@@ -105,4 +111,54 @@ struct ServerConfig: Codable, Equatable, Sendable {
         c.selectedCarID = 1
         return c
     }()
+}
+
+// MARK: - Tolerant decoding
+
+private extension KeyedDecodingContainer {
+    /// Decode a value, falling back to `fallback` when the key is missing or its type mismatches.
+    /// Keeps older persisted configs (written before a field existed) fully loadable.
+    func lenient<T: Decodable>(_ key: Key, _ fallback: T) -> T {
+        ((try? decodeIfPresent(T.self, forKey: key)) ?? nil) ?? fallback
+    }
+}
+
+extension ServerConfig {
+    /// Custom decoder so that adding a new field never invalidates a user's saved configuration:
+    /// every missing key resolves to its default instead of throwing `keyNotFound`. Defined in an
+    /// extension to preserve the synthesized memberwise initializer used elsewhere.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init()
+        serverHost = c.lenient(.serverHost, serverHost)
+        mqttHost = c.lenient(.mqttHost, mqttHost)
+        mqttPort = c.lenient(.mqttPort, mqttPort)
+        mqttTransport = c.lenient(.mqttTransport, mqttTransport)
+        mqttWebsocketPath = c.lenient(.mqttWebsocketPath, mqttWebsocketPath)
+        mqttUsername = c.lenient(.mqttUsername, mqttUsername)
+        topicNamespace = c.lenient(.topicNamespace, topicNamespace)
+        mqttClientID = c.lenient(.mqttClientID, mqttClientID)
+        usesBasicAuth = c.lenient(.usesBasicAuth, usesBasicAuth)
+        basicAuthUsername = c.lenient(.basicAuthUsername, basicAuthUsername)
+        apiBaseURL = c.lenient(.apiBaseURL, apiBaseURL)
+        trustCustomCertificate = c.lenient(.trustCustomCertificate, trustCustomCertificate)
+        pinnedPublicKeySHA256 = c.lenient(.pinnedPublicKeySHA256, pinnedPublicKeySHA256)
+        allowInsecureTransport = c.lenient(.allowInsecureTransport, allowInsecureTransport)
+        units = c.lenient(.units, units)
+        temperatureUnit = c.lenient(.temperatureUnit, temperatureUnit)
+        rangeKind = c.lenient(.rangeKind, rangeKind)
+        currencyCode = c.lenient(.currencyCode, currencyCode)
+        fuelPricePerLiter = c.lenient(.fuelPricePerLiter, fuelPricePerLiter)
+        fuelConsumptionLPer100km = c.lenient(.fuelConsumptionLPer100km, fuelConsumptionLPer100km)
+        chargePricePerKwh = c.lenient(.chargePricePerKwh, chargePricePerKwh)
+        pushEnabled = c.lenient(.pushEnabled, pushEnabled)
+        pushServiceURL = c.lenient(.pushServiceURL, pushServiceURL)
+        liveActivityEnabled = c.lenient(.liveActivityEnabled, liveActivityEnabled)
+        selectedCarID = (try? c.decodeIfPresent(Int.self, forKey: .selectedCarID)) ?? selectedCarID
+        demoMode = c.lenient(.demoMode, demoMode)
+        languageCode = c.lenient(.languageCode, languageCode)
+        dashboardCardOrder = c.lenient(.dashboardCardOrder, dashboardCardOrder)
+        appearance = c.lenient(.appearance, appearance)
+        accentColorHex = c.lenient(.accentColorHex, accentColorHex)
+    }
 }

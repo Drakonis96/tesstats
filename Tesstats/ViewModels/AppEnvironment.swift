@@ -17,6 +17,7 @@ final class AppEnvironment {
     init() {
         let settings = SettingsStore()
         LanguageManager.apply(settings.config.languageCode)   // apply saved language before any UI
+        Brand.setAccent(settings.config.accentColorHex)       // apply saved accent before any UI
         let notifications = NotificationEngine()
         let cache = CacheStore()
         self.settings = settings

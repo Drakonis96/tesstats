@@ -25,6 +25,14 @@
             ],
             "versions": [
                 {
+                    "version": "0.1.3",
+                    "date": "2026-06-06",
+                    "localizedDescription": "Themes & display polish:\n• New light theme alongside the default dark theme (Settings → Appearance).\n• Pick your accent color from 10 presets — it's applied across the whole app.\n• Activity heatmap now spans the full card width, so its left and right margins match.",
+                    "downloadURL": "https://github.com/Drakonis96/tesstats/releases/download/v0.1.3/Tesstats.ipa",
+                    "size": 1739372,
+                    "minOSVersion": "18.0"
+                },
+                {
                     "version": "0.1.2",
                     "date": "2026-06-06",
                     "localizedDescription": "Accurate trip maps:\n• Trip routes are now drawn from the real GPS positions recorded by TeslaMate, fetched per drive from TeslaMateApi — no more geocoding the address text.\n• Fixes maps that landed in the wrong place when a city name was ambiguous (e.g. Toledo, Spain resolving to Toledo, USA).\n• Elevation profiles now come from the actual drive trace too.",
@@ -49,11 +57,11 @@
                     "minOSVersion": "18.0"
                 }
             ],
-            "version": "0.1.2",
+            "version": "0.1.3",
             "versionDate": "2026-06-06",
-            "versionDescription": "Accurate trip maps:\n• Trip routes are now drawn from the real GPS positions recorded by TeslaMate, fetched per drive from TeslaMateApi — no more geocoding the address text.\n• Fixes maps that landed in the wrong place when a city name was ambiguous (e.g. Toledo, Spain resolving to Toledo, USA).\n• Elevation profiles now come from the actual drive trace too.",
-            "downloadURL": "https://github.com/Drakonis96/tesstats/releases/download/v0.1.2/Tesstats.ipa",
-            "size": 1697654,
+            "versionDescription": "Themes & display polish:\n• New light theme alongside the default dark theme (Settings → Appearance).\n• Pick your accent color from 10 presets — it's applied across the whole app.\n• Activity heatmap now spans the full card width, so its left and right margins match.",
+            "downloadURL": "https://github.com/Drakonis96/tesstats/releases/download/v0.1.3/Tesstats.ipa",
+            "size": 1739372,
             "minOSVersion": "18.0",
             "appPermissions": {
                 "entitlements": [],

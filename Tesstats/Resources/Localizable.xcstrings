@@ -577,6 +577,22 @@
         }
       }
     },
+    "Accent color": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accent color"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Color de acento"
+          }
+        }
+      }
+    },
     "Active route": {
       "localizations": {
         "es": {
@@ -765,6 +781,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Always encrypted: mqtts over TLS, or wss behind a reverse proxy. Read-only subscription."
+          }
+        }
+      }
+    },
+    "Amber": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amber"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ámbar"
+          }
+        }
+      }
+    },
+    "Appearance": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appearance"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apariencia"
           }
         }
       }
@@ -1037,6 +1085,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Black"
+          }
+        }
+      }
+    },
+    "Blue": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blue"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Azul"
           }
         }
       }
@@ -1457,6 +1521,22 @@
         }
       }
     },
+    "Choose a light or dark theme and the accent color used across the app.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a light or dark theme and the accent color used across the app."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige un tema claro u oscuro y el color de acento usado en toda la app."
+          }
+        }
+      }
+    },
     "Choose a strong password. It's required to restore the backup and can't be recovered — there's no way back in without it.": {
       "localizations": {
         "en": {
@@ -1857,6 +1937,22 @@
         }
       }
     },
+    "Crimson": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crimson"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carmesí"
+          }
+        }
+      }
+    },
     "Crunching your stats…": {
       "localizations": {
         "en": {
@@ -1949,6 +2045,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "DC fast"
+          }
+        }
+      }
+    },
+    "Dark": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscuro"
           }
         }
       }
@@ -3089,6 +3201,22 @@
         }
       }
     },
+    "Green": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Green"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verde"
+          }
+        }
+      }
+    },
     "Health": {
       "localizations": {
         "es": {
@@ -3297,6 +3425,22 @@
         }
       }
     },
+    "Indigo": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indigo"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Índigo"
+          }
+        }
+      }
+    },
     "Inferred": {
       "localizations": {
         "es": {
@@ -3469,6 +3613,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Let's Encrypt works out of the box. For self-hosted certs, trust your CA or pin its key. TLS is required by default."
+          }
+        }
+      }
+    },
+    "Light": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claro"
           }
         }
       }
@@ -4753,6 +4913,22 @@
         }
       }
     },
+    "Orange": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orange"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Naranja"
+          }
+        }
+      }
+    },
     "Origin": {
       "localizations": {
         "es": {
@@ -4993,6 +5169,22 @@
         }
       }
     },
+    "Pink": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pink"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rosa"
+          }
+        }
+      }
+    },
     "Pinned public-key SHA-256 (optional)": {
       "localizations": {
         "es": {
@@ -5181,6 +5373,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Private by design"
+          }
+        }
+      }
+    },
+    "Purple": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Purple"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Morado"
           }
         }
       }
@@ -6497,6 +6705,22 @@
         }
       }
     },
+    "Teal": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teal"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verde azulado"
+          }
+        }
+      }
+    },
     "Temp": {
       "localizations": {
         "en": {
@@ -6669,6 +6893,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "El coche muestra el aviso de Sentry (estado de pantalla 7) cerca de %@. Es una inferencia: cualquier clip está en el USB del coche y no está disponible vía TeslaMate."
+          }
+        }
+      }
+    },
+    "Theme": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Theme"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tema"
           }
         }
       }

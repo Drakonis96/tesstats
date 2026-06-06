@@ -52,6 +52,7 @@ struct SettingsView: View {
                     securitySection($settings)
                     testSection
                 case .preferences:
+                    appearanceSection($settings)
                     preferencesSection($settings)
                     dashboardLayoutSection($settings)
                 case .notifications:
@@ -345,6 +346,55 @@ struct SettingsView: View {
             }
         } header: {
             Text(L("Vehicles"))
+        }
+    }
+
+    private func appearanceSection(_ settings: Bindable<SettingsStore>) -> some View {
+        Section {
+            Picker(L("Theme"), selection: settings.config.appearance) {
+                ForEach(AppAppearance.allCases) { Text($0.label).tag($0) }
+            }
+            .onChange(of: settings.config.appearance.wrappedValue) { _, _ in env.settings.save() }
+
+            VStack(alignment: .leading, spacing: 12) {
+                Text(L("Accent color")).foregroundStyle(Brand.textSecondary)
+                accentSwatches(settings)
+            }
+            .padding(.vertical, 4)
+        } header: {
+            Text(L("Appearance"))
+        } footer: {
+            Text(L("Choose a light or dark theme and the accent color used across the app."))
+        }
+    }
+
+    private func accentSwatches(_ settings: Bindable<SettingsStore>) -> some View {
+        let selected = settings.config.accentColorHex.wrappedValue
+        return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 14), count: 5), spacing: 14) {
+            ForEach(AccentPalette.options) { opt in
+                let isSelected = selected.caseInsensitiveCompare(opt.hex) == .orderedSame
+                Button {
+                    Brand.setAccent(opt.hex)                                   // update accent before the rebuild
+                    settings.config.accentColorHex.wrappedValue = opt.hex      // triggers the root re-render
+                    env.settings.save()
+                } label: {
+                    Circle()
+                        .fill(opt.color)
+                        .frame(width: 32, height: 32)
+                        .overlay(Image(systemName: "checkmark")
+                            .font(.footnote.weight(.bold))
+                            .foregroundStyle(.white)
+                            .opacity(isSelected ? 1 : 0))
+                        .overlay(Circle()
+                            .strokeBorder(Brand.textPrimary, lineWidth: 2)
+                            .padding(-3)
+                            .opacity(isSelected ? 0.9 : 0))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(opt.name)
+                .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+            }
         }
     }
 
