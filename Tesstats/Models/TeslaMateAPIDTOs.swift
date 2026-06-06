@@ -134,6 +134,24 @@ struct DriveDTO: Decodable {
     }
 }
 
+// MARK: - Drive details (per-point GPS trace) — /v1/cars/{id}/drives/{driveId}
+
+struct DriveDetailsEnvelope: Decodable {
+    let data: DriveDetailsData?
+    struct DriveDetailsData: Decodable { let drive: DriveWithDetails? }
+    struct DriveWithDetails: Decodable { let driveDetails: [DrivePointDTO]? }
+}
+
+/// A single recorded position along a drive. Latitude/longitude are always present in
+/// TeslaMate's `positions` table; elevation is nullable on older rows.
+struct DrivePointDTO: Decodable {
+    let latitude: Double?
+    let longitude: Double?
+    let elevation: Double?
+
+    var coordinate: Coordinate? { Coordinate(latitude: latitude, longitude: longitude) }
+}
+
 // MARK: - Charges
 
 struct ChargesEnvelope: Decodable {

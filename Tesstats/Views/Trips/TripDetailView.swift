@@ -4,15 +4,20 @@ import Charts
 import CoreLocation
 
 struct TripDetailView: View {
+    @Environment(AppEnvironment.self) private var env
     let drive: DriveRecord
     let units: Units
 
-    @State private var route: MKRoute?
-    @State private var startCoord: CLLocationCoordinate2D?
-    @State private var endCoord: CLLocationCoordinate2D?
+    /// The drive's real recorded GPS positions (from TeslaMateApi's drive-details endpoint,
+    /// or the demo record's own path). The route is drawn straight from these — no geocoding.
+    @State private var path: [Coordinate] = []
+    @State private var elevation: [Double] = []
     @State private var routeState: RouteState = .loading
 
     enum RouteState { case loading, ready, unavailable }
+
+    /// Prefer the elevation fetched alongside the trace; fall back to whatever the record carries.
+    private var elevationProfile: [Double] { elevation.isEmpty ? drive.elevationProfile : elevation }
 
     var body: some View {
         ZStack {
@@ -21,7 +26,7 @@ struct TripDetailView: View {
                 VStack(spacing: Metrics.cardSpacing) {
                     routeCard
                     statsCard
-                    if drive.elevationProfile.count > 1 { elevationCard }
+                    if elevationProfile.count > 1 { elevationCard }
                     Color.clear.frame(height: 8)
                 }
                 .padding(.horizontal, Metrics.screenPadding)
@@ -39,7 +44,7 @@ struct TripDetailView: View {
                 }
             }
         }
-        .task { await loadRoute() }
+        .task { await loadTrace() }
     }
 
     // MARK: - Route map
@@ -65,12 +70,12 @@ struct TripDetailView: View {
                 routeMap
                     .frame(height: 240)
                     .clipShape(RoundedRectangle(cornerRadius: Metrics.tightRadius))
-                Text(L("Route reconstructed from the trip's addresses (TeslaMateApi doesn't expose the raw GPS trace)."))
+                Text(L("Route drawn from the trip's recorded GPS positions."))
                     .font(.caption2).foregroundStyle(Brand.textTertiary)
             case .unavailable:
                 EmptyStateView(systemImage: "point.topleft.down.to.point.bottomright.curvepath",
                                title: L("Map unavailable"),
-                               message: L("Couldn't locate these addresses on the map."))
+                               message: L("No recorded GPS positions for this trip."))
                     .frame(height: 130)
             }
         }
@@ -79,20 +84,14 @@ struct TripDetailView: View {
 
     @ViewBuilder
     private var routeMap: some View {
-        let coords = [startCoord, endCoord].compactMap { $0 }
-        Map(initialPosition: .region(region(for: coords))) {
-            if let route {
-                MapPolyline(route.polyline)
-                    .stroke(Brand.crimson, style: StrokeStyle(lineWidth: 4, lineCap: .round, lineJoin: .round))
-            } else if coords.count == 2 {
-                MapPolyline(coordinates: coords)
-                    .stroke(Brand.crimson.opacity(0.7), style: StrokeStyle(lineWidth: 3, dash: [6, 6]))
+        Map(initialPosition: .region(MKCoordinateRegion(fitting: path))) {
+            MapPolyline(coordinates: path.map(\.clLocationCoordinate))
+                .stroke(Brand.crimson, style: StrokeStyle(lineWidth: 4, lineCap: .round, lineJoin: .round))
+            if let s = path.first {
+                Annotation(L("Start"), coordinate: s.clLocationCoordinate) { endpointDot(Brand.online) }
             }
-            if let s = startCoord {
-                Annotation(L("Start"), coordinate: s) { endpointDot(Brand.online) }
-            }
-            if let e = endCoord {
-                Annotation(L("End"), coordinate: e) { endpointDot(Brand.crimson) }
+            if let e = path.last {
+                Annotation(L("End"), coordinate: e.clLocationCoordinate) { endpointDot(Brand.crimson) }
             }
         }
         .mapStyle(.standard(pointsOfInterest: .excludingAll))
@@ -102,31 +101,24 @@ struct TripDetailView: View {
         Circle().fill(color).frame(width: 14, height: 14).overlay(Circle().stroke(.white, lineWidth: 2))
     }
 
-    private func region(for coords: [CLLocationCoordinate2D]) -> MKCoordinateRegion {
-        MKCoordinateRegion(fitting: coords.map { $0.coordinate })
-    }
-
-    private func loadRoute() async {
-        guard let startName = drive.startAddress, let endName = drive.endAddress else {
-            routeState = .unavailable; return
+    /// Draw the route from the drive's real recorded GPS positions. Demo records already carry
+    /// their own path; live records fetch the per-point trace from TeslaMateApi on demand. No
+    /// text geocoding is involved, so an ambiguous city name can never resolve to the wrong place.
+    private func loadTrace() async {
+        if drive.path.count >= 2 {
+            path = drive.path
+            elevation = drive.elevationProfile
+            routeState = .ready
+            return
         }
-        let placemarksStart = try? await CLGeocoder().geocodeAddressString(startName)
-        let placemarksEnd = try? await CLGeocoder().geocodeAddressString(endName)
-        guard let s = placemarksStart?.first?.location?.coordinate,
-              let e = placemarksEnd?.first?.location?.coordinate else {
-            routeState = .unavailable; return
+        let carID = env.live.resolvedCarID ?? 1
+        if let trace = await env.history.driveTrace(carID: carID, driveID: drive.id), trace.isUsable {
+            path = trace.path
+            elevation = trace.elevationProfile
+            routeState = .ready
+        } else {
+            routeState = .unavailable
         }
-        startCoord = s
-        endCoord = e
-
-        let request = MKDirections.Request()
-        request.source = MKMapItem(placemark: MKPlacemark(coordinate: s))
-        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: e))
-        request.transportType = .automobile
-        if let response = try? await MKDirections(request: request).calculate() {
-            route = response.routes.first
-        }
-        routeState = .ready
     }
 
     // MARK: - Stats
@@ -170,10 +162,11 @@ struct TripDetailView: View {
     }
 
     private var elevationGain: String {
-        guard drive.elevationProfile.count > 1 else { return "—" }
+        let profile = elevationProfile
+        guard profile.count > 1 else { return "—" }
         var gain = 0.0
-        for i in 1..<drive.elevationProfile.count {
-            let d = drive.elevationProfile[i] - drive.elevationProfile[i - 1]
+        for i in 1..<profile.count {
+            let d = profile[i] - profile[i - 1]
             if d > 0 { gain += d }
         }
         return "\(Int(gain)) m"
@@ -182,7 +175,7 @@ struct TripDetailView: View {
     private var elevationCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             SectionHeader(L("Elevation"), systemImage: "mountain.2")
-            Chart(Array(drive.elevationProfile.enumerated()), id: \.offset) { index, value in
+            Chart(Array(elevationProfile.enumerated()), id: \.offset) { index, value in
                 AreaMark(x: .value("Point", index), y: .value("m", value))
                     .foregroundStyle(LinearGradient(colors: [Brand.crimson.opacity(0.4), .clear],
                                                      startPoint: .top, endPoint: .bottom))

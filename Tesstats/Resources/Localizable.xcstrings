@@ -737,6 +737,22 @@
         }
       }
     },
+    "Always encrypted (mqtts/wss). Enter the host as a plain name — no https:// and no path (the app builds the URL). Read-only subscription.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siempre cifrado (mqtts/wss). Pon el host como nombre simple — sin https:// ni ruta (la app construye la URL). Suscripción de solo lectura."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Always encrypted (mqtts/wss). Enter the host as a plain name — no https:// and no path (the app builds the URL). Read-only subscription."
+          }
+        }
+      }
+    },
     "Always encrypted: mqtts over TLS, or wss behind a reverse proxy. Read-only subscription.": {
       "localizations": {
         "es": {
@@ -1789,22 +1805,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "No se pudo generar el código QR."
-          }
-        }
-      }
-    },
-    "Couldn't locate these addresses on the map.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No se pudieron localizar estas direcciones en el mapa."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Couldn't locate these addresses on the map."
           }
         }
       }
@@ -3809,6 +3809,22 @@
         }
       }
     },
+    "MQTT host (name only)": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Host MQTT (solo nombre)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MQTT host (name only)"
+          }
+        }
+      }
+    },
     "MQTT over TLS (mqtts)": {
       "localizations": {
         "es": {
@@ -4289,6 +4305,22 @@
         }
       }
     },
+    "No recorded GPS positions for this trip.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No recorded GPS positions for this trip."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay posiciones GPS registradas para este viaje."
+          }
+        }
+      }
+    },
     "No saved profiles. Save your current server as a profile to switch between installs quickly.": {
       "localizations": {
         "en": {
@@ -4685,6 +4717,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Abrir ventana"
+          }
+        }
+      }
+    },
+    "Optional but recommended. Here it IS a full URL — include https:// and the path (e.g. https://host/api). Provides drives, charges and battery history. Inherits Basic Auth.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opcional pero recomendado. Aquí SÍ es una URL completa — incluye https:// y la ruta (p. ej. https://host/api). Proporciona viajes, cargas e histórico de batería. Hereda el Basic Auth."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optional but recommended. Here it IS a full URL — include https:// and the path (e.g. https://host/api). Provides drives, charges and battery history. Inherits Basic Auth."
           }
         }
       }
@@ -5617,18 +5665,18 @@
         }
       }
     },
-    "Route reconstructed from the trip's addresses (TeslaMateApi doesn't expose the raw GPS trace).": {
+    "Route drawn from the trip's recorded GPS positions.": {
       "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ruta reconstruida a partir de las direcciones del viaje (TeslaMateApi no expone la traza GPS real)."
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Route reconstructed from the trip's addresses (TeslaMateApi doesn't expose the raw GPS trace)."
+            "value": "Route drawn from the trip's recorded GPS positions."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ruta trazada con las posiciones GPS registradas del viaje."
           }
         }
       }
@@ -7805,54 +7853,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "≈ igual"
-          }
-        }
-      }
-    },
-    "MQTT host (name only)": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Host MQTT (solo nombre)"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MQTT host (name only)"
-          }
-        }
-      }
-    },
-    "Always encrypted (mqtts/wss). Enter the host as a plain name — no https:// and no path (the app builds the URL). Read-only subscription.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Siempre cifrado (mqtts/wss). Pon el host como nombre simple — sin https:// ni ruta (la app construye la URL). Suscripción de solo lectura."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Always encrypted (mqtts/wss). Enter the host as a plain name — no https:// and no path (the app builds the URL). Read-only subscription."
-          }
-        }
-      }
-    },
-    "Optional but recommended. Here it IS a full URL — include https:// and the path (e.g. https://host/api). Provides drives, charges and battery history. Inherits Basic Auth.": {
-      "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Opcional pero recomendado. Aquí SÍ es una URL completa — incluye https:// y la ruta (p. ej. https://host/api). Proporciona viajes, cargas e histórico de batería. Hereda el Basic Auth."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Optional but recommended. Here it IS a full URL — include https:// and the path (e.g. https://host/api). Provides drives, charges and battery history. Inherits Basic Auth."
           }
         }
       }

@@ -52,6 +52,16 @@ struct DriveRecord: Identifiable, Sendable, Codable, Hashable {
     var elevationProfile: [Double]   // optional sampled elevation (m) for the detail chart
 }
 
+/// The real GPS trace of a single drive, fetched on demand from TeslaMateApi's
+/// drive-details endpoint. Used to draw the route from actual recorded positions
+/// instead of geocoding the (ambiguous) start/end address text.
+struct DriveTrace: Sendable {
+    var path: [Coordinate]
+    var elevationProfile: [Double]
+
+    var isUsable: Bool { path.count >= 2 }
+}
+
 // MARK: - Charges
 
 struct ChargeRecord: Identifiable, Sendable, Codable, Hashable {

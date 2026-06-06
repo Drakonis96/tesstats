@@ -97,6 +97,15 @@ final class HistoryViewModel {
         }
     }
 
+    /// Fetch the real GPS trace of a drive so the detail map can draw the actual route
+    /// instead of geocoding the ambiguous address text. Returns nil in demo mode (the demo
+    /// drives already carry their own path) or when no API is configured.
+    func driveTrace(carID: Int, driveID: Int) async -> DriveTrace? {
+        if settings.config.demoMode { return nil }
+        guard let api = makeAPI() else { return nil }
+        return try? await api.fetchDriveDetails(carID: carID, driveID: driveID)
+    }
+
     private func makeAPI() -> HistoryAPIService? {
         let cfg = settings.makeAPIConfig()
         guard !cfg.baseURL.isEmpty else { return nil }

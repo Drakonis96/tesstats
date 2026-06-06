@@ -1,59 +1,67 @@
 {
-  "name": "Tesstats",
-  "identifier": "com.drakonis96.tesstats",
-  "subtitle": "Read-only Tesla stats from your own TeslaMate.",
-  "description": "Tesstats source — a beautiful, read-only stats app for your Tesla, powered by your self-hosted TeslaMate server.",
-  "iconURL": "https://raw.githubusercontent.com/Drakonis96/tesstats/main/docs/icon.png",
-  "website": "https://github.com/Drakonis96/tesstats",
-  "tintColor": "#B30333",
-  "apps": [
-    {
-      "name": "Tesstats",
-      "bundleIdentifier": "com.tesstats.app",
-      "developerName": "Drakonis96",
-      "subtitle": "Read-only Tesla stats from your TeslaMate.",
-      "localizedDescription": "Tesstats is a beautiful, read-only stats app for your Tesla, powered by your own self-hosted TeslaMate server.\n\n• Live dashboard: battery, range, charging, climate, security, tire pressure, location.\n• Trips with maps and consumption.\n• Charging sessions with real charge curves (kW vs %SoC).\n• Battery health and degradation over time.\n• Rich statistics: trends, records, cost, CO2 saved, phantom drain, heatmap.\n• Home Screen & Lock Screen widgets, a charging Live Activity, and Siri shortcuts.\n• Notifications, multi-car, offline cache, encrypted backups, CSV/JSON/GPX export.\n\nTesstats is strictly read-only — it never sends any command to your car. It talks only to your own server (MQTT + TeslaMateApi), with everything encrypted by default.",
-      "iconURL": "https://raw.githubusercontent.com/Drakonis96/tesstats/main/docs/icon.png",
-      "tintColor": "#B30333",
-      "category": "utilities",
-      "screenshotURLs": [
-        "https://raw.githubusercontent.com/Drakonis96/tesstats/main/docs/screenshots/02-dashboard.png",
-        "https://raw.githubusercontent.com/Drakonis96/tesstats/main/docs/screenshots/05-charging.png",
-        "https://raw.githubusercontent.com/Drakonis96/tesstats/main/docs/screenshots/04-trips.png",
-        "https://raw.githubusercontent.com/Drakonis96/tesstats/main/docs/screenshots/03-battery.png",
-        "https://raw.githubusercontent.com/Drakonis96/tesstats/main/docs/screenshots/06-settings.png"
-      ],
-      "versions": [
+    "name": "Tesstats",
+    "identifier": "com.drakonis96.tesstats",
+    "subtitle": "Read-only Tesla stats from your own TeslaMate.",
+    "description": "Tesstats source — a beautiful, read-only stats app for your Tesla, powered by your self-hosted TeslaMate server.",
+    "iconURL": "https://raw.githubusercontent.com/Drakonis96/tesstats/main/docs/icon.png",
+    "website": "https://github.com/Drakonis96/tesstats",
+    "tintColor": "#B30333",
+    "apps": [
         {
-          "version": "0.1.1",
-          "date": "2026-06-05",
-          "localizedDescription": "Connection robustness and clarity:\n• MQTT host now accepts a plain hostname — any scheme or path you paste is stripped automatically (fixes a DNS resolution error).\n• History API URL completes https:// if you omit it.\n• Unique MQTT client-id per connection prevents a reconnect loop that made the status flicker.\n• Clearer hints on the Server settings fields (host vs full URL).\n• Full Spanish and English localization with an in-app language selector.",
-          "downloadURL": "https://github.com/Drakonis96/tesstats/releases/download/v0.1.1/Tesstats.ipa",
-          "size": 1697313,
-          "minOSVersion": "18.0"
-        },
-        {
-          "version": "0.1.0",
-          "date": "2026-06-05",
-          "localizedDescription": "Initial public release.",
-          "downloadURL": "https://github.com/Drakonis96/tesstats/releases/download/v0.1.0/Tesstats.ipa",
-          "size": 1694649,
-          "minOSVersion": "18.0"
+            "name": "Tesstats",
+            "bundleIdentifier": "com.tesstats.app",
+            "developerName": "Drakonis96",
+            "subtitle": "Read-only Tesla stats from your TeslaMate.",
+            "localizedDescription": "Tesstats is a beautiful, read-only stats app for your Tesla, powered by your own self-hosted TeslaMate server.\n\n• Live dashboard: battery, range, charging, climate, security, tire pressure, location.\n• Trips with maps and consumption.\n• Charging sessions with real charge curves (kW vs %SoC).\n• Battery health and degradation over time.\n• Rich statistics: trends, records, cost, CO2 saved, phantom drain, heatmap.\n• Home Screen & Lock Screen widgets, a charging Live Activity, and Siri shortcuts.\n• Notifications, multi-car, offline cache, encrypted backups, CSV/JSON/GPX export.\n\nTesstats is strictly read-only — it never sends any command to your car. It talks only to your own server (MQTT + TeslaMateApi), with everything encrypted by default.",
+            "iconURL": "https://raw.githubusercontent.com/Drakonis96/tesstats/main/docs/icon.png",
+            "tintColor": "#B30333",
+            "category": "utilities",
+            "screenshotURLs": [
+                "https://raw.githubusercontent.com/Drakonis96/tesstats/main/docs/screenshots/02-dashboard.png",
+                "https://raw.githubusercontent.com/Drakonis96/tesstats/main/docs/screenshots/05-charging.png",
+                "https://raw.githubusercontent.com/Drakonis96/tesstats/main/docs/screenshots/04-trips.png",
+                "https://raw.githubusercontent.com/Drakonis96/tesstats/main/docs/screenshots/03-battery.png",
+                "https://raw.githubusercontent.com/Drakonis96/tesstats/main/docs/screenshots/06-settings.png"
+            ],
+            "versions": [
+                {
+                    "version": "0.1.2",
+                    "date": "2026-06-06",
+                    "localizedDescription": "Accurate trip maps:\n• Trip routes are now drawn from the real GPS positions recorded by TeslaMate, fetched per drive from TeslaMateApi — no more geocoding the address text.\n• Fixes maps that landed in the wrong place when a city name was ambiguous (e.g. Toledo, Spain resolving to Toledo, USA).\n• Elevation profiles now come from the actual drive trace too.",
+                    "downloadURL": "https://github.com/Drakonis96/tesstats/releases/download/v0.1.2/Tesstats.ipa",
+                    "size": 1697654,
+                    "minOSVersion": "18.0"
+                },
+                {
+                    "version": "0.1.1",
+                    "date": "2026-06-05",
+                    "localizedDescription": "Connection robustness and clarity:\n• MQTT host now accepts a plain hostname — any scheme or path you paste is stripped automatically (fixes a DNS resolution error).\n• History API URL completes https:// if you omit it.\n• Unique MQTT client-id per connection prevents a reconnect loop that made the status flicker.\n• Clearer hints on the Server settings fields (host vs full URL).\n• Full Spanish and English localization with an in-app language selector.",
+                    "downloadURL": "https://github.com/Drakonis96/tesstats/releases/download/v0.1.1/Tesstats.ipa",
+                    "size": 1697313,
+                    "minOSVersion": "18.0"
+                },
+                {
+                    "version": "0.1.0",
+                    "date": "2026-06-05",
+                    "localizedDescription": "Initial public release.",
+                    "downloadURL": "https://github.com/Drakonis96/tesstats/releases/download/v0.1.0/Tesstats.ipa",
+                    "size": 1694649,
+                    "minOSVersion": "18.0"
+                }
+            ],
+            "version": "0.1.2",
+            "versionDate": "2026-06-06",
+            "versionDescription": "Accurate trip maps:\n• Trip routes are now drawn from the real GPS positions recorded by TeslaMate, fetched per drive from TeslaMateApi — no more geocoding the address text.\n• Fixes maps that landed in the wrong place when a city name was ambiguous (e.g. Toledo, Spain resolving to Toledo, USA).\n• Elevation profiles now come from the actual drive trace too.",
+            "downloadURL": "https://github.com/Drakonis96/tesstats/releases/download/v0.1.2/Tesstats.ipa",
+            "size": 1697654,
+            "minOSVersion": "18.0",
+            "appPermissions": {
+                "entitlements": [],
+                "privacy": {
+                    "NSLocalNetworkUsageDescription": "Connects to your self-hosted TeslaMate server on your local network."
+                }
+            }
         }
-      ],
-      "version": "0.1.1",
-      "versionDate": "2026-06-05",
-      "versionDescription": "Connection robustness and clarity:\n• MQTT host now accepts a plain hostname — any scheme or path you paste is stripped automatically (fixes a DNS resolution error).\n• History API URL completes https:// if you omit it.\n• Unique MQTT client-id per connection prevents a reconnect loop that made the status flicker.\n• Clearer hints on the Server settings fields (host vs full URL).\n• Full Spanish and English localization with an in-app language selector.",
-      "downloadURL": "https://github.com/Drakonis96/tesstats/releases/download/v0.1.1/Tesstats.ipa",
-      "size": 1697313,
-      "minOSVersion": "18.0",
-      "appPermissions": {
-        "entitlements": [],
-        "privacy": {
-          "NSLocalNetworkUsageDescription": "Connects to your self-hosted TeslaMate server on your local network."
-        }
-      }
-    }
-  ],
-  "news": []
+    ],
+    "news": []
 }

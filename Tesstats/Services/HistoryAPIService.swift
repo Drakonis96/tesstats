@@ -153,6 +153,19 @@ final class HistoryAPIService: Sendable {
             .sorted { $0.startDate > $1.startDate }
     }
 
+    /// Real per-point GPS trace for a single drive, used to draw the route from the actual
+    /// recorded positions (no text geocoding). Returns an empty trace if the deployment doesn't
+    /// expose `drive_details` or the drive has no positions.
+    func fetchDriveDetails(carID: Int, driveID: Int) async throws -> DriveTrace {
+        let env = try await fetch(DriveDetailsEnvelope.self, path: "/v1/cars/\(carID)/drives/\(driveID)")
+        let points = env.data?.drive?.driveDetails ?? []
+        let path = points.compactMap { $0.coordinate }
+        // Elevation aligned 1:1 with the path; only meaningful when present on every point.
+        let elevations = points.map { $0.elevation }
+        let elevationProfile = elevations.allSatisfy { $0 != nil } ? elevations.compactMap { $0 } : []
+        return DriveTrace(path: path, elevationProfile: elevationProfile)
+    }
+
     /// Per-point charge curve (kW vs SoC) for a single session. Older / minimal TeslaMateApi
     /// deployments may not expose `charge_details`; callers fall back to the modeled curve.
     func fetchChargeCurve(carID: Int, chargeID: Int) async throws -> [ChargeCurvePoint] {
