@@ -1,0 +1,45 @@
+name: Update AltStore source on release
+
+# When you publish a GitHub Release with the .ipa attached, this fills the
+# version, download URL, exact byte size and changelog (the release notes)
+# into altstore.json and commits it back. No manual JSON editing needed.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:   # manual re-sync against the latest release
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-source
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update altstore.json from the release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          SOURCE_FILE: altstore.json
+        run: python3 .github/scripts/update_source.py
+
+      - name: Commit & push if changed
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "Update altstore.json for ${RELEASE_TAG:-latest release}"
+            git push
+          else
+            echo "No changes to commit."
+          fi
