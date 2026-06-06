@@ -21,7 +21,7 @@ Tesstats shows your car's live status, trips, charging sessions, battery health 
 ## Table of contents
 
 1. [What you get](#what-you-get)
-2. [How it works (in plain English)](#how-it-works-in-plain-english)
+2. [How it works](#how-it-works-in-plain-english)
 3. [What you need before you start](#what-you-need-before-you-start)
 4. [Step 1 — Get TeslaMate running](#step-1--get-teslamate-running)
 5. [Step 2 — Make your data reachable from the app](#step-2--make-your-data-reachable-from-the-app)
