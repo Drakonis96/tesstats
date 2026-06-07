@@ -145,4 +145,9 @@ struct Units: Sendable {
         let f = DateFormatter(); f.locale = locale; f.dateFormat = "MMM yy"
         return f.string(from: date)
     }
+    func shortDate(_ date: Date?) -> String {
+        guard let date else { return "—" }
+        let f = DateFormatter(); f.locale = locale; f.dateStyle = .medium; f.timeStyle = .none
+        return f.string(from: date)
+    }
 }

@@ -50,6 +50,9 @@ struct ServerConfig: Codable, Equatable, Sendable {
     var fuelConsumptionLPer100km: Double = 7.0
     /// Average electricity price you pay to charge, per kWh (used when TeslaMate has no cost).
     var chargePricePerKwh: Double = 0.15
+    /// Optional per-location price overrides (location name → €/kWh). Applied to sessions at
+    /// that place when TeslaMate has no recorded cost, for more accurate cost estimates.
+    var chargePricePerKwhByLocation: [String: Double] = [:]
 
     // MARK: Push (optional microservice for immediate alerts)
     var pushEnabled: Bool = false
@@ -151,6 +154,7 @@ extension ServerConfig {
         fuelPricePerLiter = c.lenient(.fuelPricePerLiter, fuelPricePerLiter)
         fuelConsumptionLPer100km = c.lenient(.fuelConsumptionLPer100km, fuelConsumptionLPer100km)
         chargePricePerKwh = c.lenient(.chargePricePerKwh, chargePricePerKwh)
+        chargePricePerKwhByLocation = c.lenient(.chargePricePerKwhByLocation, chargePricePerKwhByLocation)
         pushEnabled = c.lenient(.pushEnabled, pushEnabled)
         pushServiceURL = c.lenient(.pushServiceURL, pushServiceURL)
         liveActivityEnabled = c.lenient(.liveActivityEnabled, liveActivityEnabled)

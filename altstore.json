@@ -25,6 +25,14 @@
             ],
             "versions": [
                 {
+                    "version": "0.1.4",
+                    "date": "2026-06-07",
+                    "localizedDescription": "More from your TeslaMate data:\n• Battery health now uses TeslaMate's official calculation (capacity & range, new vs now).\n• Software update history — every firmware version with its install date.\n• Charging efficiency and the energy lost to charging.\n• Optional price per charging location for more accurate cost estimates.\n• Peak regeneration record, plus per-trip regen and usable battery.\n• Low tire-pressure warnings straight from the car.\n• Fixed the cost trend chart, and the weekday chart now starts on Monday.",
+                    "downloadURL": "https://github.com/Drakonis96/tesstats/releases/download/v0.1.4/Tesstats.ipa",
+                    "size": 1810955,
+                    "minOSVersion": "18.0"
+                },
+                {
                     "version": "0.1.3",
                     "date": "2026-06-06",
                     "localizedDescription": "Themes & display polish:\n• New light theme alongside the default dark theme (Settings → Appearance).\n• Pick your accent color from 10 presets — it's applied across the whole app.\n• Activity heatmap now spans the full card width, so its left and right margins match.",
@@ -57,11 +65,11 @@
                     "minOSVersion": "18.0"
                 }
             ],
-            "version": "0.1.3",
-            "versionDate": "2026-06-06",
-            "versionDescription": "Themes & display polish:\n• New light theme alongside the default dark theme (Settings → Appearance).\n• Pick your accent color from 10 presets — it's applied across the whole app.\n• Activity heatmap now spans the full card width, so its left and right margins match.",
-            "downloadURL": "https://github.com/Drakonis96/tesstats/releases/download/v0.1.3/Tesstats.ipa",
-            "size": 1739372,
+            "version": "0.1.4",
+            "versionDate": "2026-06-07",
+            "versionDescription": "More from your TeslaMate data:\n• Battery health now uses TeslaMate's official calculation (capacity & range, new vs now).\n• Software update history — every firmware version with its install date.\n• Charging efficiency and the energy lost to charging.\n• Optional price per charging location for more accurate cost estimates.\n• Peak regeneration record, plus per-trip regen and usable battery.\n• Low tire-pressure warnings straight from the car.\n• Fixed the cost trend chart, and the weekday chart now starts on Monday.",
+            "downloadURL": "https://github.com/Drakonis96/tesstats/releases/download/v0.1.4/Tesstats.ipa",
+            "size": 1810955,
             "minOSVersion": "18.0",
             "appPermissions": {
                 "entitlements": [],

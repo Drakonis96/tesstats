@@ -123,9 +123,11 @@ struct ChargesView: View {
     }
 
     private var electricityCost: Double {
-        let agg = ChargeAggregates.from(filtered)
-        // Prefer TeslaMate's recorded cost; otherwise estimate from the configured €/kWh.
-        return agg.totalCost > 0.01 ? agg.totalCost : agg.totalEnergyKwh * env.settings.config.chargePricePerKwh
+        // Sum each session's effective cost — recorded where present, otherwise the location's
+        // custom price (if set) or the global default — so per-place prices feed the total.
+        let pricing = ChargePricing(defaultPricePerKwh: env.settings.config.chargePricePerKwh,
+                                    perLocation: env.settings.config.chargePricePerKwhByLocation)
+        return filtered.reduce(0) { $0 + pricing.cost(for: $1) }
     }
 
     private var costIsEstimated: Bool {
@@ -168,6 +170,14 @@ struct ChargeAggregatesCard: View {
                 StatTile(title: L("AC / DC"),
                          value: "\(Int(aggregates.homeEnergyKwh)) / \(Int(aggregates.publicEnergyKwh)) kWh",
                          systemImage: "bolt.batteryblock")
+                if let eff = aggregates.chargingEfficiency {
+                    StatTile(title: L("Charging efficiency"), value: String(format: "%.0f%%", eff * 100),
+                             systemImage: "bolt.badge.checkmark", tint: Brand.online)
+                }
+                if let loss = aggregates.lossKwh {
+                    StatTile(title: L("Charging losses"), value: units.energy(kwh: loss, digits: 1),
+                             systemImage: "arrow.down.right")
+                }
             }
             if let cmp = fuelComparison {
                 Divider().overlay(Brand.hairline)

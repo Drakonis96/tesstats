@@ -60,6 +60,16 @@ final class CacheStore {
     func saveCharges(_ charges: [ChargeRecord], carID: Int) { write(charges, to: "charges-\(carID).json") }
     func loadCharges(carID: Int) -> [ChargeRecord] { read([ChargeRecord].self, from: "charges-\(carID).json") ?? [] }
 
+    // MARK: Software updates
+
+    func saveUpdates(_ updates: [SoftwareUpdate], carID: Int) { write(updates, to: "updates-\(carID).json") }
+    func loadUpdates(carID: Int) -> [SoftwareUpdate] { read([SoftwareUpdate].self, from: "updates-\(carID).json") ?? [] }
+
+    // MARK: Battery health (official snapshot)
+
+    func saveBatteryHealth(_ summary: BatteryHealthSummary, carID: Int) { write(summary, to: "battery-health-\(carID).json") }
+    func loadBatteryHealth(carID: Int) -> BatteryHealthSummary? { read(BatteryHealthSummary.self, from: "battery-health-\(carID).json") }
+
     // MARK: Maintenance
 
     /// Delete every cached file (snapshots + downloaded history). Best-effort.

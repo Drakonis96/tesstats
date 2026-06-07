@@ -174,4 +174,20 @@ final class HistoryAPIService: Sendable {
             .compactMap { $0.toDomain() }
             .sorted { $0.date < $1.date }
     }
+
+    /// Official battery-health snapshot (current vs new capacity & range, health %). Returns nil
+    /// when the deployment doesn't expose `/battery-health` or has insufficient data.
+    func fetchBatteryHealth(carID: Int) async throws -> BatteryHealthSummary? {
+        let env = try await fetch(BatteryHealthEnvelope.self, path: "/v1/cars/\(carID)/battery-health")
+        let isMiles = (env.data?.units?.unitOfLength ?? "km").lowercased().hasPrefix("mi")
+        return env.data?.batteryHealth?.toDomain(lengthIsMiles: isMiles)
+    }
+
+    /// Firmware update history (newest first). Empty when the deployment doesn't expose `/updates`.
+    func fetchUpdates(carID: Int) async throws -> [SoftwareUpdate] {
+        let env = try await fetch(UpdatesEnvelope.self, path: "/v1/cars/\(carID)/updates")
+        return (env.data?.updates ?? []).enumerated()
+            .compactMap { $0.element.toDomain(index: $0.offset) }
+            .sorted { $0.startDate > $1.startDate }
+    }
 }

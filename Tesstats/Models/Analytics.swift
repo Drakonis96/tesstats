@@ -40,10 +40,12 @@ struct Superlatives: Sendable {
     var longestDrive: DriveRecord?
     var mostEfficientDrive: DriveRecord?     // lowest Wh/km, min distance applied
     var fastestDrive: DriveRecord?           // highest max speed
+    var bestRegenDrive: DriveRecord?         // highest peak regen (most-negative power_min)
     var biggestCharge: ChargeRecord?         // most energy added
     var longestCharge: ChargeRecord?         // longest duration
     var fastestCharge: ChargeRecord?         // highest peak power
     var topSpeedKmh: Double?
+    var maxRegenKw: Double?                   // peak regenerative-braking power seen (kW)
 }
 
 // MARK: - Cost summary
@@ -122,9 +124,37 @@ struct ChargingLocation: Identifiable, Sendable, Hashable {
     var name: String
     var sessions: Int = 0
     var energyKwh: Double = 0
-    var cost: Double = 0
+    var cost: Double = 0                 // effective: recorded where present, else estimated
     var avgPowerKw: Double = 0
     var isFast: Bool = false
+}
+
+// MARK: - Charge pricing
+
+/// Resolves what a charge costs, honoring an optional per-location price override.
+/// TeslaMate's recorded cost always wins; otherwise the energy is valued at the location's
+/// custom price (when set) or the global default.
+struct ChargePricing: Sendable {
+    var defaultPricePerKwh: Double
+    var perLocation: [String: Double]
+
+    init(defaultPricePerKwh: Double, perLocation: [String: Double] = [:]) {
+        self.defaultPricePerKwh = defaultPricePerKwh
+        self.perLocation = perLocation
+    }
+
+    /// Price applied to a location's *unpriced* sessions — its custom override or the default.
+    func price(for locationName: String) -> Double {
+        perLocation[locationName] ?? defaultPricePerKwh
+    }
+
+    /// Effective cost of a single charge. A recorded cost is used only when it carries a real
+    /// value: TeslaMate frequently reports `0` (rather than null) when no cost is configured,
+    /// so a `0`/nil falls through to the price-based estimate.
+    func cost(for charge: ChargeRecord) -> Double {
+        if let recorded = charge.cost, recorded > 0.01 { return recorded }
+        return charge.energyAddedKwh * price(for: charge.locationName)
+    }
 }
 
 // MARK: - Engine
@@ -134,7 +164,7 @@ enum StatsEngine {
 
     // Monthly aggregation ----------------------------------------------------
 
-    static func monthly(drives: [DriveRecord], charges: [ChargeRecord], pricePerKwh: Double) -> [MonthlyStat] {
+    static func monthly(drives: [DriveRecord], charges: [ChargeRecord], pricing: ChargePricing) -> [MonthlyStat] {
         let cal = calendar
         var buckets: [Date: MonthlyStat] = [:]
         // Track distance-weighted consumption per month.
@@ -162,7 +192,7 @@ enum StatsEngine {
             var stat = buckets[m] ?? MonthlyStat(month: m)
             stat.energyChargedKwh += c.energyAddedKwh
             stat.chargeCount += 1
-            stat.chargeCost += (c.cost ?? c.energyAddedKwh * pricePerKwh)
+            stat.chargeCost += pricing.cost(for: c)
             buckets[m] = stat
         }
         for (m, w) in consWeighted where w.dist > 0 {
@@ -174,7 +204,7 @@ enum StatsEngine {
     // Period comparison ------------------------------------------------------
 
     /// Compare the most recent calendar month with the one before it.
-    static func monthOverMonth(drives: [DriveRecord], charges: [ChargeRecord], pricePerKwh: Double, now: Date = Date()) -> PeriodComparison? {
+    static func monthOverMonth(drives: [DriveRecord], charges: [ChargeRecord], pricing: ChargePricing, now: Date = Date()) -> PeriodComparison? {
         let cal = calendar
         guard let thisMonthStart = cal.date(from: cal.dateComponents([.year, .month], from: now)),
               let lastMonthStart = cal.date(byAdding: .month, value: -1, to: thisMonthStart),
@@ -192,7 +222,7 @@ enum StatsEngine {
             var energy = 0.0, cost = 0.0
             for c in charges where range.contains(c.startDate) {
                 energy += c.energyAddedKwh
-                cost += (c.cost ?? c.energyAddedKwh * pricePerKwh)
+                cost += pricing.cost(for: c)
             }
             return (energy, cost)
         }
@@ -222,6 +252,8 @@ enum StatsEngine {
             .min { ($0.consumptionWhPerKm ?? .infinity) < ($1.consumptionWhPerKm ?? .infinity) }
         s.fastestDrive = drives.max { ($0.maxSpeedKmh ?? 0) < ($1.maxSpeedKmh ?? 0) }
         s.topSpeedKmh = drives.compactMap { $0.maxSpeedKmh }.max()
+        s.bestRegenDrive = drives.filter { ($0.maxRegenKw ?? 0) > 0 }.max { ($0.maxRegenKw ?? 0) < ($1.maxRegenKw ?? 0) }
+        s.maxRegenKw = drives.compactMap { $0.maxRegenKw }.max()
         s.biggestCharge = charges.max { $0.energyAddedKwh < $1.energyAddedKwh }
         s.longestCharge = charges.max { $0.durationMin < $1.durationMin }
         s.fastestCharge = charges.max { ($0.avgPowerKw ?? 0) < ($1.avgPowerKw ?? 0) }
@@ -230,14 +262,16 @@ enum StatsEngine {
 
     // Cost -------------------------------------------------------------------
 
-    static func cost(drives: [DriveRecord], charges: [ChargeRecord], pricePerKwh: Double, now: Date = Date()) -> CostSummary {
+    static func cost(drives: [DriveRecord], charges: [ChargeRecord], pricing: ChargePricing, now: Date = Date()) -> CostSummary {
         var c = CostSummary()
         c.totalDistanceKm = drives.reduce(0) { $0 + $1.distanceKm }
         c.totalEnergyKwh = charges.reduce(0) { $0 + $1.energyAddedKwh }
 
         let recordedCost = charges.reduce(0.0) { $0 + ($1.cost ?? 0) }
         c.costIsEstimated = recordedCost <= 0.01
-        c.totalCost = c.costIsEstimated ? c.totalEnergyKwh * pricePerKwh : recordedCost
+        // Sum each session's effective cost: recorded where present, priced estimate otherwise
+        // (so sessions TeslaMate left without a cost still count, at their location's price).
+        c.totalCost = charges.reduce(0) { $0 + pricing.cost(for: $1) }
 
         if c.totalDistanceKm > 0 { c.costPer100Km = c.totalCost / c.totalDistanceKm * 100 }
 
@@ -247,8 +281,8 @@ enum StatsEngine {
             let energy = priced.reduce(0) { $0 + $1.energyAddedKwh }
             let cost = priced.reduce(0) { $0 + ($1.cost ?? 0) }
             if energy > 0 { c.avgPricePerKwh = cost / energy }
-        } else if pricePerKwh > 0 {
-            c.avgPricePerKwh = pricePerKwh
+        } else if pricing.defaultPricePerKwh > 0 {
+            c.avgPricePerKwh = pricing.defaultPricePerKwh
         }
 
         // Projection: spread the recorded cost over the days actually covered.
@@ -272,7 +306,11 @@ enum StatsEngine {
             map[wd]?.driveCount += 1
             map[wd]?.distanceKm += d.distanceKm
         }
-        return (1...7).compactMap { map[$0] }
+        // Order from the locale's first weekday (Monday across most of Europe) rather than
+        // always Sunday, so the chart reads the way the user's calendar does.
+        let first = cal.firstWeekday
+        let order = (0..<7).map { ((first - 1 + $0) % 7) + 1 }
+        return order.compactMap { map[$0] }
     }
 
     static func hourUsage(_ drives: [DriveRecord]) -> [HourUsage] {
@@ -384,7 +422,7 @@ enum StatsEngine {
 
     // Charging by location ---------------------------------------------------
 
-    static func chargingLocations(_ charges: [ChargeRecord]) -> [ChargingLocation] {
+    static func chargingLocations(_ charges: [ChargeRecord], pricing: ChargePricing) -> [ChargingLocation] {
         var map: [String: ChargingLocation] = [:]
         var powerAcc: [String: (sum: Double, n: Int)] = [:]
         for c in charges {
@@ -392,7 +430,7 @@ enum StatsEngine {
             var loc = map[name] ?? ChargingLocation(name: name)
             loc.sessions += 1
             loc.energyKwh += c.energyAddedKwh
-            loc.cost += (c.cost ?? 0)
+            loc.cost += pricing.cost(for: c)
             loc.isFast = loc.isFast || c.isFastCharger
             map[name] = loc
             if let p = c.avgPowerKw, p > 0 {

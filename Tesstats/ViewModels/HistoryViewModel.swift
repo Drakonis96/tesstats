@@ -10,6 +10,10 @@ final class HistoryViewModel {
     private(set) var drives: [DriveRecord] = []
     private(set) var charges: [ChargeRecord] = []
     private(set) var battery: [BatteryHealthPoint] = []
+    /// Official battery-health snapshot from TeslaMateApi (preferred over the derived curve).
+    private(set) var batteryHealthSummary: BatteryHealthSummary?
+    /// Firmware update history (newest first).
+    private(set) var updates: [SoftwareUpdate] = []
     private(set) var carInfo: CarInfo?
     private(set) var phase: Phase = .idle
     private(set) var usingCache = false
@@ -36,6 +40,8 @@ final class HistoryViewModel {
         drives = []
         charges = []
         battery = []
+        batteryHealthSummary = nil
+        updates = []
         carInfo = nil
         usingCache = false
         loadedCarID = nil
@@ -52,6 +58,8 @@ final class HistoryViewModel {
             drives = DemoDataProvider.drives()
             charges = DemoDataProvider.charges()
             battery = DemoDataProvider.batteryHealth()
+            batteryHealthSummary = DemoDataProvider.batteryHealthSummary
+            updates = DemoDataProvider.updates()
             carInfo = DemoDataProvider.carInfo
             phase = .loaded
             return
@@ -62,6 +70,8 @@ final class HistoryViewModel {
             drives = cache.loadDrives(carID: carID)
             charges = cache.loadCharges(carID: carID)
             battery = Self.deriveBattery(charges: charges, drives: drives, efficiency: carInfo?.efficiencyKwhPerKm)
+            batteryHealthSummary = cache.loadBatteryHealth(carID: carID)
+            updates = cache.loadUpdates(carID: carID)
             usingCache = !drives.isEmpty || !charges.isEmpty
             phase = usingCache ? .loaded
                 : .empty(L("Add a TeslaMateApi URL in Settings to see drives, charges and battery history."))
@@ -80,6 +90,22 @@ final class HistoryViewModel {
             battery = Self.deriveBattery(charges: cc, drives: dd, efficiency: carInfo?.efficiencyKwhPerKm)
             cache.saveDrives(dd, carID: carID)
             cache.saveCharges(cc, carID: carID)
+
+            // Best-effort extras — older/minimal TeslaMateApi deployments may not expose these,
+            // so a failure must not break the core history load. Keep the last cached value.
+            if let health = try? await api.fetchBatteryHealth(carID: carID) {
+                batteryHealthSummary = health
+                cache.saveBatteryHealth(health, carID: carID)
+            } else {
+                batteryHealthSummary = cache.loadBatteryHealth(carID: carID)
+            }
+            if let ups = try? await api.fetchUpdates(carID: carID), !ups.isEmpty {
+                updates = ups
+                cache.saveUpdates(ups, carID: carID)
+            } else {
+                updates = cache.loadUpdates(carID: carID)
+            }
+
             phase = (dd.isEmpty && cc.isEmpty)
                 ? .empty(L("No history returned yet."))
                 : .loaded
@@ -88,6 +114,8 @@ final class HistoryViewModel {
             drives = cache.loadDrives(carID: carID)
             charges = cache.loadCharges(carID: carID)
             battery = Self.deriveBattery(charges: charges, drives: drives, efficiency: carInfo?.efficiencyKwhPerKm)
+            batteryHealthSummary = cache.loadBatteryHealth(carID: carID)
+            updates = cache.loadUpdates(carID: carID)
             if !drives.isEmpty || !charges.isEmpty {
                 usingCache = true
                 phase = .loaded

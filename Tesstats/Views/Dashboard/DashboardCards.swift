@@ -341,24 +341,32 @@ struct TPMSCard: View {
         VStack(alignment: .leading, spacing: 14) {
             SectionHeader(L("Tire pressure"), systemImage: "gauge.with.dots.needle.bottom.50percent")
             HStack(spacing: 12) {
-                tire(L("FL"), state.tpmsPressureFL)
-                tire(L("FR"), state.tpmsPressureFR)
-                tire(L("RL"), state.tpmsPressureRL)
-                tire(L("RR"), state.tpmsPressureRR)
+                tire(L("FL"), state.tpmsPressureFL, state.tpmsSoftWarningFL == true)
+                tire(L("FR"), state.tpmsPressureFR, state.tpmsSoftWarningFR == true)
+                tire(L("RL"), state.tpmsPressureRL, state.tpmsSoftWarningRL == true)
+                tire(L("RR"), state.tpmsPressureRR, state.tpmsSoftWarningRR == true)
+            }
+            if state.anyTpmsSoftWarning {
+                Label(L("Low pressure: \(state.tiresWithSoftWarning.joined(separator: ", "))"),
+                      systemImage: "exclamationmark.triangle.fill")
+                    .font(.caption.weight(.medium)).foregroundStyle(Brand.warning)
             }
         }
         .card()
     }
 
-    private func tire(_ label: String, _ bar: Double?) -> some View {
+    private func tire(_ label: String, _ bar: Double?, _ warn: Bool) -> some View {
         VStack(spacing: 6) {
-            Text(label).font(.caption2.weight(.bold)).foregroundStyle(Brand.textTertiary)
-            Text(units.pressure(bar: bar)).font(.subheadline.weight(.semibold)).foregroundStyle(Brand.textPrimary)
+            Text(label).font(.caption2.weight(.bold)).foregroundStyle(warn ? Brand.warning : Brand.textTertiary)
+            Text(units.pressure(bar: bar))
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(warn ? Brand.warning : Brand.textPrimary)
                 .lineLimit(1).minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
-        .background(Brand.elevatedSurface, in: RoundedRectangle(cornerRadius: Metrics.tightRadius))
+        .background(warn ? Brand.warning.opacity(0.12) : Brand.elevatedSurface,
+                    in: RoundedRectangle(cornerRadius: Metrics.tightRadius))
     }
 }
 

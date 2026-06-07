@@ -11,6 +11,22 @@ struct DemoDataProvider: Sendable {
         vin: "5YJ3E1EA7KF000000", exteriorColor: "DeepBlue", wheelType: "Performance",
         efficiencyKwhPerKm: 0.152, totalDrives: 142, totalCharges: 44, totalUpdates: 5)
 
+    static let batteryHealthSummary = BatteryHealthSummary(
+        healthPercentage: 94.0,
+        currentCapacityKwh: 73.2, maxCapacityKwh: 78.0,
+        currentRangeKm: 451, maxRangeKm: 480, ratedEfficiency: 0.152)
+
+    static func updates() -> [SoftwareUpdate] {
+        let cal = Calendar.current
+        let now = Date()
+        let versions = ["2024.20.9", "2024.14.10", "2024.8.9", "2023.44.30.4", "2023.38.6"]
+        return versions.enumerated().map { idx, v in
+            let start = cal.date(byAdding: .day, value: -(idx * 47 + 5), to: now) ?? now
+            return SoftwareUpdate(id: 3000 + idx, version: v, startDate: start,
+                                  endDate: start.addingTimeInterval(35 * 60))
+        }
+    }
+
     // Madrid-ish coordinates for a believable map.
     private static let home = Coordinate(latitude: 40.4168, longitude: -3.7038)
     private static let work = Coordinate(latitude: 40.4530, longitude: -3.6883)
@@ -70,7 +86,11 @@ struct DemoDataProvider: Sendable {
         s.tpmsPressureFL = 2.9
         s.tpmsPressureFR = 2.9
         s.tpmsPressureRL = 2.8
-        s.tpmsPressureRR = 2.85
+        s.tpmsPressureRR = 2.1
+        s.tpmsSoftWarningFL = false
+        s.tpmsSoftWarningFR = false
+        s.tpmsSoftWarningRL = false
+        s.tpmsSoftWarningRR = true   // showcase the low-pressure warning UI
         s.lastUpdated = Date()
         return s
     }
@@ -140,12 +160,15 @@ struct DemoDataProvider: Sendable {
                 startGeofence: oName, endGeofence: dName,
                 distanceKm: dist, durationMin: dur,
                 startBattery: 78 - idx, endBattery: 70 - idx,
+                startUsableBattery: 77 - idx, endUsableBattery: 69 - idx,
                 startRangeKm: 300 - Double(idx), endRangeKm: 280 - Double(idx),
                 avgSpeedKmh: dist / (Double(dur) / 60),
                 maxSpeedKmh: 90 + Double(idx % 5) * 6,
                 maxPowerKw: 120 + Double(idx % 4) * 18,
+                minPowerKw: -(38 + Double(idx % 5) * 11),
                 outsideTempAvg: 13 + Double(idx % 6),
                 insideTempAvg: 21,
+                energyConsumedKwh: wh * dist / 1000.0,
                 startCoord: oCoord, endCoord: dCoord,
                 path: interpolate(from: oCoord, to: dCoord, steps: 8, seed: idx),
                 consumptionWhPerKm: wh,
@@ -177,6 +200,8 @@ struct DemoDataProvider: Sendable {
             // (the 8th tuple field was a peak hint; average is derived like the real DTO does)
             let (name, coord, energy, startB, endB, dur, cost, _, fast) = s
             let start = cal.date(byAdding: .hour, value: -idx * 30 - 6, to: now) ?? now
+            // Grid energy = battery energy ÷ efficiency (DC fast loses a bit less proportionally).
+            let used = energy / (fast ? 0.94 : 0.89)
             return ChargeRecord(
                 id: 2000 + idx,
                 startDate: start,
@@ -186,6 +211,9 @@ struct DemoDataProvider: Sendable {
                 startBattery: startB, endBattery: endB,
                 startRangeKm: Double(startB) * 4.6, endRangeKm: Double(endB) * 4.6,
                 durationMin: dur, cost: cost,
+                energyUsedKwh: used,
+                outsideTempAvg: 11 + Double(idx % 8),
+                odometerKm: 28450 - Double(idx) * 120,
                 avgPowerKw: dur > 0 ? energy / (Double(dur) / 60.0) : nil,
                 coord: coord, isFastCharger: fast
             )

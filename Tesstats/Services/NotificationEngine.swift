@@ -119,6 +119,15 @@ final class NotificationEngine {
                      title: L("Low tire pressure"),
                      body: L("\(carName): \(detail)."))
             }
+
+            // The car's own soft warning — more reliable than a fixed threshold, fires on the
+            // rising edge regardless of the bar value.
+            if !current.tiresWithSoftWarning.isEmpty, previous.tiresWithSoftWarning.isEmpty {
+                let wheels = current.tiresWithSoftWarning.joined(separator: ", ")
+                post(id: "tpms-soft-warning",
+                     title: L("Low tire pressure"),
+                     body: L("\(carName) flagged low tire pressure: \(wheels)."))
+            }
         }
 
         // Parked and left unplugged

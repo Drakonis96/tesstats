@@ -13,7 +13,10 @@ struct StatsView: View {
 
     private var drives: [DriveRecord] { env.history.drives.filter { range.contains($0.startDate) } }
     private var charges: [ChargeRecord] { env.history.charges.filter { range.contains($0.startDate) } }
-    private var pricePerKwh: Double { env.settings.config.chargePricePerKwh }
+    private var pricing: ChargePricing {
+        ChargePricing(defaultPricePerKwh: env.settings.config.chargePricePerKwh,
+                      perLocation: env.settings.config.chargePricePerKwhByLocation)
+    }
 
     var body: some View {
         NavigationStack {
@@ -73,7 +76,7 @@ struct StatsView: View {
                         .font(.subheadline).foregroundStyle(Brand.textSecondary)
                         .frame(maxWidth: .infinity).padding(.top, 30)
                 } else {
-                    if let cmp = StatsEngine.monthOverMonth(drives: env.history.drives, charges: env.history.charges, pricePerKwh: pricePerKwh) {
+                    if let cmp = StatsEngine.monthOverMonth(drives: env.history.drives, charges: env.history.charges, pricing: pricing) {
                         ComparisonCard(comparison: cmp, units: units)
                     }
                     TrendsCard(monthly: monthly, units: units)
@@ -95,8 +98,8 @@ struct StatsView: View {
     }
 
     // Derived analytics (recomputed when `range` or history changes).
-    private var monthly: [MonthlyStat] { StatsEngine.monthly(drives: drives, charges: charges, pricePerKwh: pricePerKwh) }
-    private var cost: CostSummary { StatsEngine.cost(drives: drives, charges: charges, pricePerKwh: pricePerKwh) }
+    private var monthly: [MonthlyStat] { StatsEngine.monthly(drives: drives, charges: charges, pricing: pricing) }
+    private var cost: CostSummary { StatsEngine.cost(drives: drives, charges: charges, pricing: pricing) }
     private var eco: EcoImpact { StatsEngine.eco(drives: drives, fuelLPer100km: env.settings.config.fuelConsumptionLPer100km) }
     private var tempPoints: [TempConsumptionPoint] { StatsEngine.tempConsumption(drives) }
     private var tempBins: [TempBin] { StatsEngine.tempBins(tempPoints) }
@@ -104,7 +107,7 @@ struct StatsView: View {
     private var hours: [HourUsage] { StatsEngine.hourUsage(drives) }
     private var heatmap: [CalendarDay] { StatsEngine.calendarHeatmap(drives) }
     private var drain: PhantomDrain? { StatsEngine.phantomDrain(drives: drives, charges: charges) }
-    private var chargingLocations: [ChargingLocation] { StatsEngine.chargingLocations(charges) }
+    private var chargingLocations: [ChargingLocation] { StatsEngine.chargingLocations(charges, pricing: pricing) }
     private var records: Superlatives { StatsEngine.superlatives(drives: drives, charges: charges) }
 
     private func refresh() async {
@@ -183,6 +186,10 @@ private struct TrendsCard: View {
 
             if monthly.count < 2 {
                 Text(L("Not enough history yet to show monthly trends."))
+                    .font(.subheadline).foregroundStyle(Brand.textSecondary)
+                    .frame(maxWidth: .infinity, minHeight: 80)
+            } else if metric == .cost && monthly.allSatisfy({ $0.chargeCost <= 0.01 }) {
+                Text(L("No cost data. Set a charge price per kWh in Settings — or per location below — to see cost trends."))
                     .font(.subheadline).foregroundStyle(Brand.textSecondary)
                     .frame(maxWidth: .infinity, minHeight: 80)
             } else {
@@ -342,6 +349,9 @@ private struct UsageCard: View {
     let units: Units
 
     private var weekdaySymbols: [String] { Calendar.current.shortWeekdaySymbols }
+    /// Day labels in the same order as `weekdays` (which starts on the locale's first weekday),
+    /// used to fix the chart's category order so it starts on Monday rather than alphabetically.
+    private var weekdayOrder: [String] { weekdays.map { weekdaySymbols[($0.weekday - 1) % 7] } }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -353,6 +363,7 @@ private struct UsageCard: View {
                     .foregroundStyle(Brand.crimson.gradient)
                     .cornerRadius(3)
             }
+            .chartXScale(domain: weekdayOrder)
             .chartYAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel() } }
             .frame(height: 130)
 
@@ -450,29 +461,91 @@ private struct PhantomDrainCard: View {
 // MARK: - Charging locations
 
 private struct ChargingLocationsCard: View {
+    @Environment(AppEnvironment.self) private var env
     let locations: [ChargingLocation]
     let units: Units
+
+    @State private var editing: ChargingLocation?
+    @State private var priceText = ""
+
+    private var shown: [ChargingLocation] { Array(locations.prefix(6)) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(L("Where you charge"), systemImage: "mappin.circle")
-            ForEach(locations.prefix(6)) { loc in
-                HStack(spacing: 10) {
-                    Image(systemName: loc.isFast ? "bolt.car.fill" : "house.fill")
-                        .font(.subheadline).foregroundStyle(Brand.crimson).frame(width: 22)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(loc.name).font(.subheadline.weight(.medium)).foregroundStyle(Brand.textPrimary).lineLimit(1)
-                        Text(L("\(loc.sessions) sessions · \(units.energy(kwh: loc.energyKwh, digits: 0))"))
-                            .font(.caption2).foregroundStyle(Brand.textTertiary)
-                    }
-                    Spacer()
-                    Text(loc.cost > 0 ? units.money(loc.cost) : units.power(kw: loc.avgPowerKw > 0 ? loc.avgPowerKw : nil))
-                        .font(.caption.weight(.semibold)).foregroundStyle(Brand.textSecondary)
-                }
-                if loc.id != locations.prefix(6).last?.id { Divider().overlay(Brand.hairline) }
+            ForEach(shown) { loc in
+                Button { beginEditing(loc) } label: { row(loc) }
+                    .buttonStyle(.plain)
+                if loc.id != shown.last?.id { Divider().overlay(Brand.hairline) }
             }
+            Text(L("Tap a place to set its price per kWh for more accurate cost. Optional."))
+                .font(.caption2).foregroundStyle(Brand.textTertiary)
         }
         .card()
+        .alert(L("Price per kWh"), isPresented: editingBinding, presenting: editing) { loc in
+            TextField(defaultPriceText, text: $priceText)
+                .keyboardTypeDecimal()
+            Button(L("Save")) { savePrice(for: loc) }
+            if override(loc) != nil {
+                Button(L("Use default"), role: .destructive) { clearPrice(for: loc) }
+            }
+            Button(L("Cancel"), role: .cancel) {}
+        } message: { loc in
+            Text(L("Price you pay per kWh at \(loc.name). Used to estimate cost when TeslaMate has none. Leave empty to use the default (\(defaultPriceLabel))."))
+        }
+    }
+
+    private func row(_ loc: ChargingLocation) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: loc.isFast ? "bolt.car.fill" : "house.fill")
+                .font(.subheadline).foregroundStyle(Brand.crimson).frame(width: 22)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(loc.name).font(.subheadline.weight(.medium)).foregroundStyle(Brand.textPrimary).lineLimit(1)
+                Text(L("\(loc.sessions) sessions · \(units.energy(kwh: loc.energyKwh, digits: 0))"))
+                    .font(.caption2).foregroundStyle(Brand.textTertiary)
+            }
+            Spacer()
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(loc.cost > 0 ? units.money(loc.cost) : units.power(kw: loc.avgPowerKw > 0 ? loc.avgPowerKw : nil))
+                    .font(.caption.weight(.semibold)).foregroundStyle(Brand.textSecondary)
+                if let custom = override(loc) {
+                    Text(L("\(units.money(custom))/kWh"))
+                        .font(.caption2.weight(.semibold)).foregroundStyle(Brand.crimson)
+                }
+            }
+            Image(systemName: "chevron.right")
+                .font(.caption2).foregroundStyle(Brand.textTertiary)
+        }
+        .contentShape(Rectangle())
+    }
+
+    private var editingBinding: Binding<Bool> {
+        Binding(get: { editing != nil }, set: { if !$0 { editing = nil } })
+    }
+    private func override(_ loc: ChargingLocation) -> Double? {
+        env.settings.config.chargePricePerKwhByLocation[loc.name]
+    }
+    private var defaultPriceText: String { String(format: "%g", env.settings.config.chargePricePerKwh) }
+    private var defaultPriceLabel: String { units.money(env.settings.config.chargePricePerKwh) }
+
+    private func beginEditing(_ loc: ChargingLocation) {
+        priceText = override(loc).map { String(format: "%g", $0) } ?? ""
+        editing = loc
+    }
+    private func savePrice(for loc: ChargingLocation) {
+        let normalized = priceText.replacingOccurrences(of: ",", with: ".").trimmingCharacters(in: .whitespaces)
+        if let v = Double(normalized), v > 0 {
+            env.settings.config.chargePricePerKwhByLocation[loc.name] = v
+        } else {
+            env.settings.config.chargePricePerKwhByLocation.removeValue(forKey: loc.name)
+        }
+        env.settings.save()
+        editing = nil
+    }
+    private func clearPrice(for loc: ChargingLocation) {
+        env.settings.config.chargePricePerKwhByLocation.removeValue(forKey: loc.name)
+        env.settings.save()
+        editing = nil
     }
 }
 
@@ -493,6 +566,10 @@ private struct RecordsCard: View {
             }
             if let top = records.topSpeedKmh {
                 record("speedometer", L("Top speed"), units.speed(kmh: top))
+            }
+            if let kw = records.maxRegenKw, kw > 0 {
+                record("arrow.uturn.down.circle", L("Peak regen"),
+                       records.bestRegenDrive.map { "\(units.power(kw: kw)) · \($0.destinationName)" } ?? units.power(kw: kw))
             }
             if let c = records.biggestCharge {
                 record("bolt.fill", L("Biggest charge"), "\(units.energy(kwh: c.energyAddedKwh)) · \(c.locationName)")

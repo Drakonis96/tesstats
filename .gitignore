@@ -5,6 +5,7 @@
 ## Xcode build output & indexes
 build/
 build-mac/
+build-ipa/
 build-ios-device/
 DerivedData/
 *.xcuserstate

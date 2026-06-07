@@ -124,8 +124,20 @@ struct TripDetailView: View {
     // MARK: - Stats
 
     private var energyUsedKwh: Double? {
+        // Prefer TeslaMate's recorded net energy; fall back to consumption × distance.
+        if let e = drive.energyConsumedKwh, e > 0 { return e }
         guard let c = drive.consumptionWhPerKm, c > 0, drive.distanceKm > 0 else { return nil }
         return c * drive.distanceKm / 1000.0
+    }
+
+    /// Start → end SoC, surfacing the usable level in parentheses when it differs.
+    private var socLine: String {
+        func fmt(_ level: Int?, _ usable: Int?) -> String {
+            guard let level else { return "—" }
+            if let usable, usable != level { return "\(level)% (\(usable)%)" }
+            return "\(level)%"
+        }
+        return "\(fmt(drive.startBattery, drive.startUsableBattery)) → \(fmt(drive.endBattery, drive.endUsableBattery))"
     }
 
     private var rangeUsedKm: Double? {
@@ -143,6 +155,9 @@ struct TripDetailView: View {
                 StatTile(title: L("Avg speed"), value: units.speed(kmh: drive.avgSpeedKmh))
                 StatTile(title: L("Max speed"), value: units.speed(kmh: drive.maxSpeedKmh))
                 StatTile(title: L("Max power"), value: units.power(kw: drive.maxPowerKw))
+                if let regen = drive.maxRegenKw {
+                    StatTile(title: L("Max regen"), value: units.power(kw: regen))
+                }
                 StatTile(title: L("Energy used"), value: units.energy(kwh: energyUsedKwh))
                 StatTile(title: L("Range used"), value: units.range(km: rangeUsedKm))
                 StatTile(title: L("Elev. gain"), value: elevationGain)
@@ -150,7 +165,7 @@ struct TripDetailView: View {
             Divider().overlay(Brand.hairline)
             VStack(spacing: 10) {
                 KeyValueRow(label: L("Battery"),
-                            value: "\(drive.startBattery.map { "\($0)%" } ?? "—") → \(drive.endBattery.map { "\($0)%" } ?? "—")",
+                            value: socLine,
                             systemImage: "battery.50percent")
                 KeyValueRow(label: L("Temperature"),
                             value: "\(units.temperature(c: drive.insideTempAvg)) · \(units.temperature(c: drive.outsideTempAvg))",

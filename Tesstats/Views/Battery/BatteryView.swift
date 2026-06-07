@@ -57,9 +57,11 @@ struct BatteryView: View {
         ScrollView {
             VStack(spacing: Metrics.cardSpacing) {
                 if let state = env.live.currentState { liveHealthCard(state) }
+                officialHealthCard
                 degradationCard
                 efficiencyCard
-                Text(L("Degradation is derived from charge data (rated range projected to 100% and measured kWh per SoC). An estimate, not a factory spec."))
+                updatesCard
+                Text(degradationFootnote)
                     .font(.caption2).foregroundStyle(Brand.textTertiary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 4)
@@ -95,6 +97,64 @@ struct BatteryView: View {
 
     private var currentCapacity: Double? { env.history.battery.last?.usableCapacityKwh }
     private var originalCapacity: Double? { env.history.battery.first?.usableCapacityKwh }
+
+    /// Footnote adapts to whether we have TeslaMate's official figures or only the local estimate.
+    private var degradationFootnote: String {
+        env.history.batteryHealthSummary != nil
+            ? L("Battery health uses TeslaMate's official calculation. The degradation curve below is derived from your charge history.")
+            : L("Degradation is derived from charge data (rated range projected to 100% and measured kWh per SoC). An estimate, not a factory spec.")
+    }
+
+    /// Official battery-health snapshot from TeslaMateApi, shown when available.
+    @ViewBuilder
+    private var officialHealthCard: some View {
+        if let h = env.history.batteryHealthSummary, h.healthPercentage > 0 || h.maxCapacityKwh > 0 {
+            VStack(alignment: .leading, spacing: 14) {
+                SectionHeader(L("Battery health"), systemImage: "cross.case")
+                HStack(spacing: 16) {
+                    if h.healthPercentage > 0 { statBlock(L("Health"), String(format: "%.0f%%", h.healthPercentage)) }
+                    if let loss = h.capacityLossFraction { statBlock(L("Degraded"), String(format: "%.1f%%", loss * 100)) }
+                }
+                TileGrid(columns: 2) {
+                    if h.currentCapacityKwh > 0 {
+                        StatTile(title: L("Capacity now"), value: units.energy(kwh: h.currentCapacityKwh, digits: 1), tint: Brand.crimson)
+                    }
+                    if h.maxCapacityKwh > 0 {
+                        StatTile(title: L("Capacity when new"), value: units.energy(kwh: h.maxCapacityKwh, digits: 1))
+                    }
+                    if h.currentRangeKm > 0 {
+                        StatTile(title: L("Max range now"), value: units.range(km: h.currentRangeKm))
+                    }
+                    if h.maxRangeKm > 0 {
+                        StatTile(title: L("Max range when new"), value: units.range(km: h.maxRangeKm))
+                    }
+                }
+            }
+            .card()
+        }
+    }
+
+    /// Firmware update history from TeslaMateApi's /updates endpoint.
+    @ViewBuilder
+    private var updatesCard: some View {
+        if !env.history.updates.isEmpty {
+            let shown = Array(env.history.updates.prefix(8))
+            VStack(alignment: .leading, spacing: 12) {
+                SectionHeader(L("Software updates"), systemImage: "arrow.down.circle")
+                ForEach(shown) { u in
+                    HStack(spacing: 10) {
+                        Image(systemName: "cpu").font(.subheadline).foregroundStyle(Brand.crimson).frame(width: 22)
+                        Text(u.version).font(.subheadline.weight(.medium)).foregroundStyle(Brand.textPrimary)
+                            .lineLimit(1).minimumScaleFactor(0.7)
+                        Spacer(minLength: 10)
+                        Text(units.shortDate(u.startDate)).font(.caption.weight(.medium)).foregroundStyle(Brand.textSecondary)
+                    }
+                    if u.id != shown.last?.id { Divider().overlay(Brand.hairline) }
+                }
+            }
+            .card()
+        }
+    }
 
     private var degradationPoints: [(date: Date, value: Double)] {
         points.map { point in

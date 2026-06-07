@@ -49,6 +49,22 @@
         }
       }
     },
+    "%@ flagged low tire pressure: %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ flagged low tire pressure: %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ avisó de presión baja en los neumáticos: %@."
+          }
+        }
+      }
+    },
     "%@ has about %@ of range at %lld%%.": {
       "localizations": {
         "en": {
@@ -221,6 +237,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ · %@"
+          }
+        }
+      }
+    },
+    "%@/kWh": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@/kWh"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@/kWh"
           }
         }
       }
@@ -1025,6 +1057,38 @@
         }
       }
     },
+    "Battery health": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Battery health"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salud de batería"
+          }
+        }
+      }
+    },
+    "Battery health uses TeslaMate's official calculation. The degradation curve below is derived from your charge history.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Battery health uses TeslaMate's official calculation. The degradation curve below is derived from your charge history."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La salud de batería usa el cálculo oficial de TeslaMate. La curva de degradación de abajo se deriva de tu historial de carga."
+          }
+        }
+      }
+    },
     "Battery level": {
       "localizations": {
         "en": {
@@ -1249,6 +1313,22 @@
         }
       }
     },
+    "Capacity when new": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Capacity when new"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Capacidad de nuevo"
+          }
+        }
+      }
+    },
     "Car %lld": {
       "localizations": {
         "en": {
@@ -1453,6 +1533,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Coste de carga"
+          }
+        }
+      }
+    },
+    "Charging efficiency": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charging efficiency"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eficiencia de carga"
+          }
+        }
+      }
+    },
+    "Charging losses": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charging losses"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pérdidas de carga"
           }
         }
       }
@@ -2157,6 +2269,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Degradation is derived from charge data (rated range projected to 100% and measured kWh per SoC). An estimate, not a factory spec."
+          }
+        }
+      }
+    },
+    "Degraded": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Degraded"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Degradación"
           }
         }
       }
@@ -3873,6 +4001,22 @@
         }
       }
     },
+    "Low pressure: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low pressure: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Presión baja: %@"
+          }
+        }
+      }
+    },
     "Low tire pressure": {
       "localizations": {
         "en": {
@@ -4045,6 +4189,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Max range now"
+          }
+        }
+      }
+    },
+    "Max range when new": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Max range when new"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autonomía máx. de nuevo"
+          }
+        }
+      }
+    },
+    "Max regen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Max regen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regen. máx."
           }
         }
       }
@@ -4333,6 +4509,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "No charging sessions yet"
+          }
+        }
+      }
+    },
+    "No cost data. Set a charge price per kWh in Settings — or per location below — to see cost trends.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No cost data. Set a charge price per kWh in Settings — or per location below — to see cost trends."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin datos de coste. Define un precio de recarga por kWh en Ajustes — o por lugar más abajo — para ver las tendencias de coste."
           }
         }
       }
@@ -5073,6 +5265,22 @@
         }
       }
     },
+    "Peak regen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peak regen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regeneración máx."
+          }
+        }
+      }
+    },
     "Pearl White": {
       "localizations": {
         "es": {
@@ -5357,6 +5565,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Prefs"
+          }
+        }
+      }
+    },
+    "Price per kWh": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Price per kWh"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Precio por kWh"
+          }
+        }
+      }
+    },
+    "Price you pay per kWh at %@. Used to estimate cost when TeslaMate has none. Leave empty to use the default (%@).": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Price you pay per kWh at %@. Used to estimate cost when TeslaMate has none. Leave empty to use the default (%@)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Precio que pagas por kWh en %@. Se usa para estimar el coste cuando TeslaMate no lo registra. Déjalo vacío para usar el predeterminado (%@)."
           }
         }
       }
@@ -6705,6 +6945,22 @@
         }
       }
     },
+    "Tap a place to set its price per kWh for more accurate cost. Optional.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap a place to set its price per kWh for more accurate cost. Optional."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toca un lugar para fijar su precio por kWh y calcular el coste con más precisión. Opcional."
+          }
+        }
+      }
+    },
     "Teal": {
       "localizations": {
         "en": {
@@ -7425,6 +7681,22 @@
         }
       }
     },
+    "Unknown version": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown version"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versión desconocida"
+          }
+        }
+      }
+    },
     "Unlocked": {
       "localizations": {
         "es": {
@@ -7549,6 +7821,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Usa al menos 6 caracteres."
+          }
+        }
+      }
+    },
+    "Use default": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use default"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usar predeterminado"
           }
         }
       }

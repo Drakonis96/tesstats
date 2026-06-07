@@ -96,9 +96,11 @@ struct DriveDTO: Decodable {
     let speedMax: Double?
     let speedAvg: Double?
     let powerMax: Double?
+    let powerMin: Double?                 // most-negative power (peak regen)
     let outsideTempAvg: Double?
     let insideTempAvg: Double?
     let consumptionNet: Double?          // Wh/km
+    let energyConsumedNet: Double?       // kWh for the whole drive
     let odometerDetails: OdometerDetails?
     let batteryDetails: BatteryLevels?
     let rangeRated: RangeDetail?
@@ -118,13 +120,17 @@ struct DriveDTO: Decodable {
             durationMin: durationMin ?? 0,
             startBattery: batteryDetails?.startBatteryLevel,
             endBattery: batteryDetails?.endBatteryLevel,
+            startUsableBattery: batteryDetails?.startUsableBatteryLevel,
+            endUsableBattery: batteryDetails?.endUsableBatteryLevel,
             startRangeKm: rangeRated?.startRange,
             endRangeKm: rangeRated?.endRange,
             avgSpeedKmh: speedAvg,
             maxSpeedKmh: speedMax,
             maxPowerKw: powerMax,
+            minPowerKw: powerMin,
             outsideTempAvg: outsideTempAvg,
             insideTempAvg: insideTempAvg,
+            energyConsumedKwh: energyConsumedNet,
             startCoord: nil,
             endCoord: nil,
             path: [],
@@ -166,8 +172,11 @@ struct ChargeDTO: Decodable {
     let address: String?
     let geofence: String?
     let chargeEnergyAdded: Double?
+    let chargeEnergyUsed: Double?        // grid energy incl. losses
     let cost: Double?
     let durationMin: Int?
+    let outsideTempAvg: Double?
+    let odometer: Double?
     let batteryDetails: BatteryLevels?
     let rangeRated: RangeDetail?
     let rangeIdeal: RangeDetail?
@@ -193,6 +202,9 @@ struct ChargeDTO: Decodable {
             endRangeKm: rangeRated?.endRange,
             durationMin: dur,
             cost: cost,
+            energyUsedKwh: (chargeEnergyUsed ?? 0) > 0 ? chargeEnergyUsed : nil,
+            outsideTempAvg: outsideTempAvg,
+            odometerKm: odometer,
             avgPowerKw: avgPower > 0 ? avgPower : nil,
             coord: Coordinate(latitude: latitude, longitude: longitude),
             isFastCharger: avgPower > 25
@@ -230,5 +242,65 @@ struct ChargeDetailPointDTO: Decodable {
         return ChargeCurvePoint(date: date, soc: soc, powerKw: Double(power),
                                 voltage: chargerDetails?.chargerVoltage,
                                 current: chargerDetails?.chargerActualCurrent)
+    }
+}
+
+// MARK: - Battery health — /v1/cars/{id}/battery-health
+
+struct BatteryHealthEnvelope: Decodable {
+    let data: BatteryHealthData?
+    struct BatteryHealthData: Decodable {
+        let batteryHealth: BatteryHealthDTO?
+        let units: UnitsDTO?
+    }
+    struct UnitsDTO: Decodable { let unitOfLength: String? }
+}
+
+struct BatteryHealthDTO: Decodable {
+    let maxRange: Double?
+    let currentRange: Double?
+    let maxCapacity: Double?
+    let currentCapacity: Double?
+    let ratedEfficiency: Double?
+    let batteryHealthPercentage: Double?
+
+    /// `lengthIsMiles` converts the range figures to km when TeslaMate is configured in miles,
+    /// keeping the rest of the app's km-based assumptions intact.
+    func toDomain(lengthIsMiles: Bool) -> BatteryHealthSummary? {
+        let toKm = { (v: Double?) -> Double in
+            guard let v else { return 0 }
+            return lengthIsMiles ? v * 1.609344 : v
+        }
+        let summary = BatteryHealthSummary(
+            healthPercentage: batteryHealthPercentage ?? 0,
+            currentCapacityKwh: currentCapacity ?? 0,
+            maxCapacityKwh: maxCapacity ?? 0,
+            currentRangeKm: toKm(currentRange),
+            maxRangeKm: toKm(maxRange),
+            ratedEfficiency: ratedEfficiency)
+        // Only useful if at least one signal is present.
+        guard summary.healthPercentage > 0 || summary.maxCapacityKwh > 0 || summary.maxRangeKm > 0 else { return nil }
+        return summary
+    }
+}
+
+// MARK: - Software updates — /v1/cars/{id}/updates
+
+struct UpdatesEnvelope: Decodable {
+    let data: UpdatesData?
+    struct UpdatesData: Decodable { let updates: [UpdateDTO]? }
+}
+
+struct UpdateDTO: Decodable {
+    let updateId: Int?
+    let startDate: String?
+    let endDate: String?
+    let version: String?
+
+    func toDomain(index: Int) -> SoftwareUpdate? {
+        guard let start = startDate.flatMap(VehicleState.parseDate) else { return nil }
+        let v = (version?.isEmpty == false) ? version! : L("Unknown version")
+        return SoftwareUpdate(id: updateId ?? index, version: v, startDate: start,
+                              endDate: endDate.flatMap(VehicleState.parseDate))
     }
 }

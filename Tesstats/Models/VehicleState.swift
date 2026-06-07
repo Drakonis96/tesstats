@@ -82,6 +82,12 @@ struct VehicleState: Sendable, Codable, Equatable {
     var tpmsPressureFR: Double?
     var tpmsPressureRL: Double?
     var tpmsPressureRR: Double?
+    // TPMS soft warnings — the car's own low-pressure flag per wheel (more reliable than a
+    // fixed bar threshold, since the car knows its recommended pressure).
+    var tpmsSoftWarningFL: Bool?
+    var tpmsSoftWarningFR: Bool?
+    var tpmsSoftWarningRL: Bool?
+    var tpmsSoftWarningRR: Bool?
 
     // Active route
     var activeRouteDestination: String?
@@ -118,6 +124,15 @@ extension VehicleState {
     func tiresBelow(bar threshold: Double) -> [(label: String, bar: Double)] {
         tirePressures.filter { $0.bar > 0 && $0.bar < threshold }
     }
+
+    /// Wheels the car itself flags with a low-pressure soft warning.
+    var tiresWithSoftWarning: [String] {
+        [(L("Front left"), tpmsSoftWarningFL), (L("Front right"), tpmsSoftWarningFR),
+         (L("Rear left"), tpmsSoftWarningRL), (L("Rear right"), tpmsSoftWarningRR)]
+            .compactMap { label, flag in flag == true ? label : nil }
+    }
+
+    var anyTpmsSoftWarning: Bool { !tiresWithSoftWarning.isEmpty }
 
     var anyOpeningOpen: Bool {
         [windowsOpen, doorsOpen, frunkOpen, trunkOpen,
@@ -236,6 +251,10 @@ extension VehicleState {
         case "tpms_pressure_fr": tpmsPressureFR = Double(v)
         case "tpms_pressure_rl": tpmsPressureRL = Double(v)
         case "tpms_pressure_rr": tpmsPressureRR = Double(v)
+        case "tpms_soft_warning_fl": tpmsSoftWarningFL = Self.bool(v)
+        case "tpms_soft_warning_fr": tpmsSoftWarningFR = Self.bool(v)
+        case "tpms_soft_warning_rl": tpmsSoftWarningRL = Self.bool(v)
+        case "tpms_soft_warning_rr": tpmsSoftWarningRR = Self.bool(v)
 
         // Active route
         case "active_route_destination": activeRouteDestination = v.nilIfEmpty
