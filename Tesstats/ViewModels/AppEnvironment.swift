@@ -9,6 +9,7 @@ import UIKit
 final class AppEnvironment {
     let settings: SettingsStore
     let notifications: NotificationEngine
+    let inbox: EventInboxStore
     let cache: CacheStore
     let live: VehicleLiveService
     let history: HistoryViewModel
@@ -18,9 +19,11 @@ final class AppEnvironment {
         let settings = SettingsStore()
         LanguageManager.apply(settings.config.languageCode)   // apply saved language before any UI
         Brand.setAccent(settings.config.accentColorHex)       // apply saved accent before any UI
-        let notifications = NotificationEngine()
+        let inbox = EventInboxStore()
+        let notifications = NotificationEngine(inbox: inbox)
         let cache = CacheStore()
         self.settings = settings
+        self.inbox = inbox
         self.notifications = notifications
         self.cache = cache
         self.live = VehicleLiveService(settings: settings, notifications: notifications, cache: cache)
@@ -38,6 +41,7 @@ final class AppEnvironment {
         let injected = applyEnvOverridesIfPresent()
         guard settings.isConfigured else { return }
         live.start()
+        inbox.seedWelcomeIfNeeded()
         if !isPreview && !injected {
             Task { await notifications.requestAuthorization() }
         }
@@ -116,6 +120,7 @@ final class AppEnvironment {
         live.stop()
         settings.eraseAll()
         notifications.resetToDefaults()
+        inbox.clear()
         cache.clearAll()
         history.reset()
         WidgetBridge.clearAll()

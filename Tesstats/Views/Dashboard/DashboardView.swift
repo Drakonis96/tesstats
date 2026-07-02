@@ -4,20 +4,38 @@ struct DashboardView: View {
     @Environment(AppEnvironment.self) private var env
     @State private var refreshing = false
     @State private var showSettings = false
+    @State private var activeSheet: DashboardSheet?
+    @State private var showMoreMenu = false
+    @State private var tutorialStep = 0
+    @State private var showTutorial = false
+    @AppStorage("tesstats.dashboard.tutorial.completed") private var tutorialCompleted = false
 
     private var units: Units { Units(config: env.settings.config) }
+    private var carID: Int { env.live.resolvedCarID ?? 1 }
+    private var insights: DashboardInsights {
+        DashboardInsightEngine.insights(drives: env.history.drives, charges: env.history.charges)
+    }
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                Brand.background.ignoresSafeArea()
-                content
+            VStack(spacing: 0) {
+                DemoDataBanner(isDemo: env.settings.config.demoMode) { showSettings = true }
+                ZStack {
+                    Brand.background.ignoresSafeArea()
+                    content
+                    if showMoreMenu { moreMenu }
+                    if showTutorial { tutorialOverlay }
+                }
             }
             .navigationTitle("")
             .toolbarTitleDisplayModeInline()
             .toolbar { toolbarContent }
             .settingsSheet(isPresented: $showSettings)
+            .sheet(item: $activeSheet) { sheet in
+                NavigationStack { sheet.destination }
+            }
         }
+        .task(id: carID) { await env.history.loadIfNeeded(carID: carID) }
     }
 
     @ViewBuilder
@@ -31,7 +49,11 @@ struct DashboardView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.top, 4)
                     #endif
-                    HeaderSummaryCard(state: state, status: env.live.status, units: units)
+                    HeroMapCard(state: state, units: units)
+                        .accessibilityIdentifier("dashboard-map-hero")
+                    dashboardQuickStats(state)
+                    if let last = insights.lastDrive { LastDriveDashboardCard(drive: last, units: units) }
+                    ActivityTimelineView(segments: insights.activity48h)
                     ForEach(DashboardCard.resolved(env.settings.config.dashboardCardOrder)) { card in
                         cardView(card, state: state)
                     }
@@ -42,6 +64,11 @@ struct DashboardView: View {
             }
             .scrollContentBackground(.hidden)
             .refreshable { await refresh() }
+            .onAppear {
+                if !tutorialCompleted && ProcessInfo.processInfo.environment["TESSTATS_SKIP_TUTORIAL"] != "1" {
+                    showTutorial = true
+                }
+            }
         } else {
             waitingState
         }
@@ -75,8 +102,29 @@ struct DashboardView: View {
             #if os(iOS)
             SettingsGearButton(isPresented: $showSettings)
             #endif
+            Button {
+                withAnimation(.snappy) { showMoreMenu.toggle() }
+            } label: {
+                Image(systemName: "ellipsis.circle")
+            }
+            .tint(Brand.crimson)
             RefreshButton(isRefreshing: refreshing) { Task { await refresh() } }
         }
+    }
+
+    private func dashboardQuickStats(_ state: VehicleState) -> some View {
+        HStack(spacing: 12) {
+            StatTile(title: L("Efficiency 30d"),
+                     value: insights.efficiency30dWhPerKm.map { "\(Int($0)) Wh/km" } ?? "—",
+                     systemImage: "leaf.fill", tint: Brand.driving)
+            StatTile(title: L("Range"),
+                     value: units.range(km: state.range(for: units.range)),
+                     systemImage: "road.lanes")
+            StatTile(title: L("Odometer"),
+                     value: units.distance(km: state.odometer, digits: 0),
+                     systemImage: "gauge")
+        }
+        .card()
     }
 
     @ViewBuilder
@@ -102,6 +150,145 @@ struct DashboardView: View {
         if let id = env.live.resolvedCarID { await env.history.refresh(carID: id) }
         try? await Task.sleep(for: .seconds(1.0))
         refreshing = false
+    }
+
+    private var moreMenu: some View {
+        ZStack(alignment: .trailing) {
+            Color.black.opacity(0.56)
+                .ignoresSafeArea()
+                .onTapGesture { withAnimation(.snappy) { showMoreMenu = false } }
+            VStack(alignment: .trailing, spacing: 18) {
+                moreButton(L("View all"), "square.grid.2x2") { activeSheet = .more }
+                moreButton(L("Stats"), "chart.line.uptrend.xyaxis") { activeSheet = .stats }
+                moreButton(L("Parking"), "parkingsign") { activeSheet = .parking }
+                moreButton(L("Charging"), "bolt.fill") { activeSheet = .charging }
+                moreButton(L("Trips"), "steeringwheel") { activeSheet = .trips }
+                moreButton(L("Notifications"), "bell.fill") { activeSheet = .inbox }
+            }
+            .padding(.trailing, 28)
+        }
+        .transition(.opacity)
+    }
+
+    private func moreButton(_ title: String, _ icon: String, action: @escaping () -> Void) -> some View {
+        Button {
+            withAnimation(.snappy) { showMoreMenu = false }
+            action()
+        } label: {
+            HStack(spacing: 12) {
+                Text(title)
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(.white)
+                Image(systemName: icon)
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 58, height: 58)
+                    .background(.white.opacity(0.12), in: Circle())
+                    .overlay(Circle().strokeBorder(.white.opacity(0.12), lineWidth: 1))
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var tutorialOverlay: some View {
+        let steps = tutorialSteps
+        return ZStack {
+            Color.black.opacity(0.72).ignoresSafeArea()
+            VStack(alignment: .leading, spacing: 18) {
+                HStack {
+                    Image(systemName: steps[tutorialStep].icon)
+                        .font(.title)
+                        .foregroundStyle(.white)
+                        .frame(width: 58, height: 58)
+                        .background(Brand.crimson.opacity(0.35), in: Circle())
+                    Spacer()
+                    Text("\(tutorialStep + 1) / \(steps.count)")
+                        .font(.headline)
+                        .foregroundStyle(.white.opacity(0.58))
+                }
+                Text(steps[tutorialStep].title)
+                    .font(.title2.weight(.bold))
+                    .foregroundStyle(.white)
+                Text(steps[tutorialStep].body)
+                    .font(.body)
+                    .foregroundStyle(.white.opacity(0.72))
+                HStack {
+                    Button(L("Skip tutorial")) { finishTutorial() }
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.62))
+                    Spacer()
+                    Button(tutorialStep == steps.count - 1 ? L("Done") : L("Next")) {
+                        if tutorialStep == steps.count - 1 {
+                            finishTutorial()
+                        } else {
+                            withAnimation(.snappy) { tutorialStep += 1 }
+                        }
+                    }
+                    .font(.headline.weight(.bold))
+                    .buttonStyle(.borderedProminent)
+                    .tint(Brand.crimson)
+                }
+            }
+            .padding(24)
+            .background(Brand.surface, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 28).strokeBorder(Brand.hairline, lineWidth: 1))
+            .padding(28)
+        }
+    }
+
+    private func finishTutorial() {
+        tutorialCompleted = true
+        withAnimation(.snappy) { showTutorial = false }
+    }
+
+    private var tutorialSteps: [(title: String, body: String, icon: String)] {
+        [
+            (L("This is your dashboard"), L("Battery, range and location now start from a live map-first overview."), "hand.wave.fill"),
+            (L("Recent activity"), L("The 48-hour timeline highlights driving and charging without sending commands to the car."), "clock.arrow.circlepath"),
+            (L("Read-only insights"), L("Trips, charges, parking and notifications are derived from TeslaMate data."), "eye.fill")
+        ]
+    }
+}
+
+private enum DashboardSheet: Identifiable {
+    case trips, charging, parking, stats, more, inbox
+    var id: String { String(describing: self) }
+
+    @ViewBuilder var destination: some View {
+        switch self {
+        case .trips: TripsView()
+        case .charging: ChargesView()
+        case .parking: ParkingView()
+        case .stats: StatsView()
+        case .more: MoreHubView()
+        case .inbox: NotificationInboxView()
+        }
+    }
+}
+
+private struct LastDriveDashboardCard: View {
+    let drive: DriveRecord
+    let units: Units
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(L("Last trip"), systemImage: "road.lanes")
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 6) {
+                        Text(drive.originName).font(.headline.weight(.bold)).lineLimit(1)
+                        Image(systemName: "arrow.right").font(.caption).foregroundStyle(Brand.crimson)
+                        Text(drive.destinationName).font(.headline.weight(.bold)).lineLimit(1)
+                    }
+                    Text("\(units.distance(km: drive.distanceKm)) · \(units.duration(minutes: drive.durationMin))")
+                        .font(.subheadline)
+                        .foregroundStyle(Brand.textSecondary)
+                }
+                Spacer()
+                TinyRoutePreview(path: drive.path)
+            }
+        }
+        .card()
     }
 }
 

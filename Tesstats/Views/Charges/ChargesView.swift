@@ -9,6 +9,8 @@ struct ChargesView: View {
     @State private var refreshing = false
     @State private var showExport = false
     @State private var showSettings = false
+    @State private var editingPrice: ChargeRecord?
+    @State private var priceText = ""
 
     private let pageSize = 25
     private var units: Units { Units(config: env.settings.config) }
@@ -18,6 +20,18 @@ struct ChargesView: View {
         env.history.charges.filter { c in
             typeFilter.matches(c) && range.contains(c.startDate) &&
             (search.isEmpty || c.locationName.localizedCaseInsensitiveContains(search))
+        }
+    }
+    private var visibleFiltered: [ChargeRecord] { Array(filtered.prefix(visibleCount)) }
+    private var groups: [DailyHistoryGroup<ChargeRecord>] {
+        DailyHistoryGrouper.group(visibleFiltered, date: \.startDate) { day in
+            if Calendar.current.isDateInToday(day) { return L("Today") }
+            if Calendar.current.isDateInYesterday(day) { return L("Yesterday") }
+            return DateFormatter.localizedString(from: day, dateStyle: .medium, timeStyle: .none)
+        } detail: { bucket in
+            let energy = bucket.reduce(0) { $0 + $1.energyAddedKwh }
+            let cost = bucket.reduce(0) { $0 + effectiveCost($1) }
+            return L("\(bucket.count) sessions · +\(String(format: "%.1f", energy)) kWh · \(units.money(cost))")
         }
     }
 
@@ -52,6 +66,14 @@ struct ChargesView: View {
                 ExportSheet(drives: [], charges: filtered)
             }
             .settingsSheet(isPresented: $showSettings)
+            .alert(L("Price per kWh"), isPresented: editingBinding, presenting: editingPrice) { charge in
+                TextField("0.20", text: $priceText)
+                    .keyboardTypeDecimal()
+                Button(L("Save")) { savePrice(for: charge) }
+                Button(L("Cancel"), role: .cancel) {}
+            } message: { charge in
+                Text(L("Set the price for \(charge.locationName). It will be reused for future sessions at this location."))
+            }
         }
         .task(id: carID) { await env.history.loadIfNeeded(carID: carID) }
         .onChange(of: search) { _, _ in visibleCount = pageSize }
@@ -93,16 +115,28 @@ struct ChargesView: View {
     private var list: some View {
         ScrollView {
             VStack(spacing: Metrics.cardSpacing) {
+                HistoryMapHeader(
+                    title: L("Charging"),
+                    subtitle: "\(range.summaryLabel) · \(filtered.count) \(L("sessions"))",
+                    metric: "+\(String(format: "%.0f", filtered.reduce(0) { $0 + $1.energyAddedKwh })) kWh",
+                    content: .charges(filtered)
+                )
+                quickLinks
                 ChargeAggregatesCard(aggregates: ChargeAggregates.from(filtered),
                                      electricityCost: electricityCost,
                                      costIsEstimated: costIsEstimated,
                                      fuelComparison: fuelComparison, units: units)
                 LazyVStack(spacing: 10) {
-                    ForEach(filtered.prefix(visibleCount)) { charge in
-                        NavigationLink(value: charge) {
-                            ChargeRow(charge: charge, units: units)
+                    ForEach(groups) { group in
+                        HistoryDayHeader(title: group.title, detail: group.detail)
+                        ForEach(group.items) { charge in
+                            NavigationLink(value: charge) {
+                                ChargeRow(charge: charge, units: units, effectiveCost: effectiveCost(charge)) {
+                                    beginEditing(charge)
+                                }
+                            }
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
                     }
                     if filtered.count > visibleCount {
                         LoadMoreButton(remaining: filtered.count - visibleCount) {
@@ -122,12 +156,43 @@ struct ChargesView: View {
         .refreshable { await refresh() }
     }
 
+    private var quickLinks: some View {
+        HStack(spacing: 12) {
+            NavigationLink {
+                ChargingLocationsModuleView(locations: chargingLocations, units: units)
+            } label: {
+                Label(L("Costs & places"), systemImage: "eurosign")
+                    .frame(maxWidth: .infinity)
+            }
+            .glassButtonStyle()
+            NavigationLink {
+                EmptyStateView(systemImage: "bolt.badge.automatic", title: L("Energy mix"), message: L("Energy-source mix needs an external provider and is not enabled in this read-only release."))
+            } label: {
+                Label(L("Energy mix"), systemImage: "square.stack.3d.up")
+                    .frame(maxWidth: .infinity)
+            }
+            .glassButtonStyle()
+        }
+    }
+
     private var electricityCost: Double {
         // Sum each session's effective cost — recorded where present, otherwise the location's
         // custom price (if set) or the global default — so per-place prices feed the total.
         let pricing = ChargePricing(defaultPricePerKwh: env.settings.config.chargePricePerKwh,
                                     perLocation: env.settings.config.chargePricePerKwhByLocation)
         return filtered.reduce(0) { $0 + pricing.cost(for: $1) }
+    }
+
+    private var chargingLocations: [ChargingLocation] {
+        let pricing = ChargePricing(defaultPricePerKwh: env.settings.config.chargePricePerKwh,
+                                    perLocation: env.settings.config.chargePricePerKwhByLocation)
+        return StatsEngine.chargingLocations(filtered, pricing: pricing)
+    }
+
+    private func effectiveCost(_ charge: ChargeRecord) -> Double {
+        let pricing = ChargePricing(defaultPricePerKwh: env.settings.config.chargePricePerKwh,
+                                    perLocation: env.settings.config.chargePricePerKwhByLocation)
+        return pricing.cost(for: charge)
     }
 
     private var costIsEstimated: Bool {
@@ -149,6 +214,24 @@ struct ChargesView: View {
         refreshing = true
         await env.history.refresh(carID: carID)
         refreshing = false
+    }
+
+    private var editingBinding: Binding<Bool> {
+        Binding(get: { editingPrice != nil }, set: { if !$0 { editingPrice = nil } })
+    }
+
+    private func beginEditing(_ charge: ChargeRecord) {
+        editingPrice = charge
+        priceText = env.settings.config.chargePricePerKwhByLocation[charge.locationName].map { String(format: "%g", $0) } ?? ""
+    }
+
+    private func savePrice(for charge: ChargeRecord) {
+        let normalized = priceText.replacingOccurrences(of: ",", with: ".").trimmingCharacters(in: .whitespacesAndNewlines)
+        if let value = Double(normalized), value > 0 {
+            env.settings.config.chargePricePerKwhByLocation[charge.locationName] = value
+            env.settings.save()
+        }
+        editingPrice = nil
     }
 }
 
@@ -210,6 +293,8 @@ struct ChargeAggregatesCard: View {
 struct ChargeRow: View {
     let charge: ChargeRecord
     let units: Units
+    let effectiveCost: Double
+    var addPrice: () -> Void = {}
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -220,15 +305,42 @@ struct ChargeRow: View {
                 Spacer()
                 Text(units.relative(charge.startDate)).font(.caption2).foregroundStyle(Brand.textTertiary)
             }
+            HStack(spacing: 10) {
+                Text("+\(units.energy(kwh: charge.energyAddedKwh))")
+                    .font(.title2.weight(.bold))
+                    .foregroundStyle(charge.isFastCharger ? Brand.crimson : Brand.online)
+                Spacer()
+                Text(timeRange)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Brand.textSecondary)
+            }
+            ProgressView(value: Double(charge.endBattery ?? 0), total: 100)
+                .tint(Brand.online)
             HStack(spacing: 14) {
-                metric("bolt.fill", units.energy(kwh: charge.energyAddedKwh))
                 metric("battery.50percent", "\(charge.startBattery.map { "\($0)" } ?? "—")→\(charge.endBattery.map { "\($0)%" } ?? "—")")
-                metric("creditcard", units.money(charge.cost))
+                metric("clock", units.duration(minutes: charge.durationMin))
+                metric("creditcard", units.money(effectiveCost))
                 Spacer()
                 if charge.isFastCharger { Chip(text: "DC", color: Brand.crimson) }
+                if charge.cost == nil {
+                    Button {
+                        addPrice()
+                    } label: {
+                        Label(L("Add price"), systemImage: "plus")
+                            .font(.caption.weight(.bold))
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(Brand.driving)
+                }
             }
         }
         .card(padding: 14)
+    }
+
+    private var timeRange: String {
+        let start = DateFormatter.localizedString(from: charge.startDate, dateStyle: .none, timeStyle: .short)
+        guard let end = charge.endDate else { return start }
+        return "\(start) → \(DateFormatter.localizedString(from: end, dateStyle: .none, timeStyle: .short))"
     }
 
     private func metric(_ icon: String, _ value: String) -> some View {
@@ -236,5 +348,43 @@ struct ChargeRow: View {
             Image(systemName: icon).font(.caption2).foregroundStyle(Brand.textTertiary)
             Text(value).font(.caption).foregroundStyle(Brand.textSecondary)
         }
+    }
+}
+
+private struct ChargingLocationsModuleView: View {
+    let locations: [ChargingLocation]
+    let units: Units
+
+    var body: some View {
+        ZStack {
+            Brand.background.ignoresSafeArea()
+            ScrollView {
+                VStack(spacing: 10) {
+                    ForEach(locations) { loc in
+                        HStack {
+                            Image(systemName: loc.isFast ? "bolt.car.fill" : "house.fill")
+                                .foregroundStyle(Brand.crimson)
+                                .frame(width: 28)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(loc.name).font(.headline).foregroundStyle(Brand.textPrimary)
+                                Text(L("\(loc.sessions) sessions · \(units.energy(kwh: loc.energyKwh, digits: 0))"))
+                                    .font(.caption).foregroundStyle(Brand.textTertiary)
+                            }
+                            Spacer()
+                            Text(loc.cost > 0 ? units.money(loc.cost) : units.power(kw: loc.avgPowerKw > 0 ? loc.avgPowerKw : nil))
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Brand.textSecondary)
+                        }
+                        .card()
+                    }
+                    if locations.isEmpty {
+                        EmptyStateView(systemImage: "mappin.circle", title: L("No charging places"), message: nil)
+                    }
+                }
+                .padding()
+            }
+        }
+        .navigationTitle(L("Costs & places"))
+        .navigationBarTitleDisplayModeInlineIfAvailable()
     }
 }

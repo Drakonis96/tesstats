@@ -22,11 +22,14 @@ struct RootTabView: View {
             Tab(L("Charging"), systemImage: "bolt.fill", value: AppTab.charging) {
                 ChargesView()
             }
-            Tab(L("Battery"), systemImage: "battery.100percent", value: AppTab.battery) {
-                BatteryView()
+            Tab(L("Parking"), systemImage: "parkingsign", value: AppTab.parking) {
+                ParkingView()
             }
             Tab(L("Stats"), systemImage: "chart.bar.xaxis", value: AppTab.stats) {
                 StatsView()
+            }
+            Tab(L("More"), systemImage: "ellipsis", value: AppTab.more) {
+                MoreHubView()
             }
         }
         .tint(Brand.crimson)
@@ -34,15 +37,17 @@ struct RootTabView: View {
 }
 
 enum AppTab: String, Hashable, CaseIterable {
-    case summary, trips, charging, battery, stats, settings
+    case summary, trips, charging, parking, battery, stats, more, settings
 
     var title: String {
         switch self {
         case .summary: L("Summary")
         case .trips: L("Trips")
         case .charging: L("Charging")
+        case .parking: L("Parking")
         case .battery: L("Battery")
         case .stats: L("Stats")
+        case .more: L("More")
         case .settings: L("Settings")
         }
     }
@@ -51,8 +56,10 @@ enum AppTab: String, Hashable, CaseIterable {
         case .summary: "gauge.with.dots.needle.67percent"
         case .trips: "map"
         case .charging: "bolt.fill"
+        case .parking: "parkingsign"
         case .battery: "battery.100percent"
         case .stats: "chart.bar.xaxis"
+        case .more: "ellipsis"
         case .settings: "gearshape"
         }
     }

@@ -8,7 +8,7 @@ struct MacRootView: View {
     @State private var selection: AppTab = .summary
     @State private var showSettings = false
 
-    private let sections: [AppTab] = [.summary, .trips, .charging, .battery, .stats]
+    private let sections: [AppTab] = [.summary, .trips, .charging, .parking, .battery, .stats, .more]
 
     var body: some View {
         NavigationSplitView {
@@ -86,8 +86,10 @@ struct MacRootView: View {
         case .summary: DashboardView()
         case .trips: TripsView()
         case .charging: ChargesView()
+        case .parking: ParkingView()
         case .battery: BatteryView()
         case .stats: StatsView()
+        case .more: MoreHubView()
         case .settings: DashboardView()
         }
     }

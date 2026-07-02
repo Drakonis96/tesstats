@@ -47,9 +47,11 @@ final class NotificationEngine {
 
     private let defaultsKey = "tesstats.notification.prefs"
     private let defaults: UserDefaults
+    private let inbox: EventInboxStore?
 
-    init(defaults: UserDefaults = .standard) {
+    init(defaults: UserDefaults = .standard, inbox: EventInboxStore? = nil) {
         self.defaults = defaults
+        self.inbox = inbox
         if let data = defaults.data(forKey: defaultsKey),
            let loaded = try? JSONDecoder().decode(NotificationPreferences.self, from: data) {
             self.prefs = loaded
@@ -209,6 +211,7 @@ final class NotificationEngine {
     }
 
     private func post(id: String, title: String, body: String) {
+        inbox?.add(category: .vehicle, title: title, body: body, symbol: symbol(for: id))
         if isQuietTime() { return }   // respect quiet hours for on-device alerts
         let content = UNMutableNotificationContent()
         content.title = title
@@ -216,5 +219,18 @@ final class NotificationEngine {
         content.sound = .default
         let request = UNNotificationRequest(identifier: "\(id)", content: content, trigger: nil)
         UNUserNotificationCenter.current().add(request)
+    }
+
+    private func symbol(for id: String) -> String {
+        switch id {
+        case "charge-complete", "charge-started", "charge-target", "plugged-idle": "bolt.fill"
+        case "tpms-low", "tpms-soft-warning": "gauge.with.dots.needle.bottom.50percent"
+        case "unplugged", "low-battery": "battery.25percent"
+        case "opening", "unlocked": "lock.open"
+        case "update": "arrow.down.circle"
+        case "geofence-enter", "geofence-exit": "mappin.and.ellipse"
+        case "sentry": "video.fill"
+        default: "bell"
+        }
     }
 }

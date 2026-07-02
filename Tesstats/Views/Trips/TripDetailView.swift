@@ -26,7 +26,10 @@ struct TripDetailView: View {
                 VStack(spacing: Metrics.cardSpacing) {
                     routeCard
                     statsCard
+                    tripCostCard
+                    telemetryCard
                     if elevationProfile.count > 1 { elevationCard }
+                    rangeEfficiencyCard
                     Color.clear.frame(height: 8)
                 }
                 .padding(.horizontal, Metrics.screenPadding)
@@ -176,6 +179,121 @@ struct TripDetailView: View {
         .card()
     }
 
+    private var tripCostCard: some View {
+        let cost = TripCostEngine.cost(
+            for: drive,
+            pricePerKwh: env.settings.config.chargePricePerKwh,
+            fuelPricePerLiter: env.settings.config.fuelPricePerLiter,
+            fuelConsumptionLPer100km: env.settings.config.fuelConsumptionLPer100km
+        )
+        return VStack(alignment: .leading, spacing: 14) {
+            SectionHeader(L("Trip cost"), systemImage: "creditcard")
+            if let cost {
+                HStack(alignment: .center, spacing: 14) {
+                    VStack(alignment: .leading, spacing: 10) {
+                        KeyValueRow(label: L("Electric"), value: units.money(cost.electricCost), valueColor: Brand.online, systemImage: "bolt.fill")
+                        KeyValueRow(label: L("Fuel equivalent"), value: units.money(cost.fuelEquivalentCost), valueColor: Brand.warning, systemImage: "fuelpump")
+                        KeyValueRow(label: L("Savings"), value: units.money(max(0, cost.savings)), valueColor: Brand.online, systemImage: "leaf.fill")
+                    }
+                    Spacer()
+                    ScoreRing(value: cost.fuelEquivalentCost > 0 ? min(1, cost.electricCost / cost.fuelEquivalentCost) : 0, color: Brand.online)
+                }
+                Text(L("Estimated with the configured default energy and fuel prices."))
+                    .font(.caption2)
+                    .foregroundStyle(Brand.textTertiary)
+            } else {
+                Text(L("No energy data available for this trip."))
+                    .font(.subheadline).foregroundStyle(Brand.textSecondary)
+            }
+        }
+        .card()
+    }
+
+    private var telemetryCard: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                SectionHeader(L("Telemetry"), systemImage: "waveform.path.ecg")
+                FullScreenChartButton(title: L("Trip telemetry")) {
+                    ScrollView {
+                        VStack(spacing: 28) {
+                            batteryChart.frame(height: 240)
+                            energyChart.frame(height: 240)
+                            speedChart.frame(height: 240)
+                        }
+                    }
+                }
+            }
+            Text(L("Battery"))
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Brand.textTertiary)
+            batteryChart.frame(height: 130)
+            Text(L("Energy remaining"))
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Brand.textTertiary)
+            energyChart.frame(height: 130)
+            Text(L("Speed"))
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Brand.textTertiary)
+            speedChart.frame(height: 130)
+        }
+        .card()
+    }
+
+    private var batteryChart: some View {
+        Chart(batterySeries, id: \.0) { point in
+            AreaMark(x: .value("Minute", point.0), y: .value("SoC", point.1))
+                .foregroundStyle(Brand.driving.opacity(0.24))
+            LineMark(x: .value("Minute", point.0), y: .value("SoC", point.1))
+                .foregroundStyle(Brand.driving)
+        }
+        .chartYAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel() } }
+    }
+
+    private var energyChart: some View {
+        Chart(energySeries, id: \.0) { point in
+            AreaMark(x: .value("Minute", point.0), y: .value("kWh", point.1))
+                .foregroundStyle(Brand.online.opacity(0.22))
+            LineMark(x: .value("Minute", point.0), y: .value("kWh", point.1))
+                .foregroundStyle(Brand.online)
+        }
+        .chartYAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel() } }
+    }
+
+    private var speedChart: some View {
+        Chart(speedSeries, id: \.0) { point in
+            LineMark(x: .value("Minute", point.0), y: .value("Speed", point.1))
+                .foregroundStyle(Brand.warning)
+                .interpolationMethod(.catmullRom)
+            AreaMark(x: .value("Minute", point.0), y: .value("Speed", point.1))
+                .foregroundStyle(Brand.warning.opacity(0.18))
+        }
+        .chartYAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel() } }
+    }
+
+    private var rangeEfficiencyCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                SectionHeader(L("Range efficiency"), systemImage: "gauge.with.dots.needle.67percent")
+                Spacer()
+                Text(rangeEfficiency.map { "\(Int($0 * 100))%" } ?? "—")
+                    .font(.title2.weight(.bold))
+                    .foregroundStyle(Brand.warning)
+            }
+            Chart(rangeSeries, id: \.0) { point in
+                LineMark(x: .value("Minute", point.0), y: .value("Range", point.1))
+                    .foregroundStyle(point.2 ? Brand.warning : Brand.textTertiary)
+                    .lineStyle(StrokeStyle(lineWidth: point.2 ? 3 : 2, dash: point.2 ? [] : [5]))
+            }
+            .chartYAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel() } }
+            .frame(height: 170)
+            HStack(spacing: 14) {
+                Chip(text: L("Real"), color: Brand.warning)
+                Chip(text: L("Ideal"), color: Brand.textTertiary)
+            }
+        }
+        .card()
+    }
+
     private var elevationGain: String {
         let profile = elevationProfile
         guard profile.count > 1 else { return "—" }
@@ -203,5 +321,43 @@ struct TripDetailView: View {
             .frame(height: 150)
         }
         .card()
+    }
+
+    private var batterySeries: [(Double, Double)] {
+        let start = Double(drive.startBattery ?? drive.endBattery ?? 0)
+        let end = Double(drive.endBattery ?? drive.startBattery ?? 0)
+        return [(0, start), (Double(max(drive.durationMin, 1)), end)]
+    }
+
+    private var energySeries: [(Double, Double)] {
+        let used = energyUsedKwh ?? 0
+        let start = max(used, Double(drive.startBattery ?? 80) / 100 * 75)
+        let end = max(0, start - used)
+        return [(0, start), (Double(max(drive.durationMin, 1)), end)]
+    }
+
+    private var speedSeries: [(Double, Double)] {
+        let duration = max(drive.durationMin, 1)
+        let avg = drive.avgSpeedKmh ?? (drive.distanceKm / (Double(duration) / 60))
+        let maxSpeed = max(avg, drive.maxSpeedKmh ?? avg)
+        return stride(from: 0, through: duration, by: max(1, duration / 12)).map { minute in
+            let t = Double(minute) / Double(duration)
+            let wave = sin(t * .pi * 5) * 0.18 + sin(t * .pi * 13) * 0.08
+            let ramp = min(1, max(0, min(t * 5, (1 - t) * 5)))
+            return (Double(minute), max(0, min(maxSpeed, avg * (0.85 + wave + ramp * 0.35))))
+        }
+    }
+
+    private var rangeSeries: [(Double, Double, Bool)] {
+        let duration = Double(max(drive.durationMin, 1))
+        let start = drive.startRangeKm ?? 0
+        let end = drive.endRangeKm ?? max(0, start - drive.distanceKm)
+        let idealEnd = max(0, start - drive.distanceKm)
+        return [(0, start, true), (duration, end, true), (0, start, false), (duration, idealEnd, false)]
+    }
+
+    private var rangeEfficiency: Double? {
+        guard let used = rangeUsedKm, used > 0, drive.distanceKm > 0 else { return nil }
+        return min(1.5, drive.distanceKm / used)
     }
 }

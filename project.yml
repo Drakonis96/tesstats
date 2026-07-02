@@ -11,8 +11,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    MARKETING_VERSION: "0.1.4"
-    CURRENT_PROJECT_VERSION: "5"
+    MARKETING_VERSION: "0.1.5"
+    CURRENT_PROJECT_VERSION: "6"
     DEVELOPMENT_TEAM: ""
     CODE_SIGN_STYLE: Automatic
     ENABLE_USER_SCRIPT_SANDBOXING: YES
@@ -63,3 +63,46 @@ targets:
         CODE_SIGN_ENTITLEMENTS: TesstatsWidgets/TesstatsWidgets.entitlements
         SWIFT_STRICT_CONCURRENCY: complete
         TARGETED_DEVICE_FAMILY: "1,2"
+
+  TesstatsTests:
+    type: bundle.unit-test
+    supportedDestinations: [iOS]
+    deploymentTarget:
+      iOS: "18.0"
+    sources:
+      - path: TesstatsTests
+    dependencies:
+      - target: Tesstats
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tesstats.app.tests
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_STRICT_CONCURRENCY: complete
+
+  TesstatsUITests:
+    type: bundle.ui-testing
+    supportedDestinations: [iOS]
+    deploymentTarget:
+      iOS: "18.0"
+    sources:
+      - path: TesstatsUITests
+    dependencies:
+      - target: Tesstats
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tesstats.app.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_STRICT_CONCURRENCY: complete
+
+schemes:
+  Tesstats:
+    build:
+      targets:
+        Tesstats: all
+        TesstatsTests: [test]
+        TesstatsUITests: [test]
+    test:
+      config: Debug
+      targets:
+        - TesstatsTests
+        - TesstatsUITests
