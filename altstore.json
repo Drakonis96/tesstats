@@ -25,6 +25,14 @@
             ],
             "versions": [
                 {
+                    "version": "0.1.5",
+                    "date": "2026-07-02",
+                    "localizedDescription": "Tesstats v0.1.5 focuses on a read-only visual upgrade.\n\n- Adds a map-first dashboard with demo banner, contextual tutorial, last drive, 30-day efficiency and 48-hour activity timeline.\n- Adds visual map/list views for trips and charging, including daily grouping, route previews, charge points and cost estimates.\n- Adds a read-only Parking section derived from idle gaps, with live parking sessions and detail charts.\n- Adds a local internal notification inbox with filters and persistence.\n- Adds the More hub for read-only areas like stats, battery health, parking, notifications and future modules.\n\nNo remote vehicle commands, Fleet API control, automations, social features, Pro/paywall or Dashcam Studio are included in this release.",
+                    "downloadURL": "https://github.com/Drakonis96/tesstats/releases/download/v0.1.5/Tesstats.ipa",
+                    "size": 2222700,
+                    "minOSVersion": "18.0"
+                },
+                {
                     "version": "0.1.4",
                     "date": "2026-06-07",
                     "localizedDescription": "More from your TeslaMate data:\n• Battery health now uses TeslaMate's official calculation (capacity & range, new vs now).\n• Software update history — every firmware version with its install date.\n• Charging efficiency and the energy lost to charging.\n• Optional price per charging location for more accurate cost estimates.\n• Peak regeneration record, plus per-trip regen and usable battery.\n• Low tire-pressure warnings straight from the car.\n• Fixed the cost trend chart, and the weekday chart now starts on Monday.",
@@ -65,11 +73,11 @@
                     "minOSVersion": "18.0"
                 }
             ],
-            "version": "0.1.4",
-            "versionDate": "2026-06-07",
-            "versionDescription": "More from your TeslaMate data:\n• Battery health now uses TeslaMate's official calculation (capacity & range, new vs now).\n• Software update history — every firmware version with its install date.\n• Charging efficiency and the energy lost to charging.\n• Optional price per charging location for more accurate cost estimates.\n• Peak regeneration record, plus per-trip regen and usable battery.\n• Low tire-pressure warnings straight from the car.\n• Fixed the cost trend chart, and the weekday chart now starts on Monday.",
-            "downloadURL": "https://github.com/Drakonis96/tesstats/releases/download/v0.1.4/Tesstats.ipa",
-            "size": 1810955,
+            "version": "0.1.5",
+            "versionDate": "2026-07-02",
+            "versionDescription": "Tesstats v0.1.5 focuses on a read-only visual upgrade.\n\n- Adds a map-first dashboard with demo banner, contextual tutorial, last drive, 30-day efficiency and 48-hour activity timeline.\n- Adds visual map/list views for trips and charging, including daily grouping, route previews, charge points and cost estimates.\n- Adds a read-only Parking section derived from idle gaps, with live parking sessions and detail charts.\n- Adds a local internal notification inbox with filters and persistence.\n- Adds the More hub for read-only areas like stats, battery health, parking, notifications and future modules.\n\nNo remote vehicle commands, Fleet API control, automations, social features, Pro/paywall or Dashcam Studio are included in this release.",
+            "downloadURL": "https://github.com/Drakonis96/tesstats/releases/download/v0.1.5/Tesstats.ipa",
+            "size": 2222700,
             "minOSVersion": "18.0",
             "appPermissions": {
                 "entitlements": [],
