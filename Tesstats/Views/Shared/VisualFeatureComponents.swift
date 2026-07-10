@@ -299,19 +299,37 @@ struct TinyRoutePreview: View {
 struct ScoreRing: View {
     let value: Double
     var color: Color = Brand.online
+    /// Short label under the ring saying what the score measures (e.g. "Efficiency").
+    /// Without it the bare 0–100 number is ambiguous.
+    var caption: String?
 
     var body: some View {
-        ZStack {
-            Circle().stroke(Brand.elevatedSurface, lineWidth: 7)
-            Circle()
-                .trim(from: 0, to: min(1, max(0, value)))
-                .stroke(color, style: StrokeStyle(lineWidth: 7, lineCap: .round))
-                .rotationEffect(.degrees(135))
-            Text(String(format: "%.0f", value * 100))
-                .font(.headline.weight(.bold))
-                .foregroundStyle(Brand.textPrimary)
+        VStack(spacing: 3) {
+            ZStack {
+                Circle().stroke(Brand.elevatedSurface, lineWidth: 7)
+                Circle()
+                    .trim(from: 0, to: min(1, max(0, value)))
+                    .stroke(color, style: StrokeStyle(lineWidth: 7, lineCap: .round))
+                    .rotationEffect(.degrees(135))
+                Text(String(format: "%.0f", value * 100))
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(Brand.textPrimary)
+            }
+            .frame(width: 58, height: 58)
+            if let caption {
+                Text(caption)
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(Brand.textTertiary)
+                    .lineLimit(1)
+            }
         }
-        .frame(width: 58, height: 58)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityText)
+    }
+
+    private var accessibilityText: String {
+        let pct = "\(Int((min(1, max(0, value)) * 100).rounded()))%"
+        return caption.map { "\($0): \(pct)" } ?? pct
     }
 }
 

@@ -196,7 +196,8 @@ struct TripDetailView: View {
                         KeyValueRow(label: L("Savings"), value: units.money(max(0, cost.savings)), valueColor: Brand.online, systemImage: "leaf.fill")
                     }
                     Spacer()
-                    ScoreRing(value: cost.fuelEquivalentCost > 0 ? min(1, cost.electricCost / cost.fuelEquivalentCost) : 0, color: Brand.online)
+                    ScoreRing(value: cost.fuelEquivalentCost > 0 ? min(1, cost.electricCost / cost.fuelEquivalentCost) : 0,
+                              color: Brand.online, caption: L("vs petrol"))
                 }
                 Text(L("Estimated with the configured default energy and fuel prices."))
                     .font(.caption2)

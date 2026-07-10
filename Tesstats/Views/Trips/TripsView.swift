@@ -207,7 +207,7 @@ struct DriveRow: View {
                     }
                     Spacer()
                     if drive.path.count >= 2 {
-                        ScoreRing(value: driveScore, color: Brand.driving)
+                        ScoreRing(value: driveScore, color: Brand.driving, caption: L("Efficiency"))
                     }
                 }
             }

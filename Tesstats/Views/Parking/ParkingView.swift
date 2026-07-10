@@ -186,7 +186,7 @@ private struct ParkingRow: View {
                 Text(units.duration(minutes: session.durationMinutes))
                     .font(.title.weight(.bold))
                     .foregroundStyle(Brand.textPrimary)
-                ScoreRing(value: min(1, (session.whPerHour ?? 0) / 250), color: whColor)
+                ScoreRing(value: min(1, (session.whPerHour ?? 0) / 250), color: whColor, caption: L("Drain"))
             }
             Divider().overlay(Brand.hairline)
             HStack(spacing: 12) {
@@ -251,7 +251,7 @@ private struct ParkingDetailView: View {
                 Text(hoursPart).font(.system(size: 62, weight: .bold, design: .rounded))
                 Text(minutesPart).font(.system(size: 38, weight: .bold, design: .rounded)).foregroundStyle(Brand.textSecondary)
                 Spacer()
-                ScoreRing(value: min(1, (session.whPerHour ?? 0) / 250), color: Brand.driving)
+                ScoreRing(value: min(1, (session.whPerHour ?? 0) / 250), color: Brand.driving, caption: L("Drain"))
             }
             Text(session.locationName).font(.title.weight(.bold)).foregroundStyle(Brand.textPrimary)
             Text(dateLine).font(.caption.weight(.semibold)).foregroundStyle(Brand.textTertiary).textCase(.uppercase)

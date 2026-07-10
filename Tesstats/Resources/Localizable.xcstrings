@@ -2497,6 +2497,22 @@
         }
       }
     },
+    "Drain": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drain"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drenaje"
+          }
+        }
+      }
+    },
     "Drive": {
       "localizations": {
         "es": {
@@ -8333,6 +8349,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "vs mes anterior"
+          }
+        }
+      }
+    },
+    "vs petrol": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vs petrol"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vs gasolina"
           }
         }
       }
