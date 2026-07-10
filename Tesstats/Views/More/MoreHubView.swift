@@ -105,7 +105,6 @@ struct MoreHubView: View {
 
     private var vehicleRows: [MoreRow] {
         [
-            MoreRow(title: L("Battery health"), icon: "bolt.batteryblock") { BatteryView() },
             MoreRow(title: L("Tires"), icon: "gauge.with.dots.needle.bottom.50percent") { TireModuleView() },
             MoreRow(title: L("Mileage tracking"), icon: "speedometer") { MileageModuleView() },
             MoreRow(title: L("Specs & warranty"), icon: "checkmark.shield") { VehicleSpecsView() }

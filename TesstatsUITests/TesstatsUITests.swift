@@ -21,13 +21,18 @@ final class TesstatsUITests: XCTestCase {
         XCTAssertTrue(waitForAnyText(["Charging", "Cargas"], app: app, timeout: 4))
         XCTAssertTrue(anyTextExists(["Costs & places", "Costes y ubicaciones", "Totals", "Totales"], app: app))
 
-        tapTab(["Parking"], app: app)
-        XCTAssertTrue(app.staticTexts["Parking"].waitForExistence(timeout: 4))
-        XCTAssertTrue(anyTextExists(["Time", "Tiempo", "No parking sessions in this period", "Sin reposos en este periodo"], app: app))
+        tapTab(["Battery", "Batería"], app: app)
+        XCTAssertTrue(waitForAnyText(["Battery", "Batería"], app: app, timeout: 4))
+        XCTAssertTrue(anyTextExists(["Degradation", "Degradación", "Efficiency & totals", "Eficiencia y totales"], app: app))
 
         tapTab(["More", "Más"], app: app)
         XCTAssertTrue(waitForAnyText(["More", "Más"], app: app, timeout: 4))
-        XCTAssertTrue(anyTextExists(["Statistics", "Estadísticas", "Battery health", "Salud de la batería"], app: app))
+        XCTAssertTrue(anyTextExists(["Statistics", "Estadísticas"], app: app))
+        // Parking moved from the tab bar into More → Areas.
+        if !anyTextExists(["Parking"], app: app) {
+            print("HIERARCHY-DUMP-BEGIN\n\(app.debugDescription)\nHIERARCHY-DUMP-END")
+        }
+        XCTAssertTrue(anyTextExists(["Parking"], app: app))
     }
 
     private func tapTab(_ labels: [String], app: XCUIApplication) {

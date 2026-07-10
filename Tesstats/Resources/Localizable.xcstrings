@@ -5185,6 +5185,22 @@
         }
       }
     },
+    "Parking": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parking"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parking"
+          }
+        }
+      }
+    },
     "Passenger front": {
       "localizations": {
         "es": {
@@ -6749,6 +6765,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "State of charge"
+          }
+        }
+      }
+    },
+    "Statistics": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Statistics"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estadísticas"
           }
         }
       }

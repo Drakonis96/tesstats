@@ -2,6 +2,8 @@ import SwiftUI
 
 /// Five-tab root. On iOS 26 the `TabView` automatically renders the Liquid Glass tab bar;
 /// on iPad/macOS it adapts to a sidebar while preserving the same semantics.
+/// Kept to exactly five tabs: a sixth would make iPhone collapse the bar into a
+/// system-provided "More" list, hiding the real hub behind a generic table.
 struct RootTabView: View {
     @Environment(AppEnvironment.self) private var env
     @State private var selection: AppTab
@@ -22,11 +24,8 @@ struct RootTabView: View {
             Tab(L("Charging"), systemImage: "bolt.fill", value: AppTab.charging) {
                 ChargesView()
             }
-            Tab(L("Parking"), systemImage: "parkingsign", value: AppTab.parking) {
-                ParkingView()
-            }
-            Tab(L("Stats"), systemImage: "chart.bar.xaxis", value: AppTab.stats) {
-                StatsView()
+            Tab(L("Battery"), systemImage: "battery.100percent", value: AppTab.battery) {
+                BatteryView()
             }
             Tab(L("More"), systemImage: "ellipsis", value: AppTab.more) {
                 MoreHubView()
