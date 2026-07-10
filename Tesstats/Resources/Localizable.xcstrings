@@ -1745,6 +1745,22 @@
         }
       }
     },
+    "Compares full calendar months — the range filter above does not apply here.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compares full calendar months — the range filter above does not apply here."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compara meses naturales completos: el filtro de rango de arriba no se aplica aquí."
+          }
+        }
+      }
+    },
     "Comparison car L/100km": {
       "localizations": {
         "es": {

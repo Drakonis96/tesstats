@@ -132,6 +132,8 @@ private struct ComparisonCard: View {
                 row(L("Cost"), units.money(comparison.cost.current), PeriodComparison.delta(comparison.cost), invert: true)
                 row(L("Consumption"), units.consumption(whPerKm: comparison.consumptionWhPerKm.current > 0 ? comparison.consumptionWhPerKm.current : nil), PeriodComparison.delta(comparison.consumptionWhPerKm), invert: true)
             }
+            Text(L("Compares full calendar months — the range filter above does not apply here."))
+                .font(.caption2).foregroundStyle(Brand.textTertiary)
         }
         .card()
     }
