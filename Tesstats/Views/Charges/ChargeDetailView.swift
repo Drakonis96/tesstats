@@ -8,6 +8,7 @@ struct ChargeDetailView: View {
 
     @Environment(AppEnvironment.self) private var env
     @State private var realCurve: [ChargeCurvePoint] = []
+    @State private var selectedSoc: Int?
 
     private var carID: Int { env.live.resolvedCarID ?? 1 }
     private var hasRealCurve: Bool { realCurve.count >= 2 }
@@ -62,29 +63,54 @@ struct ChargeDetailView: View {
         return lo...hi
     }
 
+    /// Nearest recorded sample to the scrubbed SoC (samples may skip percentages).
+    private var scrubbedPoint: ChargeCurvePoint? {
+        guard let selectedSoc else { return nil }
+        return realCurve.min { abs($0.soc - selectedSoc) < abs($1.soc - selectedSoc) }
+    }
+
     private var realCurveCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(L("Charge curve"), systemImage: "chart.xyaxis.line")
-            Chart(realCurve) { p in
-                AreaMark(x: .value("SoC", p.soc), y: .value("kW", p.powerKw))
-                    .foregroundStyle(LinearGradient(colors: [Brand.crimson.opacity(0.35), .clear], startPoint: .top, endPoint: .bottom))
-                LineMark(x: .value("SoC", p.soc), y: .value("kW", p.powerKw))
-                    .foregroundStyle(Brand.crimson)
-                    .interpolationMethod(.monotone)
-                if let peak = realPeakKw, p.powerKw == peak {
+            Chart {
+                ForEach(realCurve) { p in
+                    AreaMark(x: .value("SoC", p.soc), y: .value("kW", p.powerKw))
+                        .foregroundStyle(LinearGradient(colors: [Brand.crimson.opacity(0.35), .clear], startPoint: .top, endPoint: .bottom))
+                    LineMark(x: .value("SoC", p.soc), y: .value("kW", p.powerKw))
+                        .foregroundStyle(Brand.crimson)
+                        .interpolationMethod(.monotone)
+                    if scrubbedPoint == nil, let peak = realPeakKw, p.powerKw == peak {
+                        PointMark(x: .value("SoC", p.soc), y: .value("kW", p.powerKw))
+                            .foregroundStyle(Brand.crimsonBright)
+                            .symbolSize(40)
+                            .annotation(position: .top) {
+                                Text(units.power(kw: peak, digits: 0)).font(.caption2.weight(.bold)).foregroundStyle(Brand.crimsonBright)
+                            }
+                    }
+                }
+                if let p = scrubbedPoint {
+                    RuleMark(x: .value("SoC", p.soc))
+                        .foregroundStyle(Brand.textTertiary.opacity(0.6))
+                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
                     PointMark(x: .value("SoC", p.soc), y: .value("kW", p.powerKw))
                         .foregroundStyle(Brand.crimsonBright)
-                        .symbolSize(40)
-                        .annotation(position: .top) {
-                            Text(units.power(kw: peak, digits: 0)).font(.caption2.weight(.bold)).foregroundStyle(Brand.crimsonBright)
+                        .symbolSize(50)
+                        .annotation(position: .top,
+                                    overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                            Text("\(p.soc)% · \(units.power(kw: p.powerKw, digits: 0))")
+                                .font(.caption2.weight(.bold))
+                                .foregroundStyle(Brand.textPrimary)
+                                .padding(.horizontal, 6).padding(.vertical, 3)
+                                .background(Brand.elevatedSurface, in: Capsule())
                         }
                 }
             }
+            .chartXSelection(value: $selectedSoc)
             .chartXScale(domain: socDomain)
             .chartXAxis { AxisMarks { v in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel { if let s = v.as(Int.self) { Text("\(s)%") } } } }
             .chartYAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel() } }
             .frame(height: 180)
-            Text(L("Real per-point data from TeslaMate · \(realCurve.count) samples. X: state of charge, Y: power."))
+            Text(L("Real per-point data from TeslaMate · \(realCurve.count) samples. Touch and drag to inspect."))
                 .font(.caption2).foregroundStyle(Brand.textTertiary)
         }
         .card()

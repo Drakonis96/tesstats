@@ -6,6 +6,7 @@ struct BatteryView: View {
     @State private var timeRange: TimeRange = .all
     @State private var refreshing = false
     @State private var showSettings = false
+    @State private var scrubDate: Date?
 
     private var units: Units { Units(config: env.settings.config) }
     private var carID: Int { env.live.resolvedCarID ?? 1 }
@@ -184,24 +185,58 @@ struct BatteryView: View {
                         statBlock(L("Capacity"), units.energy(kwh: cap, digits: 1))
                     }
                 }
-                Chart(degradationPoints, id: \.date) { point in
-                    AreaMark(x: .value("Date", point.date), y: .value("Range", point.value))
-                        .foregroundStyle(LinearGradient(colors: [Brand.crimson.opacity(0.35), .clear],
-                                                         startPoint: .top, endPoint: .bottom))
-                    LineMark(x: .value("Date", point.date), y: .value("Range", point.value))
-                        .foregroundStyle(Brand.crimson)
-                        .interpolationMethod(.catmullRom)
-                    PointMark(x: .value("Date", point.date), y: .value("Range", point.value))
-                        .foregroundStyle(Brand.crimson)
-                        .symbolSize(16)
+                Chart {
+                    ForEach(degradationPoints, id: \.date) { point in
+                        AreaMark(x: .value("Date", point.date), y: .value("Range", point.value))
+                            .foregroundStyle(LinearGradient(colors: [Brand.crimson.opacity(0.35), .clear],
+                                                             startPoint: .top, endPoint: .bottom))
+                        LineMark(x: .value("Date", point.date), y: .value("Range", point.value))
+                            .foregroundStyle(Brand.crimson)
+                            .interpolationMethod(.catmullRom)
+                        PointMark(x: .value("Date", point.date), y: .value("Range", point.value))
+                            .foregroundStyle(Brand.crimson)
+                            .symbolSize(16)
+                    }
+                    if let p = scrubbedDegradationPoint {
+                        RuleMark(x: .value("Date", p.date))
+                            .foregroundStyle(Brand.textTertiary.opacity(0.6))
+                            .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
+                        PointMark(x: .value("Date", p.date), y: .value("Range", p.value))
+                            .foregroundStyle(Brand.crimsonBright)
+                            .symbolSize(50)
+                            .annotation(position: .top,
+                                        overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                                Text("\(p.date, format: .dateTime.month(.abbreviated).year()) · \(units.range(km: rawRangeKm(for: p)))")
+                                    .font(.caption2.weight(.bold))
+                                    .foregroundStyle(Brand.textPrimary)
+                                    .padding(.horizontal, 6).padding(.vertical, 3)
+                                    .background(Brand.elevatedSurface, in: Capsule())
+                            }
+                    }
                 }
+                .chartXSelection(value: $scrubDate)
                 .chartYScale(domain: .automatic(includesZero: false))
                 .chartYAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel() } }
                 .chartXAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel(format: .dateTime.month(.abbreviated)) } }
                 .frame(height: 200)
+                Text(L("Touch and drag to inspect a month."))
+                    .font(.caption2).foregroundStyle(Brand.textTertiary)
             }
         }
         .card()
+    }
+
+    /// Nearest degradation sample to the scrubbed date.
+    private var scrubbedDegradationPoint: (date: Date, value: Double)? {
+        guard let scrubDate else { return nil }
+        return degradationPoints.min {
+            abs($0.date.timeIntervalSince(scrubDate)) < abs($1.date.timeIntervalSince(scrubDate))
+        }
+    }
+
+    /// The chart value is already unit-converted; recover km for `units.range` formatting.
+    private func rawRangeKm(for point: (date: Date, value: Double)) -> Double {
+        units.distance == .imperial ? point.value * 1.609344 : point.value
     }
 
     private var degradationSummary: Double? {

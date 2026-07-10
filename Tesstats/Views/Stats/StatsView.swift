@@ -183,6 +183,7 @@ private struct TrendsCard: View {
     let units: Units
     @State private var metric: TrendMetric = .distance
     @State private var compareYears = false
+    @State private var scrubDate: Date?
 
     private var years: [(year: Int, months: [MonthlyStat])] { StatsEngine.yearOverYear(monthlyAllTime) }
     private var canCompareYears: Bool { years.count == 2 }
@@ -219,12 +220,28 @@ private struct TrendsCard: View {
             } else if compareYears, canCompareYears {
                 yearComparisonChart
             } else {
-                Chart(monthly) { m in
-                    BarMark(x: .value("Month", m.month, unit: .month),
-                            y: .value(metric.label, value(m)))
-                        .foregroundStyle(Brand.crimson.gradient)
-                        .cornerRadius(4)
+                Chart {
+                    ForEach(monthly) { m in
+                        BarMark(x: .value("Month", m.month, unit: .month),
+                                y: .value(metric.label, value(m)))
+                            .foregroundStyle(Brand.crimson.gradient)
+                            .cornerRadius(4)
+                            .opacity(scrubbedMonth == nil || scrubbedMonth?.id == m.id ? 1 : 0.45)
+                    }
+                    if let m = scrubbedMonth {
+                        RuleMark(x: .value("Month", m.month, unit: .month))
+                            .foregroundStyle(.clear)
+                            .annotation(position: .top,
+                                        overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                                Text("\(m.month, format: .dateTime.month(.abbreviated).year()) · \(scrubbedValueLabel(m))")
+                                    .font(.caption2.weight(.bold))
+                                    .foregroundStyle(Brand.textPrimary)
+                                    .padding(.horizontal, 6).padding(.vertical, 3)
+                                    .background(Brand.elevatedSurface, in: Capsule())
+                            }
+                    }
                 }
+                .chartXSelection(value: $scrubDate)
                 .chartYAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel() } }
                 .chartXAxis { AxisMarks(values: .stride(by: .month)) { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel(format: .dateTime.month(.narrow)) } }
                 .frame(height: 200)
@@ -285,6 +302,22 @@ private struct TrendsCard: View {
         }
         Text(L("Whole calendar years — the range filter does not apply to this comparison."))
             .font(.caption2).foregroundStyle(Brand.textTertiary)
+    }
+
+    /// The month bucket under the scrub position.
+    private var scrubbedMonth: MonthlyStat? {
+        guard let scrubDate else { return nil }
+        let cal = Calendar.current
+        return monthly.first { cal.isDate($0.month, equalTo: scrubDate, toGranularity: .month) }
+    }
+
+    private func scrubbedValueLabel(_ m: MonthlyStat) -> String {
+        switch metric {
+        case .distance: units.distance(km: m.distanceKm, digits: 0)
+        case .energy: units.energy(kwh: m.energyChargedKwh, digits: 0)
+        case .cost: units.money(m.chargeCost)
+        case .consumption: units.consumption(whPerKm: m.avgConsumptionWhPerKm > 0 ? m.avgConsumptionWhPerKm : nil)
+        }
     }
 
     private func value(_ m: MonthlyStat) -> Double {

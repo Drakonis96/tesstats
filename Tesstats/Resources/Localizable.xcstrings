@@ -5953,6 +5953,22 @@
         }
       }
     },
+    "Real per-point data from TeslaMate · %lld samples. Touch and drag to inspect.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real per-point data from TeslaMate · %lld samples. Touch and drag to inspect."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datos reales punto a punto de TeslaMate · %lld muestras. Mantén pulsado y arrastra para inspeccionar."
+          }
+        }
+      }
+    },
     "Real per-point data from TeslaMate · %lld samples. X: state of charge, Y: power.": {
       "localizations": {
         "en": {
@@ -7565,6 +7581,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Totals"
+          }
+        }
+      }
+    },
+    "Touch and drag to inspect a month.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Touch and drag to inspect a month."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mantén pulsado y arrastra para inspeccionar un mes."
           }
         }
       }
