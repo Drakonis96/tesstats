@@ -43,12 +43,6 @@ struct DashboardView: View {
         if let state = env.live.currentState {
             ScrollView {
                 VStack(spacing: Metrics.cardSpacing) {
-                    #if os(iOS)
-                    LogoMark(width: 290)
-                        .shadow(color: Brand.crimson.opacity(0.3), radius: 14)
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 4)
-                    #endif
                     HeroMapCard(state: state, units: units)
                         .accessibilityIdentifier("dashboard-map-hero")
                     dashboardQuickStats(state)
@@ -97,6 +91,7 @@ struct DashboardView: View {
     private var toolbarContent: some ToolbarContent {
         #if os(iOS)
         ToolbarItem(placement: .leadingBar) { ConnectionStatusMenu() }
+        ToolbarItem(placement: .principal) { ToolbarLogo() }
         #endif
         ToolbarItemGroup(placement: .trailingBar) {
             #if os(iOS)
