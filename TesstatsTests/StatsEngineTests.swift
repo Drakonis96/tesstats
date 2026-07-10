@@ -35,6 +35,33 @@ final class StatsEngineTests: XCTestCase {
         XCTAssertEqual(days.reduce(0) { $0 + $1.distanceKm }, 50, accuracy: 0.001)
     }
 
+    func testYearOverYearPicksTwoMostRecentYearsSorted() {
+        let cal = Calendar.current
+        func month(_ y: Int, _ m: Int) -> Date { cal.date(from: DateComponents(year: y, month: m, day: 1))! }
+        let monthly = [
+            MonthlyStat(month: month(2024, 5), distanceKm: 100),
+            MonthlyStat(month: month(2025, 2), distanceKm: 200),
+            MonthlyStat(month: month(2025, 11), distanceKm: 250),
+            MonthlyStat(month: month(2026, 1), distanceKm: 300),
+            MonthlyStat(month: month(2026, 6), distanceKm: 350)
+        ]
+
+        let years = StatsEngine.yearOverYear(monthly)
+
+        XCTAssertEqual(years.map(\.year), [2025, 2026])   // 2024 dropped, oldest first
+        XCTAssertEqual(years[0].months.map(\.distanceKm), [200, 250])
+        XCTAssertEqual(years[1].months.map(\.distanceKm), [300, 350])
+        // Months within a year come back chronologically sorted.
+        XCTAssertEqual(years[0].months.map { cal.component(.month, from: $0.month) }, [2, 11])
+    }
+
+    func testYearOverYearWithSingleYearReturnsOneEntry() {
+        let cal = Calendar.current
+        let m = MonthlyStat(month: cal.date(from: DateComponents(year: 2026, month: 3, day: 1))!, distanceKm: 10)
+        XCTAssertEqual(StatsEngine.yearOverYear([m]).count, 1)
+        XCTAssertTrue(StatsEngine.yearOverYear([]).isEmpty)
+    }
+
     private func makeDrive(id: Int, start: Date, distance: Double) -> DriveRecord {
         DriveRecord(
             id: id,

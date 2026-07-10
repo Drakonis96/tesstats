@@ -8225,6 +8225,22 @@
         }
       }
     },
+    "Whole calendar years — the range filter does not apply to this comparison.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whole calendar years — the range filter does not apply to this comparison."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Años naturales completos: el filtro de rango no se aplica a esta comparación."
+          }
+        }
+      }
+    },
     "Windows": {
       "localizations": {
         "es": {
@@ -8253,6 +8269,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Contraseña incorrecta: no se pudo descifrar la copia."
+          }
+        }
+      }
+    },
+    "Years": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Years"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Años"
           }
         }
       }

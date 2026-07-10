@@ -79,7 +79,7 @@ struct StatsView: View {
                     if let cmp = StatsEngine.monthOverMonth(drives: env.history.drives, charges: env.history.charges, pricing: pricing) {
                         ComparisonCard(comparison: cmp, units: units)
                     }
-                    TrendsCard(monthly: monthly, units: units)
+                    TrendsCard(monthly: monthly, monthlyAllTime: monthlyAllTime, units: units)
                     CostCard(cost: cost, units: units)
                     EcoCard(eco: eco, units: units)
                     if !tempPoints.isEmpty { TempConsumptionCard(points: tempPoints, bins: tempBins, units: units) }
@@ -99,6 +99,9 @@ struct StatsView: View {
 
     // Derived analytics (recomputed when `range` or history changes).
     private var monthly: [MonthlyStat] { StatsEngine.monthly(drives: drives, charges: charges, pricing: pricing) }
+    /// Unfiltered months — the year-over-year overlay compares whole years, so it must not
+    /// depend on the range filter.
+    private var monthlyAllTime: [MonthlyStat] { StatsEngine.monthly(drives: env.history.drives, charges: env.history.charges, pricing: pricing) }
     private var cost: CostSummary { StatsEngine.cost(drives: drives, charges: charges, pricing: pricing) }
     private var eco: EcoImpact { StatsEngine.eco(drives: drives, fuelLPer100km: env.settings.config.fuelConsumptionLPer100km) }
     private var tempPoints: [TempConsumptionPoint] { StatsEngine.tempConsumption(drives) }
@@ -175,12 +178,31 @@ private enum TrendMetric: String, CaseIterable, Identifiable {
 
 private struct TrendsCard: View {
     let monthly: [MonthlyStat]
+    /// Unfiltered history, pivoted per-year for the year-over-year overlay.
+    let monthlyAllTime: [MonthlyStat]
     let units: Units
     @State private var metric: TrendMetric = .distance
+    @State private var compareYears = false
+
+    private var years: [(year: Int, months: [MonthlyStat])] { StatsEngine.yearOverYear(monthlyAllTime) }
+    private var canCompareYears: Bool { years.count == 2 }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            SectionHeader(L("Trends over time"), systemImage: "chart.bar.xaxis")
+            HStack(spacing: 8) {
+                SectionHeader(L("Trends over time"), systemImage: "chart.bar.xaxis")
+                if canCompareYears {
+                    Button {
+                        withAnimation(.snappy) { compareYears.toggle() }
+                    } label: {
+                        Label(L("Years"), systemImage: "calendar.badge.clock")
+                            .font(.caption.weight(.semibold))
+                    }
+                    .buttonStyle(.bordered)
+                    .buttonBorderShape(.capsule)
+                    .tint(compareYears ? Brand.crimson : Brand.textTertiary)
+                }
+            }
             Picker("", selection: $metric) {
                 ForEach(TrendMetric.allCases) { Text($0.label).tag($0) }
             }
@@ -194,6 +216,8 @@ private struct TrendsCard: View {
                 Text(L("No cost data. Set a charge price per kWh in Settings — or per location below — to see cost trends."))
                     .font(.subheadline).foregroundStyle(Brand.textSecondary)
                     .frame(maxWidth: .infinity, minHeight: 80)
+            } else if compareYears, canCompareYears {
+                yearComparisonChart
             } else {
                 Chart(monthly) { m in
                     BarMark(x: .value("Month", m.month, unit: .month),
@@ -212,6 +236,55 @@ private struct TrendsCard: View {
             }
         }
         .card()
+    }
+
+    // MARK: Year-over-year overlay
+
+    @ViewBuilder
+    private var yearComparisonChart: some View {
+        let cal = Calendar.current
+        let previous = years[0], current = years[1]
+        Chart {
+            ForEach(current.months) { m in
+                BarMark(x: .value("Month", cal.component(.month, from: m.month)),
+                        y: .value(metric.label, value(m)))
+                    .foregroundStyle(Brand.crimson.gradient)
+                    .cornerRadius(4)
+            }
+            ForEach(previous.months) { m in
+                let month = cal.component(.month, from: m.month)
+                LineMark(x: .value("Month", month),
+                         y: .value(metric.label, value(m)))
+                    .foregroundStyle(Brand.textTertiary)
+                    .interpolationMethod(.monotone)
+                    .lineStyle(StrokeStyle(lineWidth: 2, dash: [4, 3]))
+                PointMark(x: .value("Month", month),
+                          y: .value(metric.label, value(m)))
+                    .foregroundStyle(Brand.textTertiary)
+                    .symbolSize(18)
+            }
+        }
+        .chartXScale(domain: 0.5...12.5)
+        .chartXAxis {
+            AxisMarks(values: Array(1...12)) { v in
+                AxisGridLine().foregroundStyle(Brand.hairline)
+                AxisValueLabel {
+                    if let m = v.as(Int.self) {
+                        Text(Calendar.current.veryShortMonthSymbols[m - 1])
+                    }
+                }
+            }
+        }
+        .chartYAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel() } }
+        .frame(height: 200)
+        HStack(spacing: 10) {
+            Chip(text: String(current.year), color: Brand.crimson)
+            Chip(text: String(previous.year), color: Brand.textTertiary)
+            Spacer()
+            Text(unitCaption).font(.caption2).foregroundStyle(Brand.textTertiary)
+        }
+        Text(L("Whole calendar years — the range filter does not apply to this comparison."))
+            .font(.caption2).foregroundStyle(Brand.textTertiary)
     }
 
     private func value(_ m: MonthlyStat) -> Double {

@@ -202,6 +202,14 @@ enum StatsEngine {
         return buckets.values.sorted { $0.month < $1.month }
     }
 
+    /// Pivot monthly stats into calendar years for a year-over-year comparison.
+    /// Returns the two most recent years that have any data, oldest first.
+    static func yearOverYear(_ monthly: [MonthlyStat]) -> [(year: Int, months: [MonthlyStat])] {
+        let cal = calendar
+        let grouped = Dictionary(grouping: monthly) { cal.component(.year, from: $0.month) }
+        return grouped.keys.sorted().suffix(2).map { (year: $0, months: (grouped[$0] ?? []).sorted { $0.month < $1.month }) }
+    }
+
     // Period comparison ------------------------------------------------------
 
     /// Compare the most recent calendar month with the one before it.
