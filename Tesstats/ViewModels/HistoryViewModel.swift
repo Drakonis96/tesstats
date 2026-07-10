@@ -31,7 +31,10 @@ final class HistoryViewModel {
     var efficiency: EfficiencySummary { EfficiencySummary.from(drives) }
 
     func loadIfNeeded(carID: Int) async {
-        guard loadedCarID != carID || phase == .idle else { return }
+        // Reload on first use, on car change, and after a failure — otherwise switching
+        // tabs after a failed load would keep showing the error until a manual retry.
+        let shouldRetry: Bool = if case .failed = phase { true } else { false }
+        guard loadedCarID != carID || phase == .idle || shouldRetry else { return }
         await load(carID: carID)
     }
 
