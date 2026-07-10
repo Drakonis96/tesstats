@@ -80,6 +80,7 @@ struct CalendarDay: Identifiable, Sendable, Hashable {
     var id: Date { day }
     var day: Date                            // start of day
     var distanceKm: Double
+    var driveCount: Int = 0
 }
 
 // MARK: - Environmental impact
@@ -324,21 +325,26 @@ enum StatsEngine {
         return (0..<24).compactMap { map[$0] }
     }
 
-    /// Distance per calendar day across the last `weeks` weeks (for a GitHub-style heatmap).
+    /// Distance and drive count per calendar day across the last `weeks` weeks
+    /// (for a GitHub-style heatmap).
     static func calendarHeatmap(_ drives: [DriveRecord], weeks: Int = 18, now: Date = Date()) -> [CalendarDay] {
         let cal = calendar
         let today = cal.startOfDay(for: now)
         guard let start = cal.date(byAdding: .day, value: -(weeks * 7 - 1), to: today) else { return [] }
-        var map: [Date: Double] = [:]
+        var map: [Date: (km: Double, count: Int)] = [:]
         for d in drives {
             let day = cal.startOfDay(for: d.startDate)
             guard day >= start else { continue }
-            map[day, default: 0] += d.distanceKm
+            var agg = map[day] ?? (0, 0)
+            agg.km += d.distanceKm
+            agg.count += 1
+            map[day] = agg
         }
         var days: [CalendarDay] = []
         var cursor = start
         while cursor <= today {
-            days.append(CalendarDay(day: cursor, distanceKm: map[cursor] ?? 0))
+            let agg = map[cursor]
+            days.append(CalendarDay(day: cursor, distanceKm: agg?.km ?? 0, driveCount: agg?.count ?? 0))
             guard let next = cal.date(byAdding: .day, value: 1, to: cursor) else { break }
             cursor = next
         }

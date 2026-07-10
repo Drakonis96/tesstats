@@ -305,6 +305,22 @@
         }
       }
     },
+    "%lld drives · %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld drives · %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld viajes · %@"
+          }
+        }
+      }
+    },
     "%lld sessions · %@": {
       "localizations": {
         "en": {
@@ -4577,6 +4593,22 @@
         }
       }
     },
+    "No drives": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No drives"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin viajes"
+          }
+        }
+      }
+    },
     "No drives or charges in this period.": {
       "localizations": {
         "en": {
@@ -7005,6 +7037,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "TLS only, credentials in the Keychain, zero telemetry."
+          }
+        }
+      }
+    },
+    "Tap a day for details": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap a day for details"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toca un día para ver el detalle"
           }
         }
       }

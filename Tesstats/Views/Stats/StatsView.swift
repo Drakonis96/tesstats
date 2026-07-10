@@ -392,6 +392,7 @@ private struct HeatmapCard: View {
     let units: Units
 
     @State private var gridWidth: CGFloat = 0
+    @State private var selectedDay: CalendarDay?
     private let cellSpacing: CGFloat = 3
 
     private var maxKm: Double { max(1, days.map(\.distanceKm).max() ?? 1) }
@@ -408,29 +409,97 @@ private struct HeatmapCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(L("Activity"), systemImage: "calendar")
+            monthLabels
             HStack(alignment: .top, spacing: cellSpacing) {
                 ForEach(Array(weeks.enumerated()), id: \.offset) { _, week in
                     VStack(spacing: cellSpacing) {
                         ForEach(week) { day in
-                            RoundedRectangle(cornerRadius: 2, style: .continuous)
-                                .fill(color(for: day.distanceKm))
-                                .frame(width: cellSize, height: cellSize)
+                            cell(day)
                         }
                     }
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { gridWidth = $0 }
-            HStack(spacing: 6) {
-                Text(L("Less")).font(.caption2).foregroundStyle(Brand.textTertiary)
-                ForEach(0..<5) { i in
-                    RoundedRectangle(cornerRadius: 2).fill(Brand.crimson.opacity(0.15 + Double(i) * 0.2)).frame(width: 11, height: 11)
+            if let day = selectedDay {
+                selectionDetail(day)
+            } else {
+                HStack(spacing: 6) {
+                    Text(L("Less")).font(.caption2).foregroundStyle(Brand.textTertiary)
+                    ForEach(0..<5) { i in
+                        RoundedRectangle(cornerRadius: 2).fill(Brand.crimson.opacity(0.15 + Double(i) * 0.2)).frame(width: 11, height: 11)
+                    }
+                    Text(L("More")).font(.caption2).foregroundStyle(Brand.textTertiary)
+                    Spacer()
+                    Text(L("Tap a day for details")).font(.caption2).foregroundStyle(Brand.textTertiary)
                 }
-                Text(L("More")).font(.caption2).foregroundStyle(Brand.textTertiary)
-                Spacer()
             }
         }
         .card()
+    }
+
+    private func cell(_ day: CalendarDay) -> some View {
+        let selected = selectedDay?.id == day.id
+        return RoundedRectangle(cornerRadius: 2, style: .continuous)
+            .fill(color(for: day.distanceKm))
+            .overlay {
+                if selected {
+                    RoundedRectangle(cornerRadius: 2, style: .continuous)
+                        .strokeBorder(Brand.textPrimary, lineWidth: 1.5)
+                }
+            }
+            .frame(width: cellSize, height: cellSize)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                withAnimation(.snappy(duration: 0.15)) {
+                    selectedDay = selected ? nil : day
+                }
+            }
+    }
+
+    /// GitHub-style month abbreviations above the grid, one at each month change.
+    private var monthLabels: some View {
+        let cal = Calendar.current
+        let step = cellSize + cellSpacing
+        return ZStack(alignment: .topLeading) {
+            Color.clear.frame(height: 12)
+            ForEach(Array(weeks.enumerated()), id: \.offset) { idx, week in
+                if let first = week.first?.day, showsLabel(at: idx, calendar: cal) {
+                    Text(first, format: .dateTime.month(.abbreviated))
+                        .font(.caption2.weight(.medium))
+                        .foregroundStyle(Brand.textTertiary)
+                        .fixedSize()
+                        .offset(x: CGFloat(idx) * step)
+                }
+            }
+        }
+    }
+
+    /// Label a column when its first day starts a new month vs. the previous column.
+    /// The very first column is labeled only if no month change follows within two
+    /// columns (so two labels never overlap).
+    private func showsLabel(at index: Int, calendar cal: Calendar) -> Bool {
+        func month(_ i: Int) -> Int? { weeks[i].first.map { cal.component(.month, from: $0.day) } }
+        guard let current = month(index) else { return false }
+        if index == 0 {
+            let next = (1...2).compactMap { $0 < weeks.count ? month($0) : nil }
+            return next.allSatisfy { $0 == current }
+        }
+        return month(index - 1) != current
+    }
+
+    private func selectionDetail(_ day: CalendarDay) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "calendar").font(.caption).foregroundStyle(Brand.crimson)
+            Text(day.day, format: .dateTime.weekday(.abbreviated).day().month().year())
+                .font(.caption.weight(.semibold)).foregroundStyle(Brand.textPrimary)
+            Spacer()
+            Text(day.driveCount == 0
+                 ? L("No drives")
+                 : L("\(day.driveCount) drives · \(units.distance(km: day.distanceKm, digits: 1))"))
+                .font(.caption).foregroundStyle(Brand.textSecondary)
+        }
+        .padding(.top, 2)
     }
 
     private func color(for km: Double) -> Color {
