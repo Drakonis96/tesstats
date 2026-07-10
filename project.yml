@@ -33,6 +33,9 @@ targets:
       - target: TesstatsWidgets
         embed: true
         destinationFilters: [iOS]
+      - target: TesstatsWatch
+        embed: true
+        destinationFilters: [iOS]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.tesstats.app
@@ -63,6 +66,24 @@ targets:
         CODE_SIGN_ENTITLEMENTS: TesstatsWidgets/TesstatsWidgets.entitlements
         SWIFT_STRICT_CONCURRENCY: complete
         TARGETED_DEVICE_FAMILY: "1,2"
+
+  TesstatsWatch:
+    type: application
+    platform: watchOS
+    deploymentTarget: "11.0"
+    sources:
+      - path: TesstatsWatch
+      - path: Tesstats/Shared
+      - path: Tesstats/Resources/Localizable.xcstrings
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tesstats.app.watchkitapp
+        PRODUCT_NAME: Tesstats
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_WKApplication: YES
+        INFOPLIST_KEY_WKCompanionAppBundleIdentifier: com.tesstats.app
+        INFOPLIST_KEY_CFBundleDisplayName: Tesstats
+        SWIFT_STRICT_CONCURRENCY: complete
 
   TesstatsTests:
     type: bundle.unit-test

@@ -41,13 +41,14 @@ Tesstats shows your car's live status, trips, charging sessions, battery health 
 ## What you get
 
 * **Live dashboard** — battery %, range, charging power, climate, locks/sentry, tire pressure, location, active route.
-* **Trips** — every drive with distance, duration, consumption, a map and an elevation profile.
-* **Charging** — every session with energy, cost, AC/DC, and a **real charge curve** (kW vs %SoC) for fast charges.
-* **Battery health** — degradation over time (max range at 100 %, capacity, % lost).
-* **Statistics** — monthly trends, this‑month‑vs‑last, records, cost per 100 km, CO₂ saved, consumption vs temperature, phantom drain, charging by location, and a calendar heatmap.
+* **Trips** — every drive with distance, duration, consumption, a map and an elevation profile. Tag trips **Work/Personal** (kept on-device) and filter or export by tag.
+* **Charging** — every session with energy, cost, AC/DC, and a **real charge curve** (kW vs %SoC) for fast charges — drag on the curve to inspect any point.
+* **Cost estimates** — flat price per kWh, per-location overrides, and **time-of-use tariffs** (cheap night bands, bands may cross midnight).
+* **Battery health** — degradation over time (max range at 100 %, capacity, % lost) plus a **battery-over-time** chart for the last 7/30 days.
+* **Statistics** — monthly trends with a **year-over-year overlay**, this-month-vs-last, records, cost per 100 km, CO₂ saved, consumption vs temperature, phantom drain, charging by location, and an interactive calendar heatmap.
 * **Notifications** — charging started/complete, charge limit reached, low tire pressure, doors/unlocked, geofence, software updates, quiet hours.
-* **Apple goodies** — Home Screen & Lock Screen **widgets**, a **Live Activity** for charging (Dynamic Island), and **Siri/Shortcuts** ("What's my battery?").
-* **Multi‑car**, offline cache, light/encrypted backups, CSV/JSON/GPX export, English & Spanish.
+* **Apple goodies** — Home Screen & Lock Screen **widgets**, a **Live Activity** for charging (Dynamic Island), **Siri/Shortcuts** ("What's my battery?"), and an **Apple Watch** companion app (battery, range, charging — when built from source/Xcode; sideloaded installs can't provision watch apps).
+* **Multi‑car**, offline cache with **incremental sync**, light/encrypted backups, CSV/JSON/GPX export, English & Spanish.
 * On **Mac** it can live in the **menu bar** and keep notifying in the background.
 
 ---

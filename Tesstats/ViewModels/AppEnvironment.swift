@@ -40,6 +40,9 @@ final class AppEnvironment {
             settings.config = .demo
         }
         let injected = applyEnvOverridesIfPresent()
+        #if os(iOS)
+        WatchBridge.shared.activate()   // keep the paired watch fed with live snapshots
+        #endif
         guard settings.isConfigured else { return }
         live.start()
         inbox.seedWelcomeIfNeeded()

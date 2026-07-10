@@ -49,6 +49,9 @@ enum WidgetBridge {
         #if canImport(WidgetKit)
         WidgetCenter.shared.reloadAllTimelines()
         #endif
+        #if os(iOS)
+        WatchBridge.shared.push(snap)
+        #endif
     }
 
     /// Clear the shared snapshot, stop activities and refresh widgets (used by "Delete all data").

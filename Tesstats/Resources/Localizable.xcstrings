@@ -1105,6 +1105,22 @@
         }
       }
     },
+    "Battery %lld%%": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Battery %lld%%"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Batería %lld%%"
+          }
+        }
+      }
+    },
     "Battery at arrival": {
       "localizations": {
         "es": {
@@ -5217,6 +5233,22 @@
         }
       }
     },
+    "Open Tesstats on your iPhone to sync.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Tesstats on your iPhone to sync."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre Tesstats en tu iPhone para sincronizar."
+          }
+        }
+      }
+    },
     "Open doors / unlocked": {
       "localizations": {
         "es": {
@@ -7617,6 +7649,22 @@
         }
       }
     },
+    "Time to limit": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time to limit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiempo hasta el límite"
+          }
+        }
+      }
+    },
     "Time-of-use tariff": {
       "localizations": {
         "en": {
@@ -8109,6 +8157,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Actualización disponible%@"
+          }
+        }
+      }
+    },
+    "Updated %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updated %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualizado %@"
           }
         }
       }
