@@ -4,6 +4,7 @@ struct TripsView: View {
     @Environment(AppEnvironment.self) private var env
     @State private var search = ""
     @State private var range = StatsRange()
+    @State private var tagFilter: TripTagFilter = .all
     @State private var visibleCount = 25
     @State private var refreshing = false
     @State private var showExport = false
@@ -16,6 +17,7 @@ struct TripsView: View {
     private var filtered: [DriveRecord] {
         env.history.drives.filter { d in
             range.contains(d.startDate) &&
+            tagFilter.matches(env.tripTags.tag(for: d.id)) &&
             (search.isEmpty
                 || d.originName.localizedCaseInsensitiveContains(search)
                 || d.destinationName.localizedCaseInsensitiveContains(search))
@@ -70,6 +72,7 @@ struct TripsView: View {
         .task(id: carID) { await env.history.loadIfNeeded(carID: carID) }
         .onChange(of: search) { _, _ in visibleCount = pageSize }
         .onChange(of: range) { _, _ in visibleCount = pageSize }
+        .onChange(of: tagFilter) { _, _ in visibleCount = pageSize }
     }
 
     @ViewBuilder
@@ -93,6 +96,7 @@ struct TripsView: View {
     private var filterBar: some View {
         VStack(spacing: 10) {
             SearchField(placeholder: L("Search origin or destination"), text: $search)
+            SegmentedFilter(selection: $tagFilter)
             RangeFilterBar(range: $range)
             HStack {
                 Text(L("\(filtered.count) trips · \(units.distance(km: filtered.reduce(0) { $0 + $1.distanceKm }, digits: 0))"))
@@ -120,7 +124,8 @@ struct TripsView: View {
                         HistoryDayHeader(title: group.title, detail: group.detail)
                         ForEach(group.items) { drive in
                             NavigationLink(value: drive) {
-                                DriveRow(drive: drive, units: units, cost: tripCost(drive))
+                                DriveRow(drive: drive, units: units, cost: tripCost(drive),
+                                         tag: env.tripTags.tag(for: drive.id))
                             }
                             .buttonStyle(.plain)
                         }
@@ -174,6 +179,7 @@ struct DriveRow: View {
     let drive: DriveRecord
     let units: Units
     var cost: TripCost?
+    var tag: TripTag?
 
     var body: some View {
         HStack(spacing: 14) {
@@ -184,10 +190,15 @@ struct DriveRow: View {
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(Brand.online)
                             .lineLimit(1)
-                        Label(drive.destinationName, systemImage: "circle.fill")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(Brand.danger)
-                            .lineLimit(1)
+                        HStack(spacing: 8) {
+                            Label(drive.destinationName, systemImage: "circle.fill")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Brand.danger)
+                                .lineLimit(1)
+                            if let tag {
+                                Chip(text: tag.label, systemImage: tag.icon, color: Brand.driving)
+                            }
+                        }
                     }
                     Spacer()
                     VStack(alignment: .trailing, spacing: 4) {
@@ -235,6 +246,30 @@ struct DriveRow: View {
         HStack(spacing: 4) {
             Image(systemName: icon).font(.caption2).foregroundStyle(color)
             Text(value).font(.caption).foregroundStyle(color)
+        }
+    }
+}
+
+/// Trip-list filter over the local tags: everything, one tag, or only untagged drives.
+enum TripTagFilter: String, FilterOption {
+    case all, work, personal, untagged
+
+    var id: String { rawValue }
+    var filterLabel: String {
+        switch self {
+        case .all: L("All")
+        case .work: L("Work")
+        case .personal: L("Personal")
+        case .untagged: L("Untagged")
+        }
+    }
+
+    func matches(_ tag: TripTag?) -> Bool {
+        switch self {
+        case .all: true
+        case .work: tag == .work
+        case .personal: tag == .personal
+        case .untagged: tag == nil
         }
     }
 }

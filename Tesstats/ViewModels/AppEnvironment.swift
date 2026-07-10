@@ -13,6 +13,7 @@ final class AppEnvironment {
     let cache: CacheStore
     let live: VehicleLiveService
     let history: HistoryViewModel
+    let tripTags = TripTagStore()
     let tester = ConnectionTester()
 
     init() {
@@ -123,6 +124,7 @@ final class AppEnvironment {
         inbox.clear()
         cache.clearAll()
         history.reset()
+        tripTags.clear()
         WidgetBridge.clearAll()
         live.restart()
     }

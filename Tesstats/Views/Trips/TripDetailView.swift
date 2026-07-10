@@ -25,6 +25,7 @@ struct TripDetailView: View {
             ScrollView {
                 VStack(spacing: Metrics.cardSpacing) {
                     routeCard
+                    tagCard
                     statsCard
                     tripCostCard
                     telemetryCard
@@ -122,6 +123,26 @@ struct TripDetailView: View {
         } else {
             routeState = .unavailable
         }
+    }
+
+    // MARK: - Trip tag (local, device-only)
+
+    private var tagCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(L("Tag"), systemImage: "tag")
+            Picker("", selection: Binding(
+                get: { env.tripTags.tag(for: drive.id) },
+                set: { env.tripTags.setTag($0, for: drive.id) })) {
+                Text(L("None")).tag(TripTag?.none)
+                ForEach(TripTag.allCases) { tag in
+                    Label(tag.label, systemImage: tag.icon).tag(TripTag?.some(tag))
+                }
+            }
+            .pickerStyle(.segmented)
+            Text(L("Stored only on this device — useful to separate business mileage. Included in CSV/JSON exports."))
+                .font(.caption2).foregroundStyle(Brand.textTertiary)
+        }
+        .card()
     }
 
     // MARK: - Stats

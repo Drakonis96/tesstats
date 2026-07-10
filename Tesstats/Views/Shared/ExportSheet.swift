@@ -6,6 +6,7 @@ struct ExportSheet: View {
     let drives: [DriveRecord]
     let charges: [ChargeRecord]
 
+    @Environment(AppEnvironment.self) private var env
     @Environment(\.dismiss) private var dismiss
     @State private var format: ExportFormat = .csv
 
@@ -29,7 +30,7 @@ struct ExportSheet: View {
 
                     Section {
                         shareRow(L("Trips"), count: drives.count, systemImage: "map",
-                                 url: ExportService.drivesFile(drives, format: format))
+                                 url: ExportService.drivesFile(drives, format: format, tags: env.tripTags.tags))
                         shareRow(L("Charging"), count: charges.count, systemImage: "bolt.fill",
                                  url: ExportService.chargesFile(charges, format: format))
                     } header: {

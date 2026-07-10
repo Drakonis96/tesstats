@@ -4897,6 +4897,22 @@
         }
       }
     },
+    "None": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ninguna"
+          }
+        }
+      }
+    },
     "Not configured": {
       "localizations": {
         "es": {
@@ -5501,6 +5517,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Por día"
+          }
+        }
+      }
+    },
+    "Personal": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personal"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personal"
           }
         }
       }
@@ -7057,6 +7089,22 @@
         }
       }
     },
+    "Stored only on this device — useful to separate business mileage. Included in CSV/JSON exports.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stored only on this device — useful to separate business mileage. Included in CSV/JSON exports."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se guarda solo en este dispositivo: útil para separar kilometraje de trabajo. Se incluye en los exports CSV/JSON."
+          }
+        }
+      }
+    },
     "Summary": {
       "localizations": {
         "es": {
@@ -7181,6 +7229,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "TLS only, credentials in the Keychain, zero telemetry."
+          }
+        }
+      }
+    },
+    "Tag": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tag"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etiqueta"
           }
         }
       }
@@ -8001,6 +8065,22 @@
         }
       }
     },
+    "Untagged": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Untagged"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin etiqueta"
+          }
+        }
+      }
+    },
     "Up to date": {
       "localizations": {
         "es": {
@@ -8429,6 +8509,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Windows"
+          }
+        }
+      }
+    },
+    "Work": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Work"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trabajo"
           }
         }
       }

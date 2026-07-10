@@ -26,10 +26,11 @@ enum ExportService {
 
     // MARK: - Public entry points (return a temp file URL for ShareLink)
 
-    static func drivesFile(_ drives: [DriveRecord], format: ExportFormat) -> URL? {
+    /// `tags` carries the local trip labels (drive ID → tag) into CSV/JSON exports.
+    static func drivesFile(_ drives: [DriveRecord], format: ExportFormat, tags: [Int: TripTag] = [:]) -> URL? {
         switch format {
-        case .csv: write(drivesCSV(drives), name: "tesstats-trips.csv")
-        case .json: write(prettyJSON(drives), name: "tesstats-trips.json")
+        case .csv: write(drivesCSV(drives, tags: tags), name: "tesstats-trips.csv")
+        case .json: write(drivesJSON(drives, tags: tags), name: "tesstats-trips.json")
         case .gpx: write(drivesGPX(drives), name: "tesstats-trips.gpx")
         }
     }
@@ -57,8 +58,8 @@ enum ExportService {
 
     // MARK: - CSV
 
-    static func drivesCSV(_ drives: [DriveRecord]) -> String {
-        var rows = ["start,end,origin,destination,distance_km,duration_min,start_battery,end_battery,consumption_wh_km,avg_speed_kmh,max_speed_kmh,outside_temp_c"]
+    static func drivesCSV(_ drives: [DriveRecord], tags: [Int: TripTag] = [:]) -> String {
+        var rows = ["start,end,origin,destination,distance_km,duration_min,start_battery,end_battery,consumption_wh_km,avg_speed_kmh,max_speed_kmh,outside_temp_c,tag"]
         for d in drives {
             var f: [String] = []
             f.append(iso.string(from: d.startDate))
@@ -73,6 +74,7 @@ enum ExportService {
             f.append(d.avgSpeedKmh.map { num($0) } ?? "")
             f.append(d.maxSpeedKmh.map { num($0) } ?? "")
             f.append(d.outsideTempAvg.map { num($0) } ?? "")
+            f.append(tags[d.id]?.rawValue ?? "")
             rows.append(f.joined(separator: ","))
         }
         return rows.joined(separator: "\n")
@@ -100,6 +102,18 @@ enum ExportService {
     }
 
     // MARK: - JSON
+
+    /// A drive plus its local tag. Only used when tags exist, so untagged installs keep
+    /// producing the original `[DriveRecord]` JSON shape.
+    private struct TaggedDriveExport: Encodable {
+        let drive: DriveRecord
+        let tag: String?
+    }
+
+    static func drivesJSON(_ drives: [DriveRecord], tags: [Int: TripTag] = [:]) -> String {
+        guard !tags.isEmpty else { return prettyJSON(drives) }
+        return prettyJSON(drives.map { TaggedDriveExport(drive: $0, tag: tags[$0.id]?.rawValue) })
+    }
 
     private static func prettyJSON<T: Encodable>(_ value: T) -> String {
         let enc = JSONEncoder()
