@@ -118,6 +118,19 @@ struct PhantomDrain: Sendable {
     var totalIdleDays: Double
 }
 
+// MARK: - State-of-charge timeline
+
+/// One battery-level sample reconstructed from the recorded history. TeslaMate history has
+/// no continuous SoC series, but every drive and charge carries its start/end level — chaining
+/// those boundaries yields a faithful battery timeline (flat-ish gaps are parked periods).
+struct SocSample: Identifiable, Sendable, Hashable {
+    enum Kind: String, Sendable { case drive, charge }
+    var id: Date { date }
+    var date: Date
+    var soc: Int
+    var kind: Kind
+}
+
 // MARK: - Charging location
 
 struct ChargingLocation: Identifiable, Sendable, Hashable {
@@ -357,6 +370,45 @@ enum StatsEngine {
             cursor = next
         }
         return days
+    }
+
+    // State-of-charge timeline -------------------------------------------------
+
+    /// Battery level over the last `days` days, reconstructed from drive and charge
+    /// boundaries (see `SocSample`). Sorted chronologically; same-second duplicates keep
+    /// the last value seen.
+    static func socTimeline(drives: [DriveRecord], charges: [ChargeRecord], days: Int, now: Date = Date()) -> [SocSample] {
+        guard let cutoff = calendar.date(byAdding: .day, value: -days, to: now) else { return [] }
+        var samples: [SocSample] = []
+
+        for d in drives {
+            if let soc = d.startBattery, d.startDate >= cutoff {
+                samples.append(SocSample(date: d.startDate, soc: soc, kind: .drive))
+            }
+            if let soc = d.endBattery, let end = d.endDate, end >= cutoff, end <= now {
+                samples.append(SocSample(date: end, soc: soc, kind: .drive))
+            }
+        }
+        for c in charges {
+            if let soc = c.startBattery, c.startDate >= cutoff {
+                samples.append(SocSample(date: c.startDate, soc: soc, kind: .charge))
+            }
+            if let soc = c.endBattery, let end = c.endDate, end >= cutoff, end <= now {
+                samples.append(SocSample(date: end, soc: soc, kind: .charge))
+            }
+        }
+
+        samples.sort { $0.date < $1.date }
+        // Collapse duplicate timestamps (a charge ending exactly when a drive starts).
+        var result: [SocSample] = []
+        for s in samples {
+            if let last = result.last, abs(last.date.timeIntervalSince(s.date)) < 1 {
+                result[result.count - 1] = s
+            } else {
+                result.append(s)
+            }
+        }
+        return result
     }
 
     // Environmental impact ---------------------------------------------------

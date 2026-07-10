@@ -58,6 +58,9 @@ struct BatteryView: View {
         ScrollView {
             VStack(spacing: Metrics.cardSpacing) {
                 if let state = env.live.currentState { liveHealthCard(state) }
+                SocTimelineCard(drives: env.history.drives,
+                                charges: env.history.charges,
+                                liveSoc: env.live.currentState?.batteryLevel)
                 officialHealthCard
                 degradationCard
                 efficiencyCard
@@ -291,5 +294,99 @@ struct BatteryView: View {
         refreshing = true
         await env.history.refresh(carID: carID)
         refreshing = false
+    }
+}
+
+// MARK: - State-of-charge timeline
+
+/// Battery % over the last 7/30 days, reconstructed from drive & charge boundaries.
+private struct SocTimelineCard: View {
+    let drives: [DriveRecord]
+    let charges: [ChargeRecord]
+    /// Live battery level, appended as the newest sample when available.
+    let liveSoc: Int?
+
+    @State private var days = 7
+    @State private var scrubDate: Date?
+
+    private var samples: [SocSample] {
+        var s = StatsEngine.socTimeline(drives: drives, charges: charges, days: days)
+        if let liveSoc {
+            s.append(SocSample(date: Date(), soc: liveSoc, kind: .drive))
+        }
+        return s
+    }
+
+    private var scrubbed: SocSample? {
+        guard let scrubDate else { return nil }
+        return samples.min {
+            abs($0.date.timeIntervalSince(scrubDate)) < abs($1.date.timeIntervalSince(scrubDate))
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                SectionHeader(L("Battery over time"), systemImage: "waveform.path.ecg")
+                Picker("", selection: $days) {
+                    Text(L("7d")).tag(7)
+                    Text(L("30d")).tag(30)
+                }
+                .pickerStyle(.segmented)
+                .frame(width: 110)
+            }
+
+            let points = samples
+            if points.count < 2 {
+                Text(L("Not enough drive or charge history in this window yet."))
+                    .font(.subheadline).foregroundStyle(Brand.textSecondary)
+                    .frame(maxWidth: .infinity, minHeight: 70)
+            } else {
+                Chart {
+                    ForEach(points) { p in
+                        AreaMark(x: .value("Date", p.date), y: .value("SoC", p.soc))
+                            .foregroundStyle(LinearGradient(colors: [Brand.online.opacity(0.25), .clear],
+                                                             startPoint: .top, endPoint: .bottom))
+                            .interpolationMethod(.monotone)
+                        LineMark(x: .value("Date", p.date), y: .value("SoC", p.soc))
+                            .foregroundStyle(Brand.online)
+                            .interpolationMethod(.monotone)
+                    }
+                    // Mark charge endpoints so charging jumps are recognizable.
+                    ForEach(points.filter { $0.kind == .charge }) { p in
+                        PointMark(x: .value("Date", p.date), y: .value("SoC", p.soc))
+                            .foregroundStyle(Brand.crimson)
+                            .symbolSize(14)
+                    }
+                    if let p = scrubbed {
+                        RuleMark(x: .value("Date", p.date))
+                            .foregroundStyle(Brand.textTertiary.opacity(0.6))
+                            .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
+                        PointMark(x: .value("Date", p.date), y: .value("SoC", p.soc))
+                            .foregroundStyle(Brand.textPrimary)
+                            .symbolSize(50)
+                            .annotation(position: .top,
+                                        overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                                Text("\(p.date, format: .dateTime.day().month(.abbreviated).hour().minute()) · \(p.soc)%")
+                                    .font(.caption2.weight(.bold))
+                                    .foregroundStyle(Brand.textPrimary)
+                                    .padding(.horizontal, 6).padding(.vertical, 3)
+                                    .background(Brand.elevatedSurface, in: Capsule())
+                            }
+                    }
+                }
+                .chartXSelection(value: $scrubDate)
+                .chartYScale(domain: 0...100)
+                .chartYAxis { AxisMarks(values: [0, 25, 50, 75, 100]) { v in
+                    AxisGridLine().foregroundStyle(Brand.hairline)
+                    AxisValueLabel { if let s = v.as(Int.self) { Text("\(s)%") } }
+                } }
+                .chartXAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel(format: days <= 7 ? .dateTime.weekday(.abbreviated) : .dateTime.day().month(.narrow)) } }
+                .frame(height: 170)
+                Text(L("Reconstructed from drive and charge boundaries — dots mark charging sessions."))
+                    .font(.caption2).foregroundStyle(Brand.textTertiary)
+            }
+        }
+        .card()
     }
 }

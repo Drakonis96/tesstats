@@ -513,6 +513,22 @@
         }
       }
     },
+    "7d": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7d"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7d"
+          }
+        }
+      }
+    },
     "8883": {
       "localizations": {
         "en": {
@@ -1117,6 +1133,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nivel de batería"
+          }
+        }
+      }
+    },
+    "Battery over time": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Battery over time"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Batería en el tiempo"
           }
         }
       }
@@ -4865,6 +4897,22 @@
         }
       }
     },
+    "Not enough drive or charge history in this window yet.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not enough drive or charge history in this window yet."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no hay suficiente historial de viajes o cargas en esta ventana."
+          }
+        }
+      }
+    },
     "Not enough history yet to show monthly trends.": {
       "localizations": {
         "en": {
@@ -6045,6 +6093,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tema recibido: %@"
+          }
+        }
+      }
+    },
+    "Reconstructed from drive and charge boundaries — dots mark charging sessions.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reconstructed from drive and charge boundaries — dots mark charging sessions."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reconstruido a partir de los extremos de viajes y cargas: los puntos marcan sesiones de carga."
           }
         }
       }

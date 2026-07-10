@@ -62,6 +62,38 @@ final class StatsEngineTests: XCTestCase {
         XCTAssertTrue(StatsEngine.yearOverYear([]).isEmpty)
     }
 
+    func testSocTimelineChainsDriveAndChargeBoundaries() {
+        let now = Date(timeIntervalSince1970: 1_000_000)
+        let drive = makeDrive(id: 1, start: now.addingTimeInterval(-7200), distance: 20)
+        // Charge right after the drive: 75% → 90%.
+        var charge = makeCharge(id: 1, start: now.addingTimeInterval(-4000), energy: 15)
+
+        let samples = StatsEngine.socTimeline(drives: [drive], charges: [charge], days: 7, now: now)
+
+        XCTAssertEqual(samples.map(\.soc), [80, 75, 75, 90])
+        XCTAssertEqual(samples.map(\.kind), [.drive, .drive, .charge, .charge])
+        XCTAssertEqual(samples, samples.sorted { $0.date < $1.date })
+
+        // Outside the window → excluded.
+        charge = makeCharge(id: 2, start: now.addingTimeInterval(-30 * 86_400), energy: 15)
+        XCTAssertTrue(StatsEngine.socTimeline(drives: [], charges: [charge], days: 7, now: now).isEmpty)
+    }
+
+    private func makeCharge(id: Int, start: Date, energy: Double) -> ChargeRecord {
+        ChargeRecord(
+            id: id,
+            startDate: start,
+            endDate: start.addingTimeInterval(1800),
+            address: "Home", geofence: "Home",
+            energyAddedKwh: energy,
+            startBattery: 75, endBattery: 90,
+            startRangeKm: 300, endRangeKm: 360,
+            durationMin: 30, cost: nil,
+            energyUsedKwh: nil, outsideTempAvg: nil, odometerKm: nil,
+            avgPowerKw: 11, coord: nil, isFastCharger: false
+        )
+    }
+
     private func makeDrive(id: Int, start: Date, distance: Double) -> DriveRecord {
         DriveRecord(
             id: id,
