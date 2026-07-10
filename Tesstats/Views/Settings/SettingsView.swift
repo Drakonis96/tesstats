@@ -58,6 +58,7 @@ struct SettingsView: View {
                     dashboardLayoutSection($settings)
                 case .notifications:
                     notificationsSection($notifications)
+                    sentrySignalSection
                     tpmsSection($notifications)
                     quietHoursSection($notifications)
                     liveActivitySection($settings)
@@ -548,6 +549,47 @@ struct SettingsView: View {
         } footer: {
             Text(L("On-device local alerts. iOS can't reliably poll 24/7 in the background — for guaranteed alerts with the app closed, run the optional push microservice (see README)."))
         }
+    }
+
+    /// Live view of the two MQTT signals the Sentry alert depends on, so users can verify
+    /// their TeslaMate actually emits them (walk up to the car with Sentry armed and the
+    /// screen-state row should flip to the Sentry banner).
+    private var sentrySignalSection: some View {
+        let state = env.live.currentState
+        return Section {
+            KeyValueRow(label: L("Sentry Mode"),
+                        value: state?.sentryMode.map { $0 ? L("Armed") : L("Off") } ?? "—",
+                        valueColor: state?.sentryMode == true ? Brand.online : Brand.textPrimary,
+                        systemImage: "video.fill")
+            KeyValueRow(label: L("Car screen state"),
+                        value: screenStateLabel(state?.centerDisplayState),
+                        valueColor: state?.centerDisplayState == 7 ? Brand.crimson : Brand.textPrimary,
+                        systemImage: "display")
+            KeyValueRow(label: L("Car"),
+                        value: state?.state?.label ?? "—",
+                        systemImage: "car")
+        } header: {
+            Text(L("Sentry signal (live)"))
+        } footer: {
+            Text(L("The Sentry alert fires when the screen state becomes “Sentry banner (7)”. To verify end-to-end: arm Sentry, keep this screen open, and walk up to the car — the row should flip within seconds. TeslaMate polls every ~30 s, so very brief banners can be missed; with the app closed, alerts need the push service or ntfy (see Data → README)."))
+        }
+    }
+
+    /// Human label for TeslaMate's `center_display_state` values.
+    private func screenStateLabel(_ raw: Int?) -> String {
+        guard let raw else { return "—" }
+        let name: String = switch raw {
+        case 0: L("Off")
+        case 2, 4: L("On")
+        case 3: L("Charging screen")
+        case 5: L("Charging (large)")
+        case 6: L("Ready to unlock")
+        case 7: L("Sentry banner")
+        case 8: L("Dog Mode")
+        case 9: L("Media")
+        default: L("Unknown")
+        }
+        return "\(name) (\(raw))"
     }
 
     private func tpmsSection(_ notifications: Bindable<NotificationEngine>) -> some View {

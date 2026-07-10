@@ -977,6 +977,22 @@
         }
       }
     },
+    "Armed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Armed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Armado"
+          }
+        }
+      }
+    },
     "Arrived": {
       "localizations": {
         "es": {
@@ -1457,6 +1473,22 @@
         }
       }
     },
+    "Car": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Car"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coche"
+          }
+        }
+      }
+    },
     "Car %lld": {
       "localizations": {
         "en": {
@@ -1469,6 +1501,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Coche %lld"
+          }
+        }
+      }
+    },
+    "Car screen state": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Car screen state"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pantalla del coche"
           }
         }
       }
@@ -1617,6 +1665,22 @@
         }
       }
     },
+    "Charging (large)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charging (large)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carga (grande)"
+          }
+        }
+      }
+    },
     "Charging Live Activity": {
       "localizations": {
         "en": {
@@ -1693,6 +1757,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pérdidas de carga"
+          }
+        }
+      }
+    },
+    "Charging screen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charging screen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pantalla de carga"
           }
         }
       }
@@ -2605,6 +2685,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "No molestar"
+          }
+        }
+      }
+    },
+    "Dog Mode": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dog Mode"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modo Perro"
           }
         }
       }
@@ -4417,6 +4513,22 @@
         }
       }
     },
+    "Media": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Media"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Multimedia"
+          }
+        }
+      }
+    },
     "Midnight Silver": {
       "localizations": {
         "es": {
@@ -6177,6 +6289,22 @@
         }
       }
     },
+    "Ready to unlock": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ready to unlock"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listo para desbloquear"
+          }
+        }
+      }
+    },
     "Real per-point data from TeslaMate · %lld samples. Touch and drag to inspect.": {
       "localizations": {
         "en": {
@@ -6673,6 +6801,22 @@
         }
       }
     },
+    "Sentry Mode": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sentry Mode"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modo Sentry"
+          }
+        }
+      }
+    },
     "Sentry armed": {
       "localizations": {
         "en": {
@@ -6701,6 +6845,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sentry armado / desarmado"
+          }
+        }
+      }
+    },
+    "Sentry banner": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sentry banner"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Banner Sentry"
           }
         }
       }
@@ -6765,6 +6925,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sentry on"
+          }
+        }
+      }
+    },
+    "Sentry signal (live)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sentry signal (live)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Señal Sentry (en vivo)"
           }
         }
       }
@@ -7565,6 +7741,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ese archivo no es una copia válida de Tesstats."
+          }
+        }
+      }
+    },
+    "The Sentry alert fires when the screen state becomes “Sentry banner (7)”. To verify end-to-end: arm Sentry, keep this screen open, and walk up to the car — the row should flip within seconds. TeslaMate polls every ~30 s, so very brief banners can be missed; with the app closed, alerts need the push service or ntfy (see Data → README).": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Sentry alert fires when the screen state becomes “Sentry banner (7)”. To verify end-to-end: arm Sentry, keep this screen open, and walk up to the car — the row should flip within seconds. TeslaMate polls every ~30 s, so very brief banners can be missed; with the app closed, alerts need the push service or ntfy (see Data → README)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El aviso Sentry salta cuando la pantalla pasa a “Banner Sentry (7)”. Para verificarlo de extremo a extremo: arma Sentry, deja esta pantalla abierta y acércate al coche — la fila debería cambiar en segundos. TeslaMate sondea cada ~30 s, así que banners muy breves pueden perderse; con la app cerrada, los avisos necesitan el servicio push o ntfy (ver Datos → README)."
           }
         }
       }
