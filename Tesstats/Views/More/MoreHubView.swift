@@ -34,28 +34,28 @@ struct MoreHubView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: 6) {
             Text(env.live.currentState?.displayName ?? env.history.carInfo?.name ?? L("Tesla"))
-                .font(.system(size: 44, weight: .bold, design: .rounded))
+                .font(.system(size: 38, weight: .bold, design: .rounded))
                 .foregroundStyle(Brand.textPrimary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.55)
-            Button {
-                showSettings = true
-            } label: {
-                Label(L("Configure your profile"), systemImage: "plus.circle.fill")
-                    .font(.headline.weight(.semibold))
-            }
-            .tint(Brand.driving)
-            HStack(spacing: 12) {
-                Chip(text: L("Update"), systemImage: "arrow.clockwise", color: Brand.driving)
-                Text(L("Member since this install"))
-                    .font(.caption.weight(.semibold))
+            if !headerSubtitle.isEmpty {
+                Text(headerSubtitle)
+                    .font(.subheadline.weight(.medium))
                     .foregroundStyle(Brand.textTertiary)
-                    .textCase(.uppercase)
             }
         }
-        .padding(.vertical, 24)
+        .padding(.vertical, 10)
+    }
+
+    /// Model + trim when known (e.g. "Model 3 Long Range"), otherwise nothing.
+    private var headerSubtitle: String {
+        let info = env.history.carInfo
+        guard let raw = env.live.currentState?.model ?? info?.model, !raw.isEmpty else { return "" }
+        // TeslaMate reports the bare designation ("3", "Y"); older APIs may send "Model 3".
+        let model = raw.count <= 2 ? "Model \(raw)" : raw
+        return [model, info?.trimBadging].compactMap { $0 }.joined(separator: " ")
     }
 
     private func moduleSection(_ title: String, color: Color, rows: [MoreRow]) -> some View {
@@ -107,7 +107,6 @@ struct MoreHubView: View {
         [
             MoreRow(title: L("Battery health"), icon: "bolt.batteryblock") { BatteryView() },
             MoreRow(title: L("Tires"), icon: "gauge.with.dots.needle.bottom.50percent") { TireModuleView() },
-            MoreRow(title: L("Maintenance"), icon: "wrench.and.screwdriver") { PlaceholderModuleView(title: L("Maintenance"), message: L("Maintenance tracking will stay read-only and manual in a future release.")) },
             MoreRow(title: L("Mileage tracking"), icon: "speedometer") { MileageModuleView() },
             MoreRow(title: L("Specs & warranty"), icon: "checkmark.shield") { VehicleSpecsView() }
         ]
@@ -133,20 +132,6 @@ private struct MoreRow: Identifiable {
         self.icon = icon
         self.badge = badge
         self.destination = AnyView(destination())
-    }
-}
-
-private struct PlaceholderModuleView: View {
-    let title: String
-    let message: String
-
-    var body: some View {
-        ZStack {
-            Brand.background.ignoresSafeArea()
-            EmptyStateView(systemImage: "eye", title: title, message: message)
-        }
-        .navigationTitle(title)
-        .navigationBarTitleDisplayModeInlineIfAvailable()
     }
 }
 

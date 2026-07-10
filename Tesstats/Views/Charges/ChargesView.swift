@@ -157,22 +157,13 @@ struct ChargesView: View {
     }
 
     private var quickLinks: some View {
-        HStack(spacing: 12) {
-            NavigationLink {
-                ChargingLocationsModuleView(locations: chargingLocations, units: units)
-            } label: {
-                Label(L("Costs & places"), systemImage: "eurosign")
-                    .frame(maxWidth: .infinity)
-            }
-            .glassButtonStyle()
-            NavigationLink {
-                EmptyStateView(systemImage: "bolt.badge.automatic", title: L("Energy mix"), message: L("Energy-source mix needs an external provider and is not enabled in this read-only release."))
-            } label: {
-                Label(L("Energy mix"), systemImage: "square.stack.3d.up")
-                    .frame(maxWidth: .infinity)
-            }
-            .glassButtonStyle()
+        NavigationLink {
+            ChargingLocationsModuleView(locations: chargingLocations, units: units)
+        } label: {
+            Label(L("Costs & places"), systemImage: "eurosign")
+                .frame(maxWidth: .infinity)
         }
+        .glassButtonStyle()
     }
 
     private var electricityCost: Double {
