@@ -168,22 +168,17 @@ struct ChargesView: View {
 
     private var electricityCost: Double {
         // Sum each session's effective cost — recorded where present, otherwise the location's
-        // custom price (if set) or the global default — so per-place prices feed the total.
-        let pricing = ChargePricing(defaultPricePerKwh: env.settings.config.chargePricePerKwh,
-                                    perLocation: env.settings.config.chargePricePerKwhByLocation)
+        // custom price, the time-of-use tariff, or the global default.
+        let pricing = ChargePricing(config: env.settings.config)
         return filtered.reduce(0) { $0 + pricing.cost(for: $1) }
     }
 
     private var chargingLocations: [ChargingLocation] {
-        let pricing = ChargePricing(defaultPricePerKwh: env.settings.config.chargePricePerKwh,
-                                    perLocation: env.settings.config.chargePricePerKwhByLocation)
-        return StatsEngine.chargingLocations(filtered, pricing: pricing)
+        StatsEngine.chargingLocations(filtered, pricing: ChargePricing(config: env.settings.config))
     }
 
     private func effectiveCost(_ charge: ChargeRecord) -> Double {
-        let pricing = ChargePricing(defaultPricePerKwh: env.settings.config.chargePricePerKwh,
-                                    perLocation: env.settings.config.chargePricePerKwhByLocation)
-        return pricing.cost(for: charge)
+        ChargePricing(config: env.settings.config).cost(for: charge)
     }
 
     private var costIsEstimated: Bool {

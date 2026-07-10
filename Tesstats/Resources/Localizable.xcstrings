@@ -385,6 +385,22 @@
         }
       }
     },
+    "/kWh": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/kWh"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/kWh"
+          }
+        }
+      }
+    },
     "0.15": {
       "localizations": {
         "en": {
@@ -717,6 +733,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Add a TeslaMateApi URL in Settings to see drives, charges and battery history."
+          }
+        }
+      }
+    },
+    "Add price band": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add price band"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir franja de precio"
           }
         }
       }
@@ -2733,6 +2765,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Electricity"
+          }
+        }
+      }
+    },
+    "Electricity tariff": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Electricity tariff"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarifa eléctrica"
           }
         }
       }
@@ -5697,6 +5745,22 @@
         }
       }
     },
+    "Price bands by time of day (bands may cross midnight, e.g. 22:00–06:00). Hours outside every band use the default charge price. Sessions are priced by how much of their duration falls in each band. Swipe a band to delete it.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Price bands by time of day (bands may cross midnight, e.g. 22:00–06:00). Hours outside every band use the default charge price. Sessions are priced by how much of their duration falls in each band. Swipe a band to delete it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Franjas de precio por hora del día (pueden cruzar la medianoche, p. ej. 22:00–06:00). Las horas fuera de todas las franjas usan el precio por defecto. Cada sesión se valora según cuánto de su duración cae en cada franja. Desliza una franja para eliminarla."
+          }
+        }
+      }
+    },
     "Price per kWh": {
       "localizations": {
         "en": {
@@ -7485,6 +7549,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Time to full"
+          }
+        }
+      }
+    },
+    "Time-of-use tariff": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time-of-use tariff"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarifa por franjas horarias"
           }
         }
       }

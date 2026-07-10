@@ -53,6 +53,10 @@ struct ServerConfig: Codable, Equatable, Sendable {
     /// Optional per-location price overrides (location name → €/kWh). Applied to sessions at
     /// that place when TeslaMate has no recorded cost, for more accurate cost estimates.
     var chargePricePerKwhByLocation: [String: Double] = [:]
+    /// Time-of-use tariff: price bands by time of day (e.g. cheap night rate). When enabled,
+    /// unpriced sessions with no location override are costed by time-weighted band prices.
+    var tariffEnabled: Bool = false
+    var tariffPeriods: [TariffPeriod] = []
 
     // MARK: Push (optional microservice for immediate alerts)
     var pushEnabled: Bool = false
@@ -155,6 +159,8 @@ extension ServerConfig {
         fuelConsumptionLPer100km = c.lenient(.fuelConsumptionLPer100km, fuelConsumptionLPer100km)
         chargePricePerKwh = c.lenient(.chargePricePerKwh, chargePricePerKwh)
         chargePricePerKwhByLocation = c.lenient(.chargePricePerKwhByLocation, chargePricePerKwhByLocation)
+        tariffEnabled = c.lenient(.tariffEnabled, tariffEnabled)
+        tariffPeriods = c.lenient(.tariffPeriods, tariffPeriods)
         pushEnabled = c.lenient(.pushEnabled, pushEnabled)
         pushServiceURL = c.lenient(.pushServiceURL, pushServiceURL)
         liveActivityEnabled = c.lenient(.liveActivityEnabled, liveActivityEnabled)

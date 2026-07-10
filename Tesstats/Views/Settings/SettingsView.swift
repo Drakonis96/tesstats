@@ -54,6 +54,7 @@ struct SettingsView: View {
                 case .preferences:
                     appearanceSection($settings)
                     preferencesSection($settings)
+                    tariffSection($settings)
                     dashboardLayoutSection($settings)
                 case .notifications:
                     notificationsSection($notifications)
@@ -442,6 +443,56 @@ struct SettingsView: View {
         } footer: {
             Text(L("Charge price is used to estimate cost and savings when TeslaMate has no recorded cost."))
         }
+    }
+
+    /// Time-of-use electricity tariff: price bands by time of day, applied to unpriced
+    /// charging sessions (recorded costs and per-location overrides still win).
+    private func tariffSection(_ settings: Bindable<SettingsStore>) -> some View {
+        Section {
+            Toggle(L("Time-of-use tariff"), isOn: settings.config.tariffEnabled)
+                .tint(Brand.crimson)
+            if settings.config.tariffEnabled.wrappedValue {
+                ForEach(settings.config.tariffPeriods) { $period in
+                    HStack(spacing: 6) {
+                        DatePicker("", selection: minuteOfDayBinding($period.startMinute), displayedComponents: .hourAndMinute)
+                            .labelsHidden().fixedSize()
+                        Text("–").foregroundStyle(Brand.textTertiary)
+                        DatePicker("", selection: minuteOfDayBinding($period.endMinute), displayedComponents: .hourAndMinute)
+                            .labelsHidden().fixedSize()
+                        Spacer()
+                        TextField("0.10", value: $period.pricePerKwh, format: .number)
+                            .multilineTextAlignment(.trailing)
+                            .keyboardTypeDecimal()
+                            .frame(width: 70)
+                        Text(L("/kWh")).font(.caption).foregroundStyle(Brand.textTertiary)
+                    }
+                }
+                .onDelete { settings.config.tariffPeriods.wrappedValue.remove(atOffsets: $0) }
+                Button {
+                    settings.config.tariffPeriods.wrappedValue.append(TariffPeriod())
+                } label: {
+                    Label(L("Add price band"), systemImage: "plus.circle.fill")
+                }
+                .tint(Brand.crimson)
+            }
+        } header: {
+            Text(L("Electricity tariff"))
+        } footer: {
+            Text(L("Price bands by time of day (bands may cross midnight, e.g. 22:00–06:00). Hours outside every band use the default charge price. Sessions are priced by how much of their duration falls in each band. Swipe a band to delete it."))
+        }
+    }
+
+    /// Bridge a minutes-from-midnight Int to the hour-and-minute DatePicker.
+    private func minuteOfDayBinding(_ minutes: Binding<Int>) -> Binding<Date> {
+        Binding(
+            get: {
+                let m = ((minutes.wrappedValue % 1440) + 1440) % 1440
+                return Calendar.current.date(bySettingHour: m / 60, minute: m % 60, second: 0, of: Date()) ?? Date()
+            },
+            set: { date in
+                let c = Calendar.current.dateComponents([.hour, .minute], from: date)
+                minutes.wrappedValue = (c.hour ?? 0) * 60 + (c.minute ?? 0)
+            })
     }
 
     private func dashboardLayoutSection(_ settings: Bindable<SettingsStore>) -> some View {

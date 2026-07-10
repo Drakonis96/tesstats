@@ -13,10 +13,7 @@ struct StatsView: View {
 
     private var drives: [DriveRecord] { env.history.drives.filter { range.contains($0.startDate) } }
     private var charges: [ChargeRecord] { env.history.charges.filter { range.contains($0.startDate) } }
-    private var pricing: ChargePricing {
-        ChargePricing(defaultPricePerKwh: env.settings.config.chargePricePerKwh,
-                      perLocation: env.settings.config.chargePricePerKwhByLocation)
-    }
+    private var pricing: ChargePricing { ChargePricing(config: env.settings.config) }
 
     var body: some View {
         NavigationStack {

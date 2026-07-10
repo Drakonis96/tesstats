@@ -143,18 +143,75 @@ struct ChargingLocation: Identifiable, Sendable, Hashable {
     var isFast: Bool = false
 }
 
+// MARK: - Time-of-use tariff
+
+/// One time-of-day price band (e.g. 00:00–08:00 at 0.08/kWh). Bands may wrap past
+/// midnight (start > end, e.g. 22:00–06:00). Minutes are counted from midnight, 0…1439.
+struct TariffPeriod: Codable, Equatable, Sendable, Identifiable, Hashable {
+    var id = UUID()
+    var startMinute: Int = 0
+    var endMinute: Int = 480          // exclusive
+    var pricePerKwh: Double = 0.10
+
+    /// Whether a given minute-of-day falls inside this band, honoring midnight wrap.
+    func contains(minuteOfDay m: Int) -> Bool {
+        if startMinute == endMinute { return false }        // empty band
+        if startMinute < endMinute { return m >= startMinute && m < endMinute }
+        return m >= startMinute || m < endMinute            // wraps midnight
+    }
+}
+
+/// A set of time-of-day price bands. Minutes not covered by any band cost the default price.
+struct TimeOfUseTariff: Codable, Equatable, Sendable {
+    var periods: [TariffPeriod]
+
+    /// Price at one moment: the first band containing it, or the default.
+    func price(at date: Date, defaultPrice: Double, calendar: Calendar = .current) -> Double {
+        let comps = calendar.dateComponents([.hour, .minute], from: date)
+        let minute = (comps.hour ?? 0) * 60 + (comps.minute ?? 0)
+        return periods.first { $0.contains(minuteOfDay: minute) }?.pricePerKwh ?? defaultPrice
+    }
+
+    /// Time-weighted average price across a session, sampling per minute. Assumes energy
+    /// flows roughly uniformly over the session — a good approximation for AC charging,
+    /// which is what time-of-use tariffs apply to.
+    func averagePrice(for interval: DateInterval, defaultPrice: Double, calendar: Calendar = .current) -> Double {
+        // Cap the walk at 7 days to bound the work on degenerate data.
+        let minutes = min(Int(interval.duration / 60), 7 * 24 * 60)
+        guard minutes >= 1 else { return price(at: interval.start, defaultPrice: defaultPrice, calendar: calendar) }
+        var sum = 0.0
+        for i in 0..<minutes {
+            let t = interval.start.addingTimeInterval(Double(i) * 60)
+            sum += price(at: t, defaultPrice: defaultPrice, calendar: calendar)
+        }
+        return sum / Double(minutes)
+    }
+}
+
 // MARK: - Charge pricing
 
-/// Resolves what a charge costs, honoring an optional per-location price override.
-/// TeslaMate's recorded cost always wins; otherwise the energy is valued at the location's
-/// custom price (when set) or the global default.
+/// Resolves what a charge costs. Resolution order:
+///   1. TeslaMate's recorded cost (when it carries a real value),
+///   2. the location's custom price override,
+///   3. the time-of-use tariff (time-weighted across the session), when enabled,
+///   4. the global default price.
 struct ChargePricing: Sendable {
     var defaultPricePerKwh: Double
     var perLocation: [String: Double]
+    var tariff: TimeOfUseTariff?
 
-    init(defaultPricePerKwh: Double, perLocation: [String: Double] = [:]) {
+    init(defaultPricePerKwh: Double, perLocation: [String: Double] = [:], tariff: TimeOfUseTariff? = nil) {
         self.defaultPricePerKwh = defaultPricePerKwh
         self.perLocation = perLocation
+        self.tariff = tariff
+    }
+
+    /// Everything pricing needs, straight from the app configuration.
+    init(config: ServerConfig) {
+        self.init(defaultPricePerKwh: config.chargePricePerKwh,
+                  perLocation: config.chargePricePerKwhByLocation,
+                  tariff: config.tariffEnabled && !config.tariffPeriods.isEmpty
+                      ? TimeOfUseTariff(periods: config.tariffPeriods) : nil)
     }
 
     /// Price applied to a location's *unpriced* sessions — its custom override or the default.
@@ -167,7 +224,15 @@ struct ChargePricing: Sendable {
     /// so a `0`/nil falls through to the price-based estimate.
     func cost(for charge: ChargeRecord) -> Double {
         if let recorded = charge.cost, recorded > 0.01 { return recorded }
-        return charge.energyAddedKwh * price(for: charge.locationName)
+        if let override = perLocation[charge.locationName] {
+            return charge.energyAddedKwh * override
+        }
+        if let tariff {
+            let end = charge.endDate ?? charge.startDate.addingTimeInterval(Double(max(charge.durationMin, 1)) * 60)
+            let interval = DateInterval(start: charge.startDate, end: max(end, charge.startDate.addingTimeInterval(60)))
+            return charge.energyAddedKwh * tariff.averagePrice(for: interval, defaultPrice: defaultPricePerKwh)
+        }
+        return charge.energyAddedKwh * defaultPricePerKwh
     }
 }
 

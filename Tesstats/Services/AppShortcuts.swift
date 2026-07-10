@@ -51,8 +51,7 @@ enum IntentData {
         }
         let month = charges.filter { $0.startDate >= monthStart }
         guard !month.isEmpty else { return L("No charging sessions recorded this month.") }
-        let pricing = ChargePricing(defaultPricePerKwh: settings.config.chargePricePerKwh,
-                                    perLocation: settings.config.chargePricePerKwhByLocation)
+        let pricing = ChargePricing(config: settings.config)
         let energy = month.reduce(0) { $0 + $1.energyAddedKwh }
         let cost = month.reduce(0) { $0 + pricing.cost(for: $1) }
         let u = units()
