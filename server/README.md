@@ -1,17 +1,51 @@
 # Tesstats Push Microservice (optional)
 
-Bridges TeslaMate **MQTT → Apple Push Notifications (APNs)** so Tesstats gets
-**immediate alerts even when the app is closed** — most importantly a *possible
-Sentry event* (inferred from `center_display_state == 7`), plus optional
-"unlocked while parked" and "something open" alerts.
+Bridges TeslaMate **MQTT → instant notifications** so you get alerts **even when
+the Tesstats app is closed** — most importantly a *possible Sentry event*
+(inferred from `center_display_state == 7`), plus optional "unlocked while
+parked" and "something open" alerts.
 
 > **Why this is optional.** iOS cannot reliably poll in the background, so the app
 > alone can only raise local notifications while it is running. For guaranteed,
 > instant alerts with the app closed you need a tiny always-on server that listens
-> to MQTT and pushes to APNs. That's this service. If you don't run it, the app
+> to MQTT and pushes them out. That's this service. If you don't run it, the app
 > still works — it just uses local notifications with that limitation.
 
-## What you need
+It can deliver through **three channels** (any combination):
+
+| Channel | Works with AltStore/sideloaded installs? | Needs Apple Developer account? |
+|---|---|---|
+| **ntfy** (recommended) | ✅ yes | no |
+| **Webhook** (Home Assistant, Node-RED, …) | ✅ yes (notifies via your automation) | no |
+| **APNs** (native push to the app) | ❌ **no** | yes (paid) |
+
+> ⚠️ **The APNs caveat, honestly:** sideloaded apps (AltStore/SideStore with a free
+> Apple ID) are signed **without the push-notifications entitlement**, so APNs can
+> never reach them — no matter how you configure this service. If you install
+> Tesstats via AltStore, use **ntfy** or a **webhook** instead; they are just as
+> instant and need no Apple account.
+
+## Option A — ntfy (recommended, 2 minutes)
+
+1. Install the **ntfy** app from the App Store and subscribe to a topic with a
+   long, secret name (the topic name acts as the password), e.g.
+   `tesstats-a8f3k2j9x`.
+2. Set `NTFY_URL=https://ntfy.sh` (or your self-hosted ntfy) and
+   `NTFY_TOPIC=tesstats-a8f3k2j9x` on this service.
+3. Done — Sentry alerts arrive as *urgent-priority* ntfy pushes with the app closed.
+
+## Option B — Webhook → Home Assistant automations
+
+Set `WEBHOOK_URL` (e.g. an HA webhook trigger). Each event POSTs:
+
+```json
+{ "title": "Possible Sentry event", "body": "…", "carId": "1", "event": "sentry", "ts": "2026-07-10T18:00:00Z" }
+```
+
+From there, automate anything: phone notification via the HA companion app,
+turn on the lights, sound a siren, send a Telegram message…
+
+## Option C — APNs (only for Xcode/TestFlight installs)
 
 1. An **Apple Developer account** (for the APNs Auth Key) and the app installed via
    Xcode/TestFlight with the **Push Notifications** capability enabled.
@@ -70,7 +104,7 @@ Expose `tesstats-push:8090` through your reverse proxy (e.g. `push.example.com`)
 
 | Event | Trigger | Env toggle |
 |---|---|---|
-| Possible Sentry | `center_display_state` becomes `7` | `NOTIFY_SENTRY` |
+| Possible Sentry | `center_display_state` becomes `7` (one alert per `SENTRY_COOLDOWN_SEC`, default 10 min) | `NOTIFY_SENTRY` |
 | Unlocked while parked | `locked` true→false while not driving | `NOTIFY_UNLOCKED` |
 | Something open | door/frunk/trunk/window opens while parked | `NOTIFY_OPENINGS` |
 

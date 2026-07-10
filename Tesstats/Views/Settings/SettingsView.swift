@@ -796,7 +796,7 @@ struct SettingsView: View {
         } header: {
             Text(L("Immediate push (optional)"))
         } footer: {
-            Text(L("For guaranteed alerts (Sentry/security) with the app closed, run the optional push microservice (see /server). Requires an Apple Push key. Without it, alerts are local-only while the app runs."))
+            Text(L("For guaranteed alerts (Sentry/security) with the app closed, run the optional push microservice (see /server). Native APNs push only works on Xcode/TestFlight builds — sideloaded (AltStore) installs are signed without the push entitlement and can never receive it. For those, point the service at ntfy or a Home Assistant webhook instead: same instant alerts, no Apple account."))
         }
     }
 

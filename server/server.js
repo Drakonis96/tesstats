@@ -1,12 +1,22 @@
 // Tesstats push microservice
 // ----------------------------------------------------------------------------
-// OPTIONAL. Bridges TeslaMate MQTT events to Apple Push Notifications (APNs) so
-// the Tesstats app receives IMMEDIATE alerts (e.g. a possible Sentry event) even
-// when it is closed. The app works fine without this — it just relies on local
+// OPTIONAL. Bridges TeslaMate MQTT events to instant notifications (e.g. a
+// possible Sentry event) even when the Tesstats app is closed, via any of:
+//
+//   • APNs      — native pushes to the app. Requires an Apple Developer key AND
+//                 an app signed with the push entitlement (Xcode/TestFlight).
+//                 Sideloaded (AltStore) builds are signed with a free profile
+//                 that STRIPS the entitlement — APNs can never reach them.
+//   • ntfy      — pushes to the ntfy app (ntfy.sh or self-hosted). Works for
+//                 sideloaded installs, no Apple account needed. Recommended.
+//   • webhook   — POSTs JSON to any URL (Home Assistant, Node-RED, …) so you
+//                 can chain automations: sirens, lights, Telegram, anything.
+//
+// The app itself works fine without this service — it just relies on local
 // notifications while running. See README.md for setup.
 //
 // Zero third-party deps except `mqtt`. APNs auth (ES256 JWT) and the HTTP/2 push
-// use Node's built-in `crypto`, `http2`, `http` and `fs`.
+// use Node's built-in `crypto`, `http2`, `http` and `fs`; ntfy/webhook use fetch.
 
 import mqtt from 'mqtt'
 import http from 'node:http'
@@ -30,10 +40,18 @@ const cfg = {
   apnsTeamId: process.env.APNS_TEAM_ID || '',
   bundleId: process.env.APNS_BUNDLE_ID || 'com.tesstats.app',
   production: (process.env.APNS_PRODUCTION || 'false') === 'true',
+  // ntfy (https://ntfy.sh or self-hosted) — works for sideloaded apps, no Apple account
+  ntfyUrl: process.env.NTFY_URL || '',                        // e.g. https://ntfy.sh
+  ntfyTopic: process.env.NTFY_TOPIC || '',
+  ntfyToken: process.env.NTFY_TOKEN || '',                    // optional Bearer token
+  // Generic webhook (Home Assistant, Node-RED, …): POSTs JSON per event
+  webhookUrl: process.env.WEBHOOK_URL || '',
   // Which events to push
   notifySentry: (process.env.NOTIFY_SENTRY || 'true') === 'true',
   notifyUnlocked: (process.env.NOTIFY_UNLOCKED || 'true') === 'true',
   notifyOpenings: (process.env.NOTIFY_OPENINGS || 'true') === 'true',
+  // One Sentry alert per burst: a single incident re-triggers the banner repeatedly
+  sentryCooldownSec: parseInt(process.env.SENTRY_COOLDOWN_SEC || '600', 10),
 }
 
 // ---- Device token store ----------------------------------------------------
@@ -58,11 +76,59 @@ function apnsAuthToken() {
 const b64url = (s) => Buffer.from(s).toString('base64url')
 const b64urlBuf = (b) => b.toString('base64url')
 
+// Fan an event out to every configured channel. `extra.event` tags the kind
+// ('sentry' | 'unlocked' | 'open') so receivers can filter/automate.
+function notify(title, body, extra = {}) {
+  if (!cfg.apnsKeyPath && !cfg.ntfyUrl && !cfg.webhookUrl) {
+    console.log('[no notification channel configured]', title, body)
+    return
+  }
+  pushAll(title, body, extra)
+  ntfyPush(title, body, extra)
+  webhookPost(title, body, extra)
+}
+
+// ---- ntfy ------------------------------------------------------------------
+async function ntfyPush(title, body, extra = {}) {
+  if (!cfg.ntfyUrl || !cfg.ntfyTopic) return
+  try {
+    const sentry = extra.event === 'sentry'
+    const headers = {
+      Title: title,
+      Priority: sentry ? 'urgent' : 'high',           // urgent = ntfy's max, bypasses DND if allowed
+      Tags: sentry ? 'rotating_light' : 'bell',
+    }
+    if (cfg.ntfyToken) headers.Authorization = `Bearer ${cfg.ntfyToken}`
+    const url = `${cfg.ntfyUrl.replace(/\/+$/, '')}/${cfg.ntfyTopic}`
+    const res = await fetch(url, { method: 'POST', body, headers })
+    if (!res.ok) console.warn('ntfy', res.status, await res.text().catch(() => ''))
+  } catch (e) { console.error('ntfy error', e.message) }
+}
+
+// ---- Generic webhook (Home Assistant etc.) ---------------------------------
+async function webhookPost(title, body, extra = {}) {
+  if (!cfg.webhookUrl) return
+  try {
+    const res = await fetch(cfg.webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, body, ...extra, ts: new Date().toISOString() }),
+    })
+    if (!res.ok) console.warn('webhook', res.status)
+  } catch (e) { console.error('webhook error', e.message) }
+}
+
+// ---- APNs push --------------------------------------------------------------
 function pushAll(title, body, extra = {}) {
-  if (!cfg.apnsKeyPath) { console.log('[push skipped — no APNs key]', title, body); return }
+  if (!cfg.apnsKeyPath) return
   const host = cfg.production ? 'https://api.push.apple.com' : 'https://api.sandbox.push.apple.com'
   const payload = JSON.stringify({
-    aps: { alert: { title, body }, sound: 'default', 'interruption-level': 'time-sensitive' },
+    aps: {
+      alert: { title, body },
+      // The app bundles a distinct alarm for Sentry alerts.
+      sound: extra.event === 'sentry' ? 'sentry-alert.wav' : 'default',
+      'interruption-level': 'time-sensitive',
+    },
     ...extra,
   })
   let jwt
@@ -104,9 +170,14 @@ function handle(carId, metric, value) {
     case 'center_display_state': {
       const v = parseInt(value, 10)
       if (cfg.notifySentry && c.lastCenterDisplay !== 7 && v === 7) {
-        pushAll('Possible Sentry event',
-          `${c.name} showed the Sentry banner. Inferred from the screen — any clip is on the car's USB.`,
-          { carId, event: 'sentry' })
+        const now = Date.now()
+        // One alert per burst — a single incident re-triggers the banner repeatedly.
+        if (!c.lastSentryAt || now - c.lastSentryAt >= cfg.sentryCooldownSec * 1000) {
+          c.lastSentryAt = now
+          notify('Possible Sentry event',
+            `${c.name} showed the Sentry banner. Inferred from the screen — any clip is on the car's USB.`,
+            { carId, event: 'sentry' })
+        }
       }
       c.lastCenterDisplay = v
       break
@@ -114,7 +185,7 @@ function handle(carId, metric, value) {
     case 'locked': {
       const locked = value === 'true'
       if (cfg.notifyUnlocked && c.locked === true && !locked && c.parked) {
-        pushAll('Vehicle unlocked', `${c.name} was unlocked while parked.`, { carId, event: 'unlocked' })
+        notify('Vehicle unlocked', `${c.name} was unlocked while parked.`, { carId, event: 'unlocked' })
       }
       c.locked = locked
       break
@@ -122,7 +193,7 @@ function handle(carId, metric, value) {
     case 'doors_open': case 'frunk_open': case 'trunk_open': case 'windows_open': {
       const open = value === 'true'
       if (cfg.notifyOpenings && open && c.parked) {
-        pushAll('Something is open', `${metric.replace('_', ' ')} on ${c.name} is open.`, { carId, event: 'open' })
+        notify('Something is open', `${metric.replace('_', ' ')} on ${c.name} is open.`, { carId, event: 'open' })
       }
       break
     }

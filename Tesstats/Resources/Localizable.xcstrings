@@ -3425,18 +3425,18 @@
         }
       }
     },
-    "For guaranteed alerts (Sentry/security) with the app closed, run the optional push microservice (see /server). Requires an Apple Push key. Without it, alerts are local-only while the app runs.": {
+    "For guaranteed alerts (Sentry/security) with the app closed, run the optional push microservice (see /server). Native APNs push only works on Xcode/TestFlight builds — sideloaded (AltStore) installs are signed without the push entitlement and can never receive it. For those, point the service at ntfy or a Home Assistant webhook instead: same instant alerts, no Apple account.": {
       "localizations": {
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Para avisos garantizados (Centinela/seguridad) con la app cerrada, ejecuta el microservicio de push opcional (ver /server). Requiere una clave de Apple Push. Sin él, los avisos son locales solo mientras la app está abierta."
-          }
-        },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "For guaranteed alerts (Sentry/security) with the app closed, run the optional push microservice (see /server). Requires an Apple Push key. Without it, alerts are local-only while the app runs."
+            "value": "For guaranteed alerts (Sentry/security) with the app closed, run the optional push microservice (see /server). Native APNs push only works on Xcode/TestFlight builds — sideloaded (AltStore) installs are signed without the push entitlement and can never receive it. For those, point the service at ntfy or a Home Assistant webhook instead: same instant alerts, no Apple account."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para avisos garantizados (Sentry/seguridad) con la app cerrada, ejecuta el microservicio de push opcional (ver /server). El push nativo APNs solo funciona en builds de Xcode/TestFlight: las instalaciones sideloaded (AltStore) se firman sin el entitlement de push y nunca podrán recibirlo. En ese caso, apunta el servicio a ntfy o a un webhook de Home Assistant: mismos avisos instantáneos, sin cuenta de Apple."
           }
         }
       }
