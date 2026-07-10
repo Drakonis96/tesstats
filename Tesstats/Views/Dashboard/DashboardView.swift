@@ -4,8 +4,7 @@ struct DashboardView: View {
     @Environment(AppEnvironment.self) private var env
     @State private var refreshing = false
     @State private var showSettings = false
-    @State private var activeSheet: DashboardSheet?
-    @State private var showMoreMenu = false
+    @State private var showInbox = false
     @State private var tutorialStep = 0
     @State private var showTutorial = false
     @AppStorage("tesstats.dashboard.tutorial.completed") private var tutorialCompleted = false
@@ -23,7 +22,6 @@ struct DashboardView: View {
                 ZStack {
                     Brand.background.ignoresSafeArea()
                     content
-                    if showMoreMenu { moreMenu }
                     if showTutorial { tutorialOverlay }
                 }
             }
@@ -31,8 +29,8 @@ struct DashboardView: View {
             .toolbarTitleDisplayModeInline()
             .toolbar { toolbarContent }
             .settingsSheet(isPresented: $showSettings)
-            .sheet(item: $activeSheet) { sheet in
-                NavigationStack { sheet.destination }
+            .sheet(isPresented: $showInbox) {
+                NotificationInboxView()   // brings its own NavigationStack
             }
         }
         .task(id: carID) { await env.history.loadIfNeeded(carID: carID) }
@@ -98,11 +96,12 @@ struct DashboardView: View {
             SettingsGearButton(isPresented: $showSettings)
             #endif
             Button {
-                withAnimation(.snappy) { showMoreMenu.toggle() }
+                showInbox = true
             } label: {
-                Image(systemName: "ellipsis.circle")
+                Image(systemName: "bell")
             }
             .tint(Brand.crimson)
+            .accessibilityLabel(L("Notifications"))
             RefreshButton(isRefreshing: refreshing) { Task { await refresh() } }
         }
     }
@@ -145,44 +144,6 @@ struct DashboardView: View {
         if let id = env.live.resolvedCarID { await env.history.refresh(carID: id) }
         try? await Task.sleep(for: .seconds(1.0))
         refreshing = false
-    }
-
-    private var moreMenu: some View {
-        ZStack(alignment: .trailing) {
-            Color.black.opacity(0.56)
-                .ignoresSafeArea()
-                .onTapGesture { withAnimation(.snappy) { showMoreMenu = false } }
-            VStack(alignment: .trailing, spacing: 18) {
-                moreButton(L("View all"), "square.grid.2x2") { activeSheet = .more }
-                moreButton(L("Stats"), "chart.line.uptrend.xyaxis") { activeSheet = .stats }
-                moreButton(L("Parking"), "parkingsign") { activeSheet = .parking }
-                moreButton(L("Charging"), "bolt.fill") { activeSheet = .charging }
-                moreButton(L("Trips"), "steeringwheel") { activeSheet = .trips }
-                moreButton(L("Notifications"), "bell.fill") { activeSheet = .inbox }
-            }
-            .padding(.trailing, 28)
-        }
-        .transition(.opacity)
-    }
-
-    private func moreButton(_ title: String, _ icon: String, action: @escaping () -> Void) -> some View {
-        Button {
-            withAnimation(.snappy) { showMoreMenu = false }
-            action()
-        } label: {
-            HStack(spacing: 12) {
-                Text(title)
-                    .font(.title3.weight(.bold))
-                    .foregroundStyle(.white)
-                Image(systemName: icon)
-                    .font(.title2.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 58, height: 58)
-                    .background(.white.opacity(0.12), in: Circle())
-                    .overlay(Circle().strokeBorder(.white.opacity(0.12), lineWidth: 1))
-            }
-        }
-        .buttonStyle(.plain)
     }
 
     private var tutorialOverlay: some View {
@@ -242,22 +203,6 @@ struct DashboardView: View {
             (L("Recent activity"), L("The 48-hour timeline highlights driving and charging without sending commands to the car."), "clock.arrow.circlepath"),
             (L("Read-only insights"), L("Trips, charges, parking and notifications are derived from TeslaMate data."), "eye.fill")
         ]
-    }
-}
-
-private enum DashboardSheet: Identifiable {
-    case trips, charging, parking, stats, more, inbox
-    var id: String { String(describing: self) }
-
-    @ViewBuilder var destination: some View {
-        switch self {
-        case .trips: TripsView()
-        case .charging: ChargesView()
-        case .parking: ParkingView()
-        case .stats: StatsView()
-        case .more: MoreHubView()
-        case .inbox: NotificationInboxView()
-        }
     }
 }
 
