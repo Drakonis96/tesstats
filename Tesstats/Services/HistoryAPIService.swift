@@ -125,32 +125,57 @@ final class HistoryAPIService: Sendable {
 
     private let pageLimit = 100   // TeslaMateApi returns up to 100 rows per page
 
-    func fetchDrives(carID: Int) async throws -> [DriveRecord] {
+    /// Download drives, stopping pagination as soon as a page overlaps `cached` (incremental
+    /// sync — past drives never change). With an empty cache this is a plain full fetch.
+    /// Early-stop only engages when the server paginates newest-first; otherwise all pages
+    /// are fetched as before. The result is fetched-over-cached, newest first.
+    func fetchDrives(carID: Int, mergingWith cached: [DriveRecord] = []) async throws -> [DriveRecord] {
+        let newestCachedID = cached.map(\.id).max()
         var all: [DriveDTO] = []
         var page = 1
+        var canStopEarly = newestCachedID != nil
         while page <= 50 {
             let env = try await fetch(DrivesEnvelope.self, path: "/v1/cars/\(carID)/drives?page=\(page)")
             let batch = env.data?.drives ?? []
             all.append(contentsOf: batch)
+            if page == 1 {
+                let dates = batch.compactMap { $0.startDate.flatMap(VehicleState.parseDate) }
+                canStopEarly = canStopEarly && HistorySync.isNewestFirst(dates: dates)
+            }
             if batch.count < pageLimit { break }
+            if canStopEarly,
+               HistorySync.reachedCachedHistory(batchIDs: batch.compactMap(\.driveId), newestCachedID: newestCachedID) {
+                break
+            }
             page += 1
         }
-        return all.enumerated().compactMap { $0.element.toDomain(index: $0.offset) }
-            .sorted { $0.startDate > $1.startDate }
+        let fetched = all.enumerated().compactMap { $0.element.toDomain(index: $0.offset) }
+        return HistorySync.merge(fetched: fetched, cached: cached) { $0.startDate }
     }
 
-    func fetchCharges(carID: Int) async throws -> [ChargeRecord] {
+    /// Charges counterpart of `fetchDrives(carID:mergingWith:)` — same early-stop rules.
+    func fetchCharges(carID: Int, mergingWith cached: [ChargeRecord] = []) async throws -> [ChargeRecord] {
+        let newestCachedID = cached.map(\.id).max()
         var all: [ChargeDTO] = []
         var page = 1
+        var canStopEarly = newestCachedID != nil
         while page <= 50 {
             let env = try await fetch(ChargesEnvelope.self, path: "/v1/cars/\(carID)/charges?page=\(page)")
             let batch = env.data?.charges ?? []
             all.append(contentsOf: batch)
+            if page == 1 {
+                let dates = batch.compactMap { $0.startDate.flatMap(VehicleState.parseDate) }
+                canStopEarly = canStopEarly && HistorySync.isNewestFirst(dates: dates)
+            }
             if batch.count < pageLimit { break }
+            if canStopEarly,
+               HistorySync.reachedCachedHistory(batchIDs: batch.compactMap(\.chargeId), newestCachedID: newestCachedID) {
+                break
+            }
             page += 1
         }
-        return all.enumerated().compactMap { $0.element.toDomain(index: $0.offset) }
-            .sorted { $0.startDate > $1.startDate }
+        let fetched = all.enumerated().compactMap { $0.element.toDomain(index: $0.offset) }
+        return HistorySync.merge(fetched: fetched, cached: cached) { $0.startDate }
     }
 
     /// Real per-point GPS trace for a single drive, used to draw the route from the actual

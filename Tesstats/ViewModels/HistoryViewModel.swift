@@ -35,7 +35,7 @@ final class HistoryViewModel {
         // tabs after a failed load would keep showing the error until a manual retry.
         let shouldRetry: Bool = if case .failed = phase { true } else { false }
         guard loadedCarID != carID || phase == .idle || shouldRetry else { return }
-        await load(carID: carID)
+        await load(carID: carID, incremental: true)
     }
 
     /// Drop all in-memory history so the next view re-fetches (used after clearing data/cache).
@@ -51,9 +51,13 @@ final class HistoryViewModel {
         phase = .idle
     }
 
-    func refresh(carID: Int) async { await load(carID: carID) }
+    /// Explicit user refresh (pull-to-refresh / toolbar): full re-download, so late edits to
+    /// old records in TeslaMate (e.g. a corrected charge cost) are picked up.
+    func refresh(carID: Int) async { await load(carID: carID, incremental: false) }
 
-    private func load(carID: Int) async {
+    /// `incremental` reuses the cached history and only downloads pages until they overlap
+    /// it — automatic loads stay fast on multi-year histories.
+    private func load(carID: Int, incremental: Bool = false) async {
         loadedCarID = carID
         usingCache = false
 
@@ -83,8 +87,10 @@ final class HistoryViewModel {
 
         phase = .loading
         do {
-            async let d = api.fetchDrives(carID: carID)
-            async let c = api.fetchCharges(carID: carID)
+            let cachedDrives = incremental ? cache.loadDrives(carID: carID) : []
+            let cachedCharges = incremental ? cache.loadCharges(carID: carID) : []
+            async let d = api.fetchDrives(carID: carID, mergingWith: cachedDrives)
+            async let c = api.fetchCharges(carID: carID, mergingWith: cachedCharges)
             let (dd, cc) = try await (d, c)
             let fetchedInfo = (try? await api.fetchCarInfo(carID: carID)) ?? nil
             if let fetchedInfo { carInfo = fetchedInfo }
