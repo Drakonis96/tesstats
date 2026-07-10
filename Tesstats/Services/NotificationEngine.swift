@@ -14,6 +14,11 @@ struct NotificationPreferences: Codable, Sendable, Equatable {
     var softwareUpdate = true
     var geofence = true
     var sentryInferred = true
+    /// Notify when Sentry Mode is armed or disarmed (the `sentry_mode` topic). Off by
+    /// default — arming at every parking spot can be noisy.
+    var sentryArmedAlerts = false
+    /// Security alerts matter most at night: let the Sentry event break through quiet hours.
+    var sentryBypassQuietHours = true
 
     // Tire pressure (TPMS) — threshold stored canonically in bar; the UI lets the user
     // enter it in bar or psi. Default ~2.4 bar (≈ 35 psi), a common low-pressure warning point.
@@ -34,6 +39,38 @@ struct NotificationPreferences: Codable, Sendable, Equatable {
     }
 }
 
+extension NotificationPreferences {
+    /// Lenient decoding: every missing key falls back to its default, so adding a new
+    /// preference never resets a user's saved choices (synthesized Codable would throw).
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init()
+        func read<T: Decodable>(_ key: CodingKeys, _ into: inout T) {
+            if let v = ((try? c.decodeIfPresent(T.self, forKey: key)) ?? nil) { into = v }
+        }
+        read(.enabled, &enabled)
+        read(.chargeComplete, &chargeComplete)
+        read(.chargeStarted, &chargeStarted)
+        read(.chargeTargetReached, &chargeTargetReached)
+        read(.leftUnplugged, &leftUnplugged)
+        read(.pluggedNotCharging, &pluggedNotCharging)
+        read(.openingsOrUnlocked, &openingsOrUnlocked)
+        read(.lowBattery, &lowBattery)
+        read(.lowBatteryThreshold, &lowBatteryThreshold)
+        read(.softwareUpdate, &softwareUpdate)
+        read(.geofence, &geofence)
+        read(.sentryInferred, &sentryInferred)
+        read(.sentryArmedAlerts, &sentryArmedAlerts)
+        read(.sentryBypassQuietHours, &sentryBypassQuietHours)
+        read(.tpmsLow, &tpmsLow)
+        read(.tpmsThresholdBar, &tpmsThresholdBar)
+        read(.tpmsUnitIsPsi, &tpmsUnitIsPsi)
+        read(.quietHoursEnabled, &quietHoursEnabled)
+        read(.quietStartMinutes, &quietStartMinutes)
+        read(.quietEndMinutes, &quietEndMinutes)
+    }
+}
+
 /// On-device notification engine. Generates **local** notifications from live MQTT
 /// transitions whenever the app has execution (foreground, or a background window the OS
 /// grants). iOS cannot poll 24/7 reliably in the background — for guaranteed alerts with
@@ -48,6 +85,11 @@ final class NotificationEngine {
     private let defaultsKey = "tesstats.notification.prefs"
     private let defaults: UserDefaults
     private let inbox: EventInboxStore?
+
+    /// A real Sentry alert triggers the banner repeatedly (each passer-by). One alert per
+    /// window is plenty; the inbox keeps only the first of each burst too.
+    static let sentryCooldown: TimeInterval = 10 * 60
+    private var lastSentryEventAt: Date?
 
     init(defaults: UserDefaults = .standard, inbox: EventInboxStore? = nil) {
         self.defaults = defaults
@@ -77,7 +119,8 @@ final class NotificationEngine {
     }
 
     /// Diff two consecutive snapshots and emit notifications for noteworthy transitions.
-    func process(previous: VehicleState?, current: VehicleState, carName: String) {
+    /// `now` is injectable for tests (cooldown windows).
+    func process(previous: VehicleState?, current: VehicleState, carName: String, now: Date = Date()) {
         guard prefs.enabled, let previous else { return }
 
         // Charge complete
@@ -190,14 +233,40 @@ final class NotificationEngine {
             }
         }
 
+        // Sentry armed / disarmed (the sentry_mode topic — a reliable signal).
+        if prefs.sentryArmedAlerts, let was = previous.sentryMode, let isNow = current.sentryMode, was != isNow {
+            if isNow {
+                post(id: "sentry-armed",
+                     title: L("Sentry armed"),
+                     body: L("\(carName) armed Sentry Mode."))
+            } else {
+                post(id: "sentry-disarmed",
+                     title: L("Sentry disarmed"),
+                     body: L("\(carName) disarmed Sentry Mode."))
+            }
+        }
+
         // Inferred Sentry event (center_display_state == 7). Honest: inference, no video.
+        // Cooldown suppresses the repeat-banner burst a single incident produces, and the
+        // alert may break through quiet hours (a 3 AM security alert is the point of it).
         if prefs.sentryInferred, !previous.sentryBannerActive, current.sentryBannerActive {
-            let place = current.geofence ?? current.activeRouteDestination ?? L("its location")
-            post(id: "sentry",
-                 title: L("Possible Sentry event"),
-                 body: L("\(carName) showed the Sentry banner near \(place). Inferred from the screen — any clip is on the car's USB, not available via TeslaMate."))
+            let withinCooldown = lastSentryEventAt.map { now.timeIntervalSince($0) < Self.sentryCooldown } ?? false
+            if !withinCooldown {
+                lastSentryEventAt = now
+                let place = current.geofence ?? current.activeRouteDestination ?? L("its location")
+                post(id: "sentry",
+                     title: L("Possible Sentry event"),
+                     body: L("\(carName) showed the Sentry banner near \(place). Inferred from the screen — any clip is on the car's USB, not available via TeslaMate."),
+                     sound: Self.sentrySound,
+                     timeSensitive: true,
+                     bypassQuietHours: prefs.sentryBypassQuietHours)
+            }
         }
     }
+
+    /// Distinct two-tone alarm bundled with the app, so a Sentry alert is recognizable
+    /// without looking at the phone.
+    static let sentrySound = UNNotificationSound(named: UNNotificationSoundName("sentry-alert.wav"))
 
     /// True if `date` falls inside the user's quiet-hours window (handles overnight wrap).
     func isQuietTime(_ date: Date = Date()) -> Bool {
@@ -210,13 +279,21 @@ final class NotificationEngine {
                            : (mins >= start || mins < end)   // window crosses midnight
     }
 
-    private func post(id: String, title: String, body: String) {
+    private func post(id: String, title: String, body: String,
+                      sound: UNNotificationSound = .default,
+                      timeSensitive: Bool = false,
+                      bypassQuietHours: Bool = false) {
         inbox?.add(category: .vehicle, title: title, body: body, symbol: symbol(for: id))
-        if isQuietTime() { return }   // respect quiet hours for on-device alerts
+        if isQuietTime() && !bypassQuietHours { return }   // respect quiet hours for on-device alerts
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
-        content.sound = .default
+        content.sound = sound
+        if timeSensitive {
+            // Breaks through Focus/scheduled summaries where the user allowed it. Degrades
+            // to a normal alert when the signing profile lacks the entitlement (sideloads).
+            content.interruptionLevel = .timeSensitive
+        }
         let request = UNNotificationRequest(identifier: "\(id)", content: content, trigger: nil)
         UNUserNotificationCenter.current().add(request)
     }
@@ -229,7 +306,7 @@ final class NotificationEngine {
         case "opening", "unlocked": "lock.open"
         case "update": "arrow.down.circle"
         case "geofence-enter", "geofence-exit": "mappin.and.ellipse"
-        case "sentry": "video.fill"
+        case "sentry", "sentry-armed", "sentry-disarmed": "video.fill"
         default: "bell"
         }
     }

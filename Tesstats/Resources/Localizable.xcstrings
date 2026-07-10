@@ -1,6 +1,38 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%@ armed Sentry Mode.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ armed Sentry Mode."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ armó el modo Sentry."
+          }
+        }
+      }
+    },
+    "%@ disarmed Sentry Mode.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ disarmed Sentry Mode."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ desarmó el modo Sentry."
+          }
+        }
+      }
+    },
     "%@ dropped to %lld%%.": {
       "localizations": {
         "en": {
@@ -5185,6 +5217,22 @@
         }
       }
     },
+    "On-device alerts are silenced during this window (e.g. overnight). A possible Sentry event can still alert you — that 3 AM warning is usually the one you want.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On-device alerts are silenced during this window (e.g. overnight). A possible Sentry event can still alert you — that 3 AM warning is usually the one you want."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los avisos locales se silencian durante esta ventana (p. ej. de noche). Un posible evento Sentry puede seguir avisándote: ese aviso de las 3 AM suele ser justo el que quieres."
+          }
+        }
+      }
+    },
     "On-device local alerts. iOS can't reliably poll 24/7 in the background — for guaranteed alerts with the app closed, run the optional push microservice (see README).": {
       "localizations": {
         "es": {
@@ -6621,6 +6669,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sentry"
+          }
+        }
+      }
+    },
+    "Sentry armed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sentry armed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sentry armado"
+          }
+        }
+      }
+    },
+    "Sentry armed / disarmed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sentry armed / disarmed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sentry armado / desarmado"
+          }
+        }
+      }
+    },
+    "Sentry breaks through quiet hours": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sentry breaks through quiet hours"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sentry ignora las horas de silencio"
+          }
+        }
+      }
+    },
+    "Sentry disarmed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sentry disarmed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sentry desarmado"
           }
         }
       }

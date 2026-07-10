@@ -537,6 +537,7 @@ struct SettingsView: View {
                 Toggle(L("Software updates"), isOn: notifications.prefs.softwareUpdate).tint(Brand.crimson)
                 Toggle(L("Geofence enter / exit"), isOn: notifications.prefs.geofence).tint(Brand.crimson)
                 Toggle(L("Possible Sentry (inferred)"), isOn: notifications.prefs.sentryInferred).tint(Brand.crimson)
+                Toggle(L("Sentry armed / disarmed"), isOn: notifications.prefs.sentryArmedAlerts).tint(Brand.crimson)
                 Stepper(value: notifications.prefs.lowBatteryThreshold, in: 5...60, step: 5) {
                     Toggle(L("Low battery below \(notifications.prefs.lowBatteryThreshold.wrappedValue)%"),
                            isOn: notifications.prefs.lowBattery).tint(Brand.crimson)
@@ -589,11 +590,13 @@ struct SettingsView: View {
                     get: { Self.date(fromMinutes: notifications.prefs.quietEndMinutes.wrappedValue) },
                     set: { notifications.prefs.quietEndMinutes.wrappedValue = Self.minutes(from: $0) }),
                     displayedComponents: .hourAndMinute)
+                Toggle(L("Sentry breaks through quiet hours"), isOn: notifications.prefs.sentryBypassQuietHours)
+                    .tint(Brand.crimson)
             }
         } header: {
             Text(L("Do not disturb"))
         } footer: {
-            Text(L("On-device alerts are silenced during this window (e.g. overnight)."))
+            Text(L("On-device alerts are silenced during this window (e.g. overnight). A possible Sentry event can still alert you — that 3 AM warning is usually the one you want."))
         }
     }
 
