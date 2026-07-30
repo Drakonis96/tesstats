@@ -188,6 +188,110 @@ struct TimeOfUseTariff: Codable, Equatable, Sendable {
     }
 }
 
+// MARK: - Tariff plans
+
+/// What a band is for, so a plan reads at a glance and the day bar can colour it.
+enum TariffBandKind: String, Codable, CaseIterable, Identifiable, Sendable {
+    case valley, flat, peak
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .valley: L("Off-peak")
+        case .flat: L("Standard")
+        case .peak: L("Peak")
+        }
+    }
+}
+
+/// One band of a plan. Only `startMinute` is user-editable: `endMinute` is derived by
+/// `TariffPlan.normalized()` so the bands always tile a full 24 h with no gap or overlap.
+struct TariffBand: Codable, Equatable, Sendable, Identifiable, Hashable {
+    var id = UUID()
+    var kind: TariffBandKind = .flat
+    var startMinute: Int = 0
+    var endMinute: Int = 0            // derived; exclusive
+    var buyPricePerKwh: Double = 0.10
+    /// Price paid for energy exported back. `nil` means "same as buy".
+    var sellPricePerKwh: Double?
+
+    var effectiveSellPrice: Double { sellPricePerKwh ?? buyPricePerKwh }
+
+    /// A single band that starts and ends at the same minute covers the whole day, which is
+    /// what a one-band plan means.
+    func contains(minuteOfDay m: Int) -> Bool {
+        if startMinute == endMinute { return true }
+        if startMinute < endMinute { return m >= startMinute && m < endMinute }
+        return m >= startMinute || m < endMinute            // wraps midnight
+    }
+
+    var durationMinutes: Int {
+        if startMinute == endMinute { return 1440 }
+        return startMinute < endMinute ? endMinute - startMinute : 1440 - startMinute + endMinute
+    }
+}
+
+/// A named set of price bands covering the whole day.
+struct TariffPlan: Codable, Equatable, Sendable, Identifiable, Hashable {
+    var id = UUID()
+    var name: String = ""
+    var bands: [TariffBand] = []
+
+    /// Sort by start time, drop duplicate starts, and close every band on the next one's start
+    /// (the last wraps to the first) so the day is always exactly covered.
+    func normalized() -> TariffPlan {
+        var copy = self
+        var seen = Set<Int>()
+        let sorted = bands
+            .map { band -> TariffBand in
+                var b = band
+                b.startMinute = ((b.startMinute % 1440) + 1440) % 1440
+                return b
+            }
+            .sorted { $0.startMinute < $1.startMinute }
+            .filter { seen.insert($0.startMinute).inserted }
+
+        copy.bands = sorted.enumerated().map { index, band in
+            var b = band
+            b.endMinute = sorted.count == 1 ? band.startMinute : sorted[(index + 1) % sorted.count].startMinute
+            return b
+        }
+        return copy
+    }
+
+    /// Midpoint of the longest band — adding a band there splits the biggest slot rather than
+    /// landing on top of an existing boundary.
+    func suggestedStartForNewBand() -> Int {
+        let n = normalized()
+        guard let longest = n.bands.max(by: { $0.durationMinutes < $1.durationMinutes }) else { return 0 }
+        return (longest.startMinute + longest.durationMinutes / 2) % 1440
+    }
+
+    func band(at date: Date, calendar: Calendar = .current) -> TariffBand? {
+        let comps = calendar.dateComponents([.hour, .minute], from: date)
+        let minute = (comps.hour ?? 0) * 60 + (comps.minute ?? 0)
+        return normalized().bands.first { $0.contains(minuteOfDay: minute) }
+    }
+
+    func buyPrice(at date: Date, defaultPrice: Double, calendar: Calendar = .current) -> Double {
+        band(at: date, calendar: calendar)?.buyPricePerKwh ?? defaultPrice
+    }
+
+    /// Time-weighted average buy price across a session, sampled per minute. Assumes energy
+    /// flows roughly uniformly, which is a good approximation for the AC charging that
+    /// time-of-use tariffs apply to.
+    func averageBuyPrice(for interval: DateInterval, defaultPrice: Double, calendar: Calendar = .current) -> Double {
+        let minutes = min(Int(interval.duration / 60), 7 * 24 * 60)   // bounded on degenerate data
+        guard minutes >= 1 else { return buyPrice(at: interval.start, defaultPrice: defaultPrice, calendar: calendar) }
+        let n = normalized()
+        var sum = 0.0
+        for i in 0..<minutes {
+            sum += n.buyPrice(at: interval.start.addingTimeInterval(Double(i) * 60),
+                              defaultPrice: defaultPrice, calendar: calendar)
+        }
+        return sum / Double(minutes)
+    }
+}
+
 // MARK: - Charge pricing
 
 /// Resolves what a charge costs. Resolution order:
@@ -195,22 +299,35 @@ struct TimeOfUseTariff: Codable, Equatable, Sendable {
 ///   2. the location's custom price override,
 ///   3. the time-of-use tariff (time-weighted across the session), when enabled,
 ///   4. the global default price.
-struct ChargePricing: Sendable {
+struct ChargePricing: Sendable, Equatable {
     var defaultPricePerKwh: Double
     var perLocation: [String: Double]
+    /// A plan tiles the whole day, so every minute has a price.
+    var plan: TariffPlan?
+    /// Pre-plan band list. Bands may leave part of the day uncovered, and those minutes cost
+    /// the default price — different semantics from a plan, so the two stay separate.
     var tariff: TimeOfUseTariff?
 
-    init(defaultPricePerKwh: Double, perLocation: [String: Double] = [:], tariff: TimeOfUseTariff? = nil) {
+    init(defaultPricePerKwh: Double,
+         perLocation: [String: Double] = [:],
+         plan: TariffPlan? = nil,
+         tariff: TimeOfUseTariff? = nil) {
         self.defaultPricePerKwh = defaultPricePerKwh
         self.perLocation = perLocation
+        self.plan = plan
         self.tariff = tariff
     }
 
-    /// Everything pricing needs, straight from the app configuration.
+    /// Everything pricing needs, straight from the app configuration. A selected plan wins;
+    /// otherwise a pre-plan band list keeps pricing exactly as it did before plans existed.
     init(config: ServerConfig) {
+        let selected = config.tariffEnabled
+            ? config.tariffPlans.first { $0.id.uuidString == config.activeTariffPlanID && !$0.bands.isEmpty }
+            : nil
         self.init(defaultPricePerKwh: config.chargePricePerKwh,
                   perLocation: config.chargePricePerKwhByLocation,
-                  tariff: config.tariffEnabled && !config.tariffPeriods.isEmpty
+                  plan: selected?.normalized(),
+                  tariff: selected == nil && config.tariffEnabled && !config.tariffPeriods.isEmpty
                       ? TimeOfUseTariff(periods: config.tariffPeriods) : nil)
     }
 
@@ -227,10 +344,13 @@ struct ChargePricing: Sendable {
         if let override = perLocation[charge.locationName] {
             return charge.energyAddedKwh * override
         }
-        if let tariff {
+        if plan != nil || tariff != nil {
             let end = charge.endDate ?? charge.startDate.addingTimeInterval(Double(max(charge.durationMin, 1)) * 60)
             let interval = DateInterval(start: charge.startDate, end: max(end, charge.startDate.addingTimeInterval(60)))
-            return charge.energyAddedKwh * tariff.averagePrice(for: interval, defaultPrice: defaultPricePerKwh)
+            let price = plan?.averageBuyPrice(for: interval, defaultPrice: defaultPricePerKwh)
+                ?? tariff?.averagePrice(for: interval, defaultPrice: defaultPricePerKwh)
+                ?? defaultPricePerKwh
+            return charge.energyAddedKwh * price
         }
         return charge.energyAddedKwh * defaultPricePerKwh
     }
@@ -520,6 +640,10 @@ enum StatsEngine {
     /// idle is vampire drain. Aggregated to a daily rate.
     static func phantomDrain(drives: [DriveRecord], charges: [ChargeRecord]) -> PhantomDrain? {
         let ordered = drives.sorted { $0.startDate < $1.startDate }
+        // Sorted once so the "was it charged during this gap?" test below is a binary search
+        // instead of a full scan per gap — that scan was O(drives × charges) and dominated
+        // the whole Stats screen on multi-year histories.
+        let chargeStarts = charges.map(\.startDate).sorted()
         var pctPerDay: [Double] = []
         var kmPerDay: [Double] = []
         var totalIdle = 0.0
@@ -532,8 +656,7 @@ enum StatsEngine {
             // Require a real, sane parked gap: 2h … 14d.
             guard idle >= 7_200, idle <= 1_209_600 else { continue }
             // Skip if a charge happened during the gap (it would mask the drain).
-            let charged = charges.contains { $0.startDate > aEnd && $0.startDate < b.startDate }
-            if charged { continue }
+            if Self.containsDate(chargeStarts, after: aEnd, before: b.startDate) { continue }
             let idleDays = idle / 86_400
 
             if let ab = a.endBattery, let bb = b.startBattery, ab - bb >= 0, ab - bb <= 30 {
@@ -549,6 +672,17 @@ enum StatsEngine {
         let avgPct = pctPerDay.isEmpty ? 0 : pctPerDay.reduce(0, +) / Double(pctPerDay.count)
         let avgKm = kmPerDay.isEmpty ? 0 : kmPerDay.reduce(0, +) / Double(kmPerDay.count)
         return PhantomDrain(avgPercentPerDay: avgPct, avgRangeLossKmPerDay: avgKm, idleSamples: samples, totalIdleDays: totalIdle)
+    }
+
+    /// Is there any date in the ascending `sorted` strictly between `after` and `before`?
+    /// Binary search for the first element greater than `after`, then one comparison.
+    private static func containsDate(_ sorted: [Date], after: Date, before: Date) -> Bool {
+        var low = 0, high = sorted.count
+        while low < high {
+            let mid = (low + high) / 2
+            if sorted[mid] > after { high = mid } else { low = mid + 1 }
+        }
+        return low < sorted.count && sorted[low] < before
     }
 
     // Charging by location ---------------------------------------------------

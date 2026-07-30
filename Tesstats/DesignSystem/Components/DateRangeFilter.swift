@@ -73,11 +73,8 @@ struct StatsRange: Equatable, Hashable {
     }
 
     var summaryLabel: String {
-        let f = DateFormatter()
-        f.dateStyle = .medium
-        f.timeStyle = .none
         switch preset {
-        case .custom: return "\(f.string(from: customStart)) – \(f.string(from: customEnd))"
+        case .custom: return "\(AppDate.mediumDate(customStart)) – \(AppDate.mediumDate(customEnd))"
         default: return preset.label
         }
     }

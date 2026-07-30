@@ -9,6 +9,8 @@ struct ChargeDetailView: View {
     @Environment(AppEnvironment.self) private var env
     @State private var realCurve: [ChargeCurvePoint] = []
     @State private var selectedSoc: Int?
+    @State private var editingPrice = false
+    @State private var priceText = ""
 
     private var carID: Int { env.live.resolvedCarID ?? 1 }
     private var hasRealCurve: Bool { realCurve.count >= 2 }
@@ -16,6 +18,18 @@ struct ChargeDetailView: View {
     private var realPeakKw: Double? { hasRealCurve ? realCurve.map(\.powerKw).max() : nil }
 
     var body: some View {
+        content
+            .alert(L("Price per kWh"), isPresented: $editingPrice) {
+                TextField("0.20", text: $priceText).keyboardTypeDecimal()
+                Button(L("Save")) { savePrice() }
+                Button(L("Use default price"), role: .destructive) { priceText = ""; savePrice() }
+                Button(L("Cancel"), role: .cancel) { priceText = "" }
+            } message: {
+                Text(L("Set the price for \(charge.locationName). It will be reused for future sessions at this location."))
+            }
+    }
+
+    private var content: some View {
         ZStack {
             Brand.background.ignoresSafeArea()
             ScrollView {
@@ -164,7 +178,7 @@ struct ChargeDetailView: View {
             SectionHeader(L("Session"), systemImage: "bolt.fill")
             TileGrid(columns: 2) {
                 StatTile(title: L("Energy added"), value: units.energy(kwh: charge.energyAddedKwh), tint: Brand.crimson)
-                StatTile(title: L("Cost"), value: units.money(charge.cost))
+                StatTile(title: L("Cost"), value: units.money(pricing.cost(for: charge)))
                 StatTile(title: realPeakKw != nil ? L("Peak power") : L("Avg power"),
                          value: units.power(kw: realPeakKw ?? charge.avgPowerKw),
                          tint: realPeakKw != nil ? Brand.crimson : Brand.textPrimary)
@@ -174,8 +188,59 @@ struct ChargeDetailView: View {
             KeyValueRow(label: L("State of charge"),
                         value: "\(charge.startBattery.map { "\($0)%" } ?? "—") → \(charge.endBattery.map { "\($0)%" } ?? "—")",
                         valueColor: Brand.crimson, systemImage: "battery.75percent")
+            priceControls
         }
         .card()
+    }
+
+    /// Where the displayed cost comes from, and a way to set this location's price. A recorded
+    /// cost always wins, so the override is explained as applying to this place's uncosted
+    /// sessions rather than to the one on screen.
+    @ViewBuilder
+    private var priceControls: some View {
+        Divider().overlay(Brand.hairline)
+        VStack(alignment: .leading, spacing: 8) {
+            if let recorded = charge.cost, recorded > 0.01 {
+                Label(L("Recorded by TeslaMate"), systemImage: "checkmark.seal")
+                    .font(.caption).foregroundStyle(Brand.textTertiary)
+                Text(L("This session uses the cost TeslaMate recorded. Your price applies to sessions here that have none."))
+                    .font(.caption2).foregroundStyle(Brand.textTertiary)
+            } else if let plan = env.settings.config.activeTariff, storedPrice == nil {
+                Label(L("Tariff plan: \(plan.name.isEmpty ? L("Untitled plan") : plan.name)"), systemImage: "clock")
+                    .font(.caption).foregroundStyle(Brand.textTertiary)
+            }
+            HStack(spacing: 10) {
+                Button {
+                    priceText = storedPrice.map { String(format: "%.2f", $0) } ?? ""
+                    editingPrice = true
+                } label: {
+                    Label(storedPrice == nil ? L("Set price per kWh") : L("Edit price per kWh"),
+                          systemImage: "eurosign.circle")
+                        .font(.caption.weight(.semibold))
+                }
+                .tint(Brand.crimson)
+                if let stored = storedPrice {
+                    Text(L("Your price for this location")).font(.caption2).foregroundStyle(Brand.textTertiary)
+                    Text(units.money(stored)).font(.caption.weight(.semibold)).foregroundStyle(Brand.warning)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var pricing: ChargePricing { ChargePricing(config: env.settings.config) }
+    private var storedPrice: Double? { env.settings.config.chargePricePerKwhByLocation[charge.locationName] }
+
+    private func savePrice() {
+        let cleaned = priceText.replacingOccurrences(of: ",", with: ".")
+            .trimmingCharacters(in: .whitespaces)
+        if let value = Double(cleaned), value > 0 {
+            env.settings.config.chargePricePerKwhByLocation[charge.locationName] = value
+        } else {
+            env.settings.config.chargePricePerKwhByLocation.removeValue(forKey: charge.locationName)
+        }
+        env.settings.save()
+        priceText = ""
     }
 
     private func mapCard(_ coord: Coordinate) -> some View {

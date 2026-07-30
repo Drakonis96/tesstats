@@ -8,12 +8,20 @@ struct StatsView: View {
     @State private var exportSheet = false
     @State private var showSettings = false
 
+    /// Derived analytics, rebuilt off the main actor only when `digestKey` changes.
+    @State private var digest = StatsDigest()
+    @State private var digestReady = false
+
     private var units: Units { Units(config: env.settings.config) }
     private var carID: Int { env.live.resolvedCarID ?? 1 }
 
-    private var drives: [DriveRecord] { env.history.drives.filter { range.contains($0.startDate) } }
-    private var charges: [ChargeRecord] { env.history.charges.filter { range.contains($0.startDate) } }
     private var pricing: ChargePricing { ChargePricing(config: env.settings.config) }
+    private var digestKey: StatsDigestKey {
+        StatsDigestKey(revision: env.history.revision,
+                       range: range,
+                       pricing: pricing,
+                       fuelLPer100km: env.settings.config.fuelConsumptionLPer100km)
+    }
 
     var body: some View {
         NavigationStack {
@@ -31,6 +39,7 @@ struct StatsView: View {
                 ToolbarItemGroup(placement: .trailingBar) {
                     Button { exportSheet = true } label: { Image(systemName: "square.and.arrow.up") }
                         .tint(Brand.crimson)
+                    ArrangeSectionButton(section: .stats, blockType: StatsBlock.self)
                     #if os(iOS)
                     SettingsGearButton(isPresented: $showSettings)
                     #endif
@@ -38,11 +47,28 @@ struct StatsView: View {
                 }
             }
             .sheet(isPresented: $exportSheet) {
-                ExportSheet(drives: drives, charges: charges)
+                ExportSheet(drives: digest.drives, charges: digest.charges)
             }
             .settingsSheet(isPresented: $showSettings)
         }
         .task(id: carID) { await env.history.loadIfNeeded(carID: carID) }
+        .task(id: digestKey) { await rebuildDigest() }
+    }
+
+    /// Aggregating a multi-year history takes long enough to drop frames, so it runs off the
+    /// main actor and the result is published in one assignment.
+    private func rebuildDigest() async {
+        let drives = env.history.drives
+        let charges = env.history.charges
+        let key = digestKey
+        let fresh = await Task.detached(priority: .userInitiated) {
+            StatsDigest.make(allDrives: drives, allCharges: charges,
+                             range: key.range, pricing: key.pricing,
+                             fuelLPer100km: key.fuelLPer100km)
+        }.value
+        guard !Task.isCancelled else { return }
+        digest = fresh
+        digestReady = true
     }
 
     @ViewBuilder
@@ -68,23 +94,16 @@ struct StatsView: View {
             VStack(spacing: Metrics.cardSpacing) {
                 RangeFilterBar(range: $range)
                     .padding(.top, 4)
-                if drives.isEmpty && charges.isEmpty {
+                if !digestReady {
+                    LoadingStateView(label: L("Crunching your stats…")).padding(.top, 30)
+                } else if digest.isEmpty {
                     Text(L("No drives or charges in this period."))
                         .font(.subheadline).foregroundStyle(Brand.textSecondary)
                         .frame(maxWidth: .infinity).padding(.top, 30)
                 } else {
-                    if let cmp = StatsEngine.monthOverMonth(drives: env.history.drives, charges: env.history.charges, pricing: pricing) {
-                        ComparisonCard(comparison: cmp, units: units)
+                    ForEach(SectionLayout.visible(StatsBlock.self, layout: env.settings.config.layout(for: .stats))) { block in
+                        blockView(block)
                     }
-                    TrendsCard(monthly: monthly, monthlyAllTime: monthlyAllTime, units: units)
-                    CostCard(cost: cost, units: units)
-                    EcoCard(eco: eco, units: units)
-                    if !tempPoints.isEmpty { TempConsumptionCard(points: tempPoints, bins: tempBins, units: units) }
-                    UsageCard(weekdays: weekdays, hours: hours, units: units)
-                    HeatmapCard(days: heatmap, units: units)
-                    if let drain { PhantomDrainCard(drain: drain, units: units) }
-                    if !chargingLocations.isEmpty { ChargingLocationsCard(locations: chargingLocations, units: units) }
-                    RecordsCard(records: records, units: units)
                 }
                 Color.clear.frame(height: 8)
             }
@@ -94,21 +113,21 @@ struct StatsView: View {
         .refreshable { await refresh() }
     }
 
-    // Derived analytics (recomputed when `range` or history changes).
-    private var monthly: [MonthlyStat] { StatsEngine.monthly(drives: drives, charges: charges, pricing: pricing) }
-    /// Unfiltered months — the year-over-year overlay compares whole years, so it must not
-    /// depend on the range filter.
-    private var monthlyAllTime: [MonthlyStat] { StatsEngine.monthly(drives: env.history.drives, charges: env.history.charges, pricing: pricing) }
-    private var cost: CostSummary { StatsEngine.cost(drives: drives, charges: charges, pricing: pricing) }
-    private var eco: EcoImpact { StatsEngine.eco(drives: drives, fuelLPer100km: env.settings.config.fuelConsumptionLPer100km) }
-    private var tempPoints: [TempConsumptionPoint] { StatsEngine.tempConsumption(drives) }
-    private var tempBins: [TempBin] { StatsEngine.tempBins(tempPoints) }
-    private var weekdays: [WeekdayUsage] { StatsEngine.weekdayUsage(drives) }
-    private var hours: [HourUsage] { StatsEngine.hourUsage(drives) }
-    private var heatmap: [CalendarDay] { StatsEngine.calendarHeatmap(drives) }
-    private var drain: PhantomDrain? { StatsEngine.phantomDrain(drives: drives, charges: charges) }
-    private var chargingLocations: [ChargingLocation] { StatsEngine.chargingLocations(charges, pricing: pricing) }
-    private var records: Superlatives { StatsEngine.superlatives(drives: drives, charges: charges) }
+    @ViewBuilder
+    private func blockView(_ block: StatsBlock) -> some View {
+        switch block {
+        case .comparison: if let cmp = digest.comparison { ComparisonCard(comparison: cmp, units: units) }
+        case .cost: CostCard(cost: digest.cost, units: units)
+        case .trends: TrendsCard(monthly: digest.monthly, monthlyAllTime: digest.monthlyAllTime, units: units)
+        case .charging: if !digest.chargingLocations.isEmpty { ChargingLocationsCard(locations: digest.chargingLocations, units: units) }
+        case .usage: UsageCard(weekdays: digest.weekdays, hours: digest.hours, units: units)
+        case .heatmap: HeatmapCard(days: digest.heatmap, units: units)
+        case .records: RecordsCard(records: digest.records, units: units)
+        case .temperature: if !digest.tempPoints.isEmpty { TempConsumptionCard(points: digest.tempPoints, bins: digest.tempBins, units: units) }
+        case .drain: if let drain = digest.drain { PhantomDrainCard(drain: drain, units: units) }
+        case .eco: EcoCard(eco: digest.eco, units: units)
+        }
+    }
 
     private func refresh() async {
         refreshing = true
@@ -230,7 +249,7 @@ private struct TrendsCard: View {
                             .foregroundStyle(.clear)
                             .annotation(position: .top,
                                         overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
-                                Text("\(m.month, format: .dateTime.month(.abbreviated).year()) · \(scrubbedValueLabel(m))")
+                                Text("\(m.month, format: .dateTime.month(.abbreviated).year().appLanguage) · \(scrubbedValueLabel(m))")
                                     .font(.caption2.weight(.bold))
                                     .foregroundStyle(Brand.textPrimary)
                                     .padding(.horizontal, 6).padding(.vertical, 3)
@@ -240,7 +259,7 @@ private struct TrendsCard: View {
                 }
                 .chartXSelection(value: $scrubDate)
                 .chartYAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel() } }
-                .chartXAxis { AxisMarks(values: .stride(by: .month)) { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel(format: .dateTime.month(.narrow)) } }
+                .chartXAxis { AxisMarks(values: .stride(by: .month)) { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel(format: .dateTime.month(.narrow).appLanguage) } }
                 .frame(height: 200)
                 HStack {
                     Text(unitCaption).font(.caption2).foregroundStyle(Brand.textTertiary)
@@ -284,7 +303,7 @@ private struct TrendsCard: View {
                 AxisGridLine().foregroundStyle(Brand.hairline)
                 AxisValueLabel {
                     if let m = v.as(Int.self) {
-                        Text(Calendar.current.veryShortMonthSymbols[m - 1])
+                        Text(LanguageManager.calendar.veryShortMonthSymbols[m - 1])
                     }
                 }
             }
@@ -453,7 +472,7 @@ private struct UsageCard: View {
     let hours: [HourUsage]
     let units: Units
 
-    private var weekdaySymbols: [String] { Calendar.current.shortWeekdaySymbols }
+    private var weekdaySymbols: [String] { LanguageManager.calendar.shortWeekdaySymbols }
     /// Day labels in the same order as `weekdays` (which starts on the locale's first weekday),
     /// used to fix the chart's category order so it starts on Monday rather than alphabetically.
     private var weekdayOrder: [String] { weekdays.map { weekdaySymbols[($0.weekday - 1) % 7] } }
@@ -568,7 +587,7 @@ private struct HeatmapCard: View {
             Color.clear.frame(height: 12)
             ForEach(Array(weeks.enumerated()), id: \.offset) { idx, week in
                 if let first = week.first?.day, showsLabel(at: idx, calendar: cal) {
-                    Text(first, format: .dateTime.month(.abbreviated))
+                    Text(first, format: .dateTime.month(.abbreviated).appLanguage)
                         .font(.caption2.weight(.medium))
                         .foregroundStyle(Brand.textTertiary)
                         .fixedSize()
@@ -594,7 +613,7 @@ private struct HeatmapCard: View {
     private func selectionDetail(_ day: CalendarDay) -> some View {
         HStack(spacing: 8) {
             Image(systemName: "calendar").font(.caption).foregroundStyle(Brand.crimson)
-            Text(day.day, format: .dateTime.weekday(.abbreviated).day().month().year())
+            Text(day.day, format: .dateTime.weekday(.abbreviated).day().month().year().appLanguage)
                 .font(.caption.weight(.semibold)).foregroundStyle(Brand.textPrimary)
             Spacer()
             Text(day.driveCount == 0

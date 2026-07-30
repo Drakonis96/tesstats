@@ -11,9 +11,10 @@ struct DashboardView: View {
 
     private var units: Units { Units(config: env.settings.config) }
     private var carID: Int { env.live.resolvedCarID ?? 1 }
-    private var insights: DashboardInsights {
-        DashboardInsightEngine.insights(drives: env.history.drives, charges: env.history.charges)
-    }
+
+    /// Rebuilt only when the history changes. Read three times per body pass, and the live
+    /// MQTT feed re-evaluates that body several times a second.
+    @State private var insights = DashboardInsights(lastDrive: nil, efficiency30dWhPerKm: nil, activity48h: [])
 
     var body: some View {
         NavigationStack {
@@ -34,6 +35,10 @@ struct DashboardView: View {
             }
         }
         .task(id: carID) { await env.history.loadIfNeeded(carID: carID) }
+        .task(id: env.history.revision) {
+            insights = DashboardInsightEngine.insights(drives: env.history.drives,
+                                                       charges: env.history.charges)
+        }
     }
 
     @ViewBuilder
@@ -46,7 +51,7 @@ struct DashboardView: View {
                     dashboardQuickStats(state)
                     if let last = insights.lastDrive { LastDriveDashboardCard(drive: last, units: units) }
                     ActivityTimelineView(segments: insights.activity48h)
-                    ForEach(DashboardCard.resolved(env.settings.config.dashboardCardOrder)) { card in
+                    ForEach(SectionLayout.visible(DashboardCard.self, layout: env.settings.config.layout(for: .summary))) { card in
                         cardView(card, state: state)
                     }
                     Color.clear.frame(height: 8)
@@ -92,6 +97,7 @@ struct DashboardView: View {
         ToolbarItem(placement: .principal) { ToolbarLogo() }
         #endif
         ToolbarItemGroup(placement: .trailingBar) {
+            ArrangeSectionButton(section: .summary, blockType: DashboardCard.self)
             #if os(iOS)
             SettingsGearButton(isPresented: $showSettings)
             #endif
@@ -108,9 +114,9 @@ struct DashboardView: View {
 
     private func dashboardQuickStats(_ state: VehicleState) -> some View {
         HStack(spacing: 12) {
-            StatTile(title: L("Efficiency 30d"),
-                     value: insights.efficiency30dWhPerKm.map { "\(Int($0)) Wh/km" } ?? "—",
-                     systemImage: "leaf.fill", tint: Brand.driving)
+            UnitStatTile(title: L("Efficiency 30d"),
+                         value: units.consumption(whPerKm: insights.efficiency30dWhPerKm),
+                         systemImage: "leaf.fill", tint: Brand.driving) { UnitToggle.consumption(env) }
             StatTile(title: L("Range"),
                      value: units.range(km: state.range(for: units.range)),
                      systemImage: "road.lanes")
@@ -232,9 +238,9 @@ private struct LastDriveDashboardCard: View {
     }
 }
 
-enum DashboardCard: String, CaseIterable, Identifiable, Codable {
-    case battery, charging, driving, sentry, climate, security, tpms, location, route, vehicle, software
-    var id: String { rawValue }
+enum DashboardCard: String, Codable, SectionBlock {
+    // Default order: what the car is doing now, then where it is, then reference info.
+    case battery, charging, driving, route, location, climate, security, sentry, tpms, vehicle, software
 
     var title: String {
         switch self {
@@ -267,12 +273,25 @@ enum DashboardCard: String, CaseIterable, Identifiable, Codable {
         }
     }
 
+    var blurb: String {
+        switch self {
+        case .battery: L("Charge, usable capacity and range right now.")
+        case .charging: L("Live power, time to full and limit while charging.")
+        case .driving: L("Speed, power and consumption while driving.")
+        case .route: L("Destination, ETA and arrival charge.")
+        case .location: L("Where the car is parked, on a map.")
+        case .climate: L("Inside and outside temperature.")
+        case .security: L("Locks, windows, doors and trunks.")
+        case .sentry: L("Sentry banner detected on the car's screen.")
+        case .tpms: L("Pressure for each tyre.")
+        case .vehicle: L("Model, VIN, colour and wheels.")
+        case .software: L("Installed firmware and pending updates.")
+        }
+    }
+
     /// Resolve a saved order into a complete, valid card list (appends any new cards).
     static func resolved(_ raw: [String]) -> [DashboardCard] {
-        let saved = raw.compactMap { DashboardCard(rawValue: $0) }
-        guard !saved.isEmpty else { return allCases }
-        let missing = allCases.filter { !saved.contains($0) }
-        return saved + missing
+        SectionLayout.resolved(DashboardCard.self, layout: SectionLayoutState(order: raw))
     }
 }
 

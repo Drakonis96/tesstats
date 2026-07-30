@@ -79,6 +79,90 @@ final class StatsEngineTests: XCTestCase {
         XCTAssertTrue(StatsEngine.socTimeline(drives: [], charges: [charge], days: 7, now: now).isEmpty)
     }
 
+    // MARK: Phantom drain
+
+    /// A drive that leaves the car at `endB` %, so the next drive starting lower means the car
+    /// lost charge while parked (which is what phantom drain measures).
+    private func drainDrive(id: Int, start: Date, startB: Int, endB: Int) -> DriveRecord {
+        var d = makeDrive(id: id, start: start, distance: 10)
+        d.startBattery = startB
+        d.endBattery = endB
+        d.startRangeKm = Double(startB) * 4
+        d.endRangeKm = Double(endB) * 4
+        return d
+    }
+
+    /// The "was the car charged during this parked gap?" test is a binary search over sorted
+    /// charge dates. These pin the boundary behaviour it has to reproduce.
+    func testPhantomDrainIgnoresGapsContainingACharge() {
+        let base = Date(timeIntervalSince1970: 1_800_000_000)
+        let day = 86_400.0
+        // Two parked gaps of about a day, losing 10 points of charge in each.
+        let drives = [
+            drainDrive(id: 1, start: base, startB: 90, endB: 80),
+            drainDrive(id: 2, start: base + day, startB: 70, endB: 60),
+            drainDrive(id: 3, start: base + 2 * day, startB: 50, endB: 40)
+        ]
+
+        XCTAssertEqual(StatsEngine.phantomDrain(drives: drives, charges: [])?.idleSamples, 2)
+
+        // A charge inside the first gap removes that sample only.
+        let inFirstGap = makeCharge(id: 1, start: base + day / 2, energy: 10)
+        XCTAssertEqual(StatsEngine.phantomDrain(drives: drives, charges: [inFirstGap])?.idleSamples, 1)
+
+        // Charges outside every gap (before the first drive, after the last) change nothing.
+        let outside = [makeCharge(id: 2, start: base - day, energy: 10),
+                       makeCharge(id: 3, start: base + 5 * day, energy: 10)]
+        XCTAssertEqual(StatsEngine.phantomDrain(drives: drives, charges: outside)?.idleSamples, 2)
+
+        // A charge exactly on a gap boundary is not "inside" it.
+        let onBoundary = makeCharge(id: 4, start: base + day, energy: 10)   // == drive 2 start
+        XCTAssertEqual(StatsEngine.phantomDrain(drives: drives, charges: [onBoundary])?.idleSamples, 2)
+
+        // Unsorted charge input must give the same answer as sorted input.
+        let shuffled = [outside[1], inFirstGap, outside[0]]
+        XCTAssertEqual(StatsEngine.phantomDrain(drives: drives, charges: shuffled)?.idleSamples,
+                       StatsEngine.phantomDrain(drives: drives,
+                                                charges: shuffled.sorted { $0.startDate < $1.startDate })?.idleSamples)
+    }
+
+    func testPhantomDrainMatchesLinearScanOnRandomData() {
+        // Reference implementation: the O(drives × charges) scan the binary search replaced.
+        func referenceSamples(_ drives: [DriveRecord], _ charges: [ChargeRecord]) -> Int {
+            let ordered = drives.sorted { $0.startDate < $1.startDate }
+            var samples = 0
+            for i in 0..<max(0, ordered.count - 1) {
+                let a = ordered[i], b = ordered[i + 1]
+                let aEnd = a.endDate ?? a.startDate
+                let idle = b.startDate.timeIntervalSince(aEnd)
+                guard idle >= 7_200, idle <= 1_209_600 else { continue }
+                if charges.contains(where: { $0.startDate > aEnd && $0.startDate < b.startDate }) { continue }
+                if let ab = a.endBattery, let bb = b.startBattery, ab - bb >= 0, ab - bb <= 30 { samples += 1 }
+            }
+            return samples
+        }
+
+        var seed: UInt64 = 42
+        func next(_ bound: Int) -> Int {                      // deterministic LCG, no Date/random
+            seed = seed &* 6_364_136_223_846_793_005 &+ 1_442_695_040_888_963_407
+            return Int(truncatingIfNeeded: seed >> 33) % bound
+        }
+        let base = Date(timeIntervalSince1970: 1_800_000_000)
+        let drives = (0..<200).map { i -> DriveRecord in
+            let level = 40 + next(50)
+            return drainDrive(id: i,
+                              start: base + Double(i) * 86_400 + Double(next(40_000)),
+                              startB: level, endB: level - next(20))
+        }
+        let charges = (0..<80).map { i in
+            makeCharge(id: i, start: base + Double(next(200)) * 86_400 + Double(next(80_000)), energy: 10)
+        }
+
+        let fast = StatsEngine.phantomDrain(drives: drives, charges: charges)?.idleSamples ?? 0
+        XCTAssertEqual(fast, referenceSamples(drives, charges))
+        XCTAssertGreaterThan(fast, 0, "fixture should produce real samples, otherwise this proves nothing")
+    }
+
     private func makeCharge(id: Int, start: Date, energy: Double) -> ChargeRecord {
         ChargeRecord(
             id: id,

@@ -26,6 +26,8 @@ enum TripTag: String, Codable, CaseIterable, Identifiable, Sendable {
 @Observable
 final class TripTagStore {
     private(set) var tags: [Int: TripTag] = [:]
+    /// Bumped on every tag change so views can cache tag-dependent work.
+    private(set) var revision = 0
 
     private let defaults: UserDefaults
     private let key: String
@@ -57,6 +59,7 @@ final class TripTagStore {
     }
 
     private func persist() {
+        revision += 1
         let raw = Dictionary(uniqueKeysWithValues: tags.map { (String($0.key), $0.value) })
         if let data = try? JSONEncoder().encode(raw) {
             defaults.set(data, forKey: key)

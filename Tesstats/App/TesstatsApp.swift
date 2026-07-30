@@ -28,6 +28,8 @@ struct TesstatsApp: App {
         // even after the window is closed, with battery/charge status always in the menu bar.
         MenuBarExtra {
             MenuBarContent(env: env)
+                .environment(\.locale, LanguageManager.locale)
+                .environment(\.calendar, LanguageManager.calendar)
         } label: {
             MenuBarLabel(env: env)
         }
@@ -92,11 +94,18 @@ struct RootContainerView: View {
             }
         }
         .preferredColorScheme(config.appearance.colorScheme)
+        // Dates, weekday names and chart axis labels are formatted from the environment
+        // locale, not from the string table — without this they keep the device language
+        // and leak through an app the user switched to another language.
+        .environment(\.locale, LanguageManager.locale)
+        .environment(\.calendar, LanguageManager.calendar)
         .tint(Brand.crimson)
         .task {
             env.bootstrap()
-            try? await Task.sleep(for: .seconds(1.1))
-            withAnimation(.easeOut(duration: 0.5)) { showSplash = false }
+            // Just long enough for the logo to register; the app used to hold the splash for
+            // 1.1 s on top of a 0.5 s fade, which read as a slow launch.
+            try? await Task.sleep(for: .seconds(0.35))
+            withAnimation(.easeOut(duration: 0.25)) { showSplash = false }
         }
         .onChange(of: scenePhase) { _, phase in
             // iOS suspends background work, so reconnect on foreground and release on background.

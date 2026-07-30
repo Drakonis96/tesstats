@@ -29,6 +29,7 @@ struct BatteryView: View {
                 ToolbarItem(placement: .principal) { ToolbarLogo() }
                 #endif
                 ToolbarItemGroup(placement: .trailingBar) {
+                    ArrangeSectionButton(section: .battery, blockType: BatteryBlock.self)
                     #if os(iOS)
                     SettingsGearButton(isPresented: $showSettings)
                     #endif
@@ -38,6 +39,20 @@ struct BatteryView: View {
             .settingsSheet(isPresented: $showSettings)
         }
         .task(id: carID) { await env.history.loadIfNeeded(carID: carID) }
+    }
+
+    @ViewBuilder
+    private func blockView(_ block: BatteryBlock) -> some View {
+        switch block {
+        case .current: if let state = env.live.currentState { liveHealthCard(state) }
+        case .timeline: SocTimelineCard(drives: env.history.drives,
+                                        charges: env.history.charges,
+                                        liveSoc: env.live.currentState?.batteryLevel)
+        case .health: officialHealthCard
+        case .degradation: degradationCard
+        case .efficiency: efficiencyCard
+        case .updates: updatesCard
+        }
     }
 
     @ViewBuilder
@@ -57,14 +72,9 @@ struct BatteryView: View {
     private var loaded: some View {
         ScrollView {
             VStack(spacing: Metrics.cardSpacing) {
-                if let state = env.live.currentState { liveHealthCard(state) }
-                SocTimelineCard(drives: env.history.drives,
-                                charges: env.history.charges,
-                                liveSoc: env.live.currentState?.batteryLevel)
-                officialHealthCard
-                degradationCard
-                efficiencyCard
-                updatesCard
+                ForEach(SectionLayout.visible(BatteryBlock.self, layout: env.settings.config.layout(for: .battery))) { block in
+                    blockView(block)
+                }
                 Text(degradationFootnote)
                     .font(.caption2).foregroundStyle(Brand.textTertiary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -89,7 +99,7 @@ struct BatteryView: View {
                     StatTile(title: L("Capacity now"), value: units.energy(kwh: cap, digits: 1), tint: Brand.crimson)
                 }
                 if let eff = env.history.carInfo?.efficiencyKwhPerKm, eff > 0 {
-                    StatTile(title: L("Rated eff."), value: "\(Int(eff * 1000)) Wh/km")
+                    UnitStatTile(title: L("Rated eff."), value: units.consumption(whPerKm: eff * 1000)) { UnitToggle.consumption(env) }
                 }
                 StatTile(title: L("Health"),
                          value: state.healthy == true ? L("OK") : (state.healthy == false ? L("Check") : "—"),
@@ -209,7 +219,7 @@ struct BatteryView: View {
                             .symbolSize(50)
                             .annotation(position: .top,
                                         overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
-                                Text("\(p.date, format: .dateTime.month(.abbreviated).year()) · \(units.range(km: rawRangeKm(for: p)))")
+                                Text("\(p.date, format: .dateTime.month(.abbreviated).year().appLanguage) · \(units.range(km: rawRangeKm(for: p)))")
                                     .font(.caption2.weight(.bold))
                                     .foregroundStyle(Brand.textPrimary)
                                     .padding(.horizontal, 6).padding(.vertical, 3)
@@ -220,7 +230,7 @@ struct BatteryView: View {
                 .chartXSelection(value: $scrubDate)
                 .chartYScale(domain: .automatic(includesZero: false))
                 .chartYAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel() } }
-                .chartXAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel(format: .dateTime.month(.abbreviated)) } }
+                .chartXAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel(format: .dateTime.month(.abbreviated).appLanguage) } }
                 .frame(height: 200)
                 Text(L("Touch and drag to inspect a month."))
                     .font(.caption2).foregroundStyle(Brand.textTertiary)
@@ -367,7 +377,7 @@ private struct SocTimelineCard: View {
                             .symbolSize(50)
                             .annotation(position: .top,
                                         overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
-                                Text("\(p.date, format: .dateTime.day().month(.abbreviated).hour().minute()) · \(p.soc)%")
+                                Text("\(p.date, format: .dateTime.day().month(.abbreviated).hour().minute().appLanguage) · \(p.soc)%")
                                     .font(.caption2.weight(.bold))
                                     .foregroundStyle(Brand.textPrimary)
                                     .padding(.horizontal, 6).padding(.vertical, 3)
@@ -381,7 +391,7 @@ private struct SocTimelineCard: View {
                     AxisGridLine().foregroundStyle(Brand.hairline)
                     AxisValueLabel { if let s = v.as(Int.self) { Text("\(s)%") } }
                 } }
-                .chartXAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel(format: days <= 7 ? .dateTime.weekday(.abbreviated) : .dateTime.day().month(.narrow)) } }
+                .chartXAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel(format: days <= 7 ? .dateTime.weekday(.abbreviated).appLanguage : .dateTime.day().month(.narrow).appLanguage) } }
                 .frame(height: 170)
                 Text(L("Reconstructed from drive and charge boundaries — dots mark charging sessions."))
                     .font(.caption2).foregroundStyle(Brand.textTertiary)

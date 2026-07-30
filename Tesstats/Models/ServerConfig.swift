@@ -45,6 +45,11 @@ struct ServerConfig: Codable, Equatable, Sendable {
     var units: UnitsPreference = .metric
     var temperatureUnit: TempUnit = .celsius
     var rangeKind: RangeKind = .rated
+    /// Consumption shown as Wh/km or kWh/100 km. Toggled by tapping any consumption value,
+    /// so it is a display preference rather than something buried in Settings.
+    var consumptionUnit: ConsumptionUnit = .whPerKm
+    /// Tyre pressure shown in psi instead of bar. Toggled by tapping any pressure value.
+    var pressureIsPsi: Bool = false
     var currencyCode: String = "EUR"
     var fuelPricePerLiter: Double = 1.70
     var fuelConsumptionLPer100km: Double = 7.0
@@ -56,7 +61,12 @@ struct ServerConfig: Codable, Equatable, Sendable {
     /// Time-of-use tariff: price bands by time of day (e.g. cheap night rate). When enabled,
     /// unpriced sessions with no location override are costed by time-weighted band prices.
     var tariffEnabled: Bool = false
+    /// Pre-plan flat band list. Still honoured when no plan exists so an upgrade keeps pricing.
     var tariffPeriods: [TariffPeriod] = []
+    /// Named time-of-use plans (off-peak / standard / peak bands, buy and sell prices).
+    var tariffPlans: [TariffPlan] = []
+    /// `id` of the plan in use. Empty (or unknown) means "no plan".
+    var activeTariffPlanID: String = ""
 
     // MARK: Push (optional microservice for immediate alerts)
     var pushEnabled: Bool = false
@@ -72,7 +82,11 @@ struct ServerConfig: Codable, Equatable, Sendable {
     /// In-app language override: "" (system), "es", or "en".
     var languageCode: String = ""
     /// User-defined order of the Summary (dashboard) cards. Empty = default order.
+    /// Superseded by `sectionLayouts[.summary]`; still decoded so existing installs keep the
+    /// order they arranged before per-section layouts existed.
     var dashboardCardOrder: [String] = []
+    /// Per-screen block order and hidden blocks, keyed by `SectionID.rawValue`.
+    var sectionLayouts: [String: SectionLayoutState] = [:]
 
     // MARK: Appearance
     /// Light or dark theme (dark by default).
@@ -109,6 +123,64 @@ struct ServerConfig: Codable, Equatable, Sendable {
         if allowInsecureTransport { return true } // user explicitly accepted the risk
         let apiSecure = normalizedAPIBaseURL.isEmpty || normalizedAPIBaseURL.lowercased().hasPrefix("https://")
         return apiSecure // MQTT path always uses TLS/wss in this app
+    }
+
+    /// Everything that changes how a value is rendered. Views use it to know when cached,
+    /// pre-formatted strings must be rebuilt.
+    var unitsSignature: String {
+        "\(units.rawValue)|\(temperatureUnit.rawValue)|\(rangeKind.rawValue)|\(currencyCode)|\(languageCode)|\(consumptionUnit.rawValue)|\(pressureIsPsi)"
+    }
+
+    // MARK: Tariff
+
+    /// The plan that prices unrecorded charges: the selected one, or a pre-plan band list
+    /// wrapped on the fly so upgrading never silently drops the user's tariff.
+    var activeTariff: TariffPlan? {
+        guard tariffEnabled else { return nil }
+        if let plan = tariffPlans.first(where: { $0.id.uuidString == activeTariffPlanID }) {
+            return plan.bands.isEmpty ? nil : plan.normalized()
+        }
+        guard !tariffPeriods.isEmpty else { return nil }
+        return Self.plan(fromLegacy: tariffPeriods).normalized()
+    }
+
+    /// Move a pre-plan band list into a real plan, once.
+    mutating func migrateLegacyTariffIfNeeded() {
+        guard !tariffPeriods.isEmpty, tariffPlans.isEmpty else { return }
+        let plan = Self.plan(fromLegacy: tariffPeriods).normalized()
+        tariffPlans = [plan]
+        if activeTariffPlanID.isEmpty { activeTariffPlanID = plan.id.uuidString }
+        tariffPeriods = []
+    }
+
+    private static func plan(fromLegacy periods: [TariffPeriod]) -> TariffPlan {
+        TariffPlan(name: L("My tariff"),
+                   bands: periods
+                       .sorted { $0.startMinute < $1.startMinute }
+                       .map { TariffBand(kind: .flat, startMinute: $0.startMinute,
+                                         endMinute: $0.endMinute, buyPricePerKwh: $0.pricePerKwh) })
+    }
+
+    // MARK: Section layouts
+
+    /// The saved arrangement for a screen. Falls back to the pre-existing dashboard order so
+    /// an upgrade keeps the cards where the user put them.
+    func layout(for section: SectionID) -> SectionLayoutState {
+        if let saved = sectionLayouts[section.rawValue] { return saved }
+        if section == .summary, !dashboardCardOrder.isEmpty {
+            return SectionLayoutState(order: dashboardCardOrder, hidden: [])
+        }
+        return SectionLayoutState()
+    }
+
+    mutating func setLayout(_ layout: SectionLayoutState, for section: SectionID) {
+        if layout.isDefault {
+            sectionLayouts.removeValue(forKey: section.rawValue)
+            if section == .summary { dashboardCardOrder = [] }
+        } else {
+            sectionLayouts[section.rawValue] = layout
+            if section == .summary { dashboardCardOrder = layout.order }
+        }
     }
 
     static let demo: ServerConfig = {
@@ -154,6 +226,8 @@ extension ServerConfig {
         units = c.lenient(.units, units)
         temperatureUnit = c.lenient(.temperatureUnit, temperatureUnit)
         rangeKind = c.lenient(.rangeKind, rangeKind)
+        consumptionUnit = c.lenient(.consumptionUnit, consumptionUnit)
+        pressureIsPsi = c.lenient(.pressureIsPsi, pressureIsPsi)
         currencyCode = c.lenient(.currencyCode, currencyCode)
         fuelPricePerLiter = c.lenient(.fuelPricePerLiter, fuelPricePerLiter)
         fuelConsumptionLPer100km = c.lenient(.fuelConsumptionLPer100km, fuelConsumptionLPer100km)
@@ -161,6 +235,8 @@ extension ServerConfig {
         chargePricePerKwhByLocation = c.lenient(.chargePricePerKwhByLocation, chargePricePerKwhByLocation)
         tariffEnabled = c.lenient(.tariffEnabled, tariffEnabled)
         tariffPeriods = c.lenient(.tariffPeriods, tariffPeriods)
+        tariffPlans = c.lenient(.tariffPlans, tariffPlans)
+        activeTariffPlanID = c.lenient(.activeTariffPlanID, activeTariffPlanID)
         pushEnabled = c.lenient(.pushEnabled, pushEnabled)
         pushServiceURL = c.lenient(.pushServiceURL, pushServiceURL)
         liveActivityEnabled = c.lenient(.liveActivityEnabled, liveActivityEnabled)
@@ -168,6 +244,7 @@ extension ServerConfig {
         demoMode = c.lenient(.demoMode, demoMode)
         languageCode = c.lenient(.languageCode, languageCode)
         dashboardCardOrder = c.lenient(.dashboardCardOrder, dashboardCardOrder)
+        sectionLayouts = c.lenient(.sectionLayouts, sectionLayouts)
         appearance = c.lenient(.appearance, appearance)
         accentColorHex = c.lenient(.accentColorHex, accentColorHex)
     }

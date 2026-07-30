@@ -58,13 +58,15 @@ struct VehicleInfoCard: View {
     let info: CarInfo?
     let state: VehicleState
     let units: Units
+    @Environment(AppEnvironment.self) private var env
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             SectionHeader(L("Vehicle"), systemImage: "car.fill")
             TileGrid(columns: 3) {
                 if let eff = info?.efficiencyKwhPerKm, eff > 0 {
-                    StatTile(title: L("Efficiency"), value: "\(Int(eff * 1000)) Wh/km", tint: Brand.crimson)
+                    UnitStatTile(title: L("Efficiency"), value: units.consumption(whPerKm: eff * 1000),
+                                 tint: Brand.crimson) { UnitToggle.consumption(env) }
                 }
                 if let color = info?.exteriorColor ?? state.exteriorColor {
                     StatTile(title: L("Color"), value: prettyColor(color))
@@ -336,6 +338,7 @@ struct SecurityCard: View {
 struct TPMSCard: View {
     let state: VehicleState
     let units: Units
+    @Environment(AppEnvironment.self) private var env
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -355,18 +358,26 @@ struct TPMSCard: View {
         .card()
     }
 
+    /// Tapping any tyre flips every pressure in the app between bar and psi.
     private func tire(_ label: String, _ bar: Double?, _ warn: Bool) -> some View {
-        VStack(spacing: 6) {
-            Text(label).font(.caption2.weight(.bold)).foregroundStyle(warn ? Brand.warning : Brand.textTertiary)
-            Text(units.pressure(bar: bar))
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(warn ? Brand.warning : Brand.textPrimary)
-                .lineLimit(1).minimumScaleFactor(0.7)
+        Button {
+            withAnimation(.snappy) { UnitToggle.pressure(env) }
+        } label: {
+            VStack(spacing: 6) {
+                Text(label).font(.caption2.weight(.bold)).foregroundStyle(warn ? Brand.warning : Brand.textTertiary)
+                Text(units.pressure(bar: bar))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(warn ? Brand.warning : Brand.textPrimary)
+                    .lineLimit(1).minimumScaleFactor(0.7)
+                    .contentTransition(.numericText())
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(warn ? Brand.warning.opacity(0.12) : Brand.elevatedSurface,
+                        in: RoundedRectangle(cornerRadius: Metrics.tightRadius))
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(warn ? Brand.warning.opacity(0.12) : Brand.elevatedSurface,
-                    in: RoundedRectangle(cornerRadius: Metrics.tightRadius))
+        .buttonStyle(.plain)
+        .accessibilityLabel(L("\(label): \(units.pressure(bar: bar)). Tap to change unit."))
     }
 }
 
@@ -400,18 +411,13 @@ struct LocationCard: View {
 struct MiniMap: View {
     let coordinate: Coordinate
     var body: some View {
-        Map(initialPosition: .region(MKCoordinateRegion(
-            center: coordinate.clLocationCoordinate,
-            span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)))) {
-            Annotation("", coordinate: coordinate.clLocationCoordinate) {
-                ZStack {
-                    Circle().fill(Brand.crimson.opacity(0.25)).frame(width: 34, height: 34)
-                    Circle().fill(Brand.crimson).frame(width: 16, height: 16)
-                        .overlay(Circle().stroke(.white, lineWidth: 2))
-                }
+        FollowingMap(coordinate: coordinate, span: 0.01) {
+            ZStack {
+                Circle().fill(Brand.crimson.opacity(0.25)).frame(width: 34, height: 34)
+                Circle().fill(Brand.crimson).frame(width: 16, height: 16)
+                    .overlay(Circle().stroke(.white, lineWidth: 2))
             }
         }
-        .mapStyle(.standard(pointsOfInterest: .excludingAll))
     }
 }
 

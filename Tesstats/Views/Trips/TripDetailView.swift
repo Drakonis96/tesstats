@@ -88,7 +88,7 @@ struct TripDetailView: View {
 
     @ViewBuilder
     private var routeMap: some View {
-        Map(initialPosition: .region(MKCoordinateRegion(fitting: path))) {
+        FittingMap(coordinates: path) {
             MapPolyline(coordinates: path.map(\.clLocationCoordinate))
                 .stroke(Brand.crimson, style: StrokeStyle(lineWidth: 4, lineCap: .round, lineJoin: .round))
             if let s = path.first {
