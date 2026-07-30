@@ -302,19 +302,33 @@ struct TariffPlan: Codable, Equatable, Sendable, Identifiable, Hashable {
 struct ChargePricing: Sendable, Equatable {
     var defaultPricePerKwh: Double
     var perLocation: [String: Double]
+    /// A plan tiles the whole day, so every minute has a price.
     var plan: TariffPlan?
+    /// Pre-plan band list. Bands may leave part of the day uncovered, and those minutes cost
+    /// the default price — different semantics from a plan, so the two stay separate.
+    var tariff: TimeOfUseTariff?
 
-    init(defaultPricePerKwh: Double, perLocation: [String: Double] = [:], plan: TariffPlan? = nil) {
+    init(defaultPricePerKwh: Double,
+         perLocation: [String: Double] = [:],
+         plan: TariffPlan? = nil,
+         tariff: TimeOfUseTariff? = nil) {
         self.defaultPricePerKwh = defaultPricePerKwh
         self.perLocation = perLocation
         self.plan = plan
+        self.tariff = tariff
     }
 
-    /// Everything pricing needs, straight from the app configuration.
+    /// Everything pricing needs, straight from the app configuration. A selected plan wins;
+    /// otherwise a pre-plan band list keeps pricing exactly as it did before plans existed.
     init(config: ServerConfig) {
+        let selected = config.tariffEnabled
+            ? config.tariffPlans.first { $0.id.uuidString == config.activeTariffPlanID && !$0.bands.isEmpty }
+            : nil
         self.init(defaultPricePerKwh: config.chargePricePerKwh,
                   perLocation: config.chargePricePerKwhByLocation,
-                  plan: config.activeTariff)
+                  plan: selected?.normalized(),
+                  tariff: selected == nil && config.tariffEnabled && !config.tariffPeriods.isEmpty
+                      ? TimeOfUseTariff(periods: config.tariffPeriods) : nil)
     }
 
     /// Price applied to a location's *unpriced* sessions — its custom override or the default.
@@ -330,10 +344,13 @@ struct ChargePricing: Sendable, Equatable {
         if let override = perLocation[charge.locationName] {
             return charge.energyAddedKwh * override
         }
-        if let plan {
+        if plan != nil || tariff != nil {
             let end = charge.endDate ?? charge.startDate.addingTimeInterval(Double(max(charge.durationMin, 1)) * 60)
             let interval = DateInterval(start: charge.startDate, end: max(end, charge.startDate.addingTimeInterval(60)))
-            return charge.energyAddedKwh * plan.averageBuyPrice(for: interval, defaultPrice: defaultPricePerKwh)
+            let price = plan?.averageBuyPrice(for: interval, defaultPrice: defaultPricePerKwh)
+                ?? tariff?.averagePrice(for: interval, defaultPrice: defaultPricePerKwh)
+                ?? defaultPricePerKwh
+            return charge.energyAddedKwh * price
         }
         return charge.energyAddedKwh * defaultPricePerKwh
     }
