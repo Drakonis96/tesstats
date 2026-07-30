@@ -233,52 +233,69 @@ struct DriveRow: View {
     let units: Units
     var cost: TripCost?
     var tag: TripTag?
+    @Environment(AppEnvironment.self) private var env
 
     var body: some View {
-        HStack(spacing: 14) {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(spacing: 6) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Label(drive.originName, systemImage: "circle.fill")
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top, spacing: 10) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Label(drive.originName, systemImage: "circle.fill")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Brand.online)
+                        .lineLimit(1)
+                    HStack(spacing: 8) {
+                        Label(drive.destinationName, systemImage: "circle.fill")
                             .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(Brand.online)
+                            .foregroundStyle(Brand.danger)
                             .lineLimit(1)
-                        HStack(spacing: 8) {
-                            Label(drive.destinationName, systemImage: "circle.fill")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(Brand.danger)
-                                .lineLimit(1)
-                            if let tag {
-                                Chip(text: tag.label, systemImage: tag.icon, color: Brand.driving)
-                            }
+                        if let tag {
+                            Chip(text: tag.label, systemImage: tag.icon, color: Brand.driving)
                         }
                     }
-                    Spacer()
-                    VStack(alignment: .trailing, spacing: 4) {
-                        Text(units.distance(km: drive.distanceKm))
-                            .font(.title.weight(.bold))
-                            .foregroundStyle(Brand.textPrimary)
-                        Text(timeRange)
-                            .font(.caption)
-                            .foregroundStyle(Brand.textSecondary)
-                    }
                 }
-                HStack(spacing: 12) {
-                    metric("clock", units.duration(minutes: drive.durationMin), Brand.textSecondary)
-                    metric("leaf.fill", units.consumption(whPerKm: drive.consumptionWhPerKm), Brand.driving)
-                    if let cost {
-                        metric("creditcard", units.money(cost.electricCost), Brand.warning)
-                    }
-                    Spacer()
-                    if drive.path.count >= 2 {
-                        ScoreRing(value: driveScore, color: Brand.driving, caption: L("Efficiency"))
-                    }
+                Spacer(minLength: 8)
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(units.distance(km: drive.distanceKm))
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(Brand.textPrimary)
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                    Text(timeRange)
+                        .font(.caption)
+                        .foregroundStyle(Brand.textSecondary)
+                        .lineLimit(1).minimumScaleFactor(0.8)
+                }
+                .fixedSize(horizontal: false, vertical: true)
+            }
+
+            // One line, never wrapping: these used to fight the score ring and the route
+            // preview for width, which broke "€0.23" across two rows.
+            HStack(spacing: 14) {
+                metric("clock", units.duration(minutes: drive.durationMin), Brand.textSecondary)
+                Button {
+                    withAnimation(.snappy) { UnitToggle.consumption(env) }
+                } label: {
+                    metric("leaf.fill", units.consumption(whPerKm: drive.consumptionWhPerKm),
+                           Brand.driving, swappable: true)
+                }
+                .buttonStyle(.plain)
+                if let cost {
+                    metric("creditcard", units.money(cost.electricCost), Brand.warning)
+                }
+                Spacer(minLength: 4)
+                if drive.path.count >= 2 {
+                    ScoreRing(value: driveScore, color: Brand.driving,
+                              caption: L("Efficiency"), diameter: 44)
                 }
             }
+        }
+        // The route sketch moved behind the content: as a sibling column it took 95 pt that
+        // the metrics needed, and it reads fine as a watermark.
+        .background(alignment: .trailing) {
             if drive.path.count >= 2 {
                 TinyRoutePreview(path: drive.path)
-                    .frame(width: 95)
-                    .opacity(0.75)
+                    .frame(width: 120)
+                    .opacity(0.28)
+                    .allowsHitTesting(false)
             }
         }
         .card(padding: 14)
@@ -295,10 +312,16 @@ struct DriveRow: View {
         return "\(start) → \(units.time(end))"
     }
 
-    private func metric(_ icon: String, _ value: String, _ color: Color) -> some View {
+    private func metric(_ icon: String, _ value: String, _ color: Color, swappable: Bool = false) -> some View {
         HStack(spacing: 4) {
             Image(systemName: icon).font(.caption2).foregroundStyle(color)
-            Text(value).font(.caption).foregroundStyle(color)
+            Text(value)
+                .font(.caption)
+                .foregroundStyle(color)
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
+                .contentTransition(.numericText())
+            if swappable { UnitSwapHint() }
         }
     }
 }

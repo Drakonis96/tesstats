@@ -46,18 +46,13 @@ struct HeroMapCard: View {
     var body: some View {
         ZStack(alignment: .bottomLeading) {
             if let coordinate = state.coordinate {
-                Map(initialPosition: .region(MKCoordinateRegion(
-                    center: coordinate.clLocationCoordinate,
-                    span: MKCoordinateSpan(latitudeDelta: 0.018, longitudeDelta: 0.018)))) {
-                    Annotation("", coordinate: coordinate.clLocationCoordinate) {
-                        ZStack {
-                            Circle().fill(Brand.driving.opacity(0.25)).frame(width: 46, height: 46)
-                            Circle().fill(Brand.driving).frame(width: 18, height: 18)
-                                .overlay(Circle().stroke(.white, lineWidth: 3))
-                        }
+                FollowingMap(coordinate: coordinate, span: 0.018) {
+                    ZStack {
+                        Circle().fill(Brand.driving.opacity(0.25)).frame(width: 46, height: 46)
+                        Circle().fill(Brand.driving).frame(width: 18, height: 18)
+                            .overlay(Circle().stroke(.white, lineWidth: 3))
                     }
                 }
-                .mapStyle(.standard(pointsOfInterest: .excludingAll))
             } else {
                 LinearGradient(colors: [Brand.elevatedSurface, Brand.surface], startPoint: .top, endPoint: .bottom)
             }
@@ -217,7 +212,7 @@ struct HistoryMapHeader: View {
         if coords.isEmpty {
             Brand.elevatedSurface
         } else {
-            Map(initialPosition: .region(MKCoordinateRegion(fitting: coords))) {
+            FittingMap(coordinates: coords) {
                 switch content {
                 case .drives(let drives):
                     ForEach(drives.prefix(8)) { drive in
@@ -302,20 +297,22 @@ struct ScoreRing: View {
     /// Short label under the ring saying what the score measures (e.g. "Efficiency").
     /// Without it the bare 0–100 number is ambiguous.
     var caption: String?
+    /// Ring size. Rows keep it small so the metrics beside it are not squeezed into wrapping.
+    var diameter: CGFloat = 58
 
     var body: some View {
         VStack(spacing: 3) {
             ZStack {
-                Circle().stroke(Brand.elevatedSurface, lineWidth: 7)
+                Circle().stroke(Brand.elevatedSurface, lineWidth: diameter < 52 ? 5 : 7)
                 Circle()
                     .trim(from: 0, to: min(1, max(0, value)))
-                    .stroke(color, style: StrokeStyle(lineWidth: 7, lineCap: .round))
+                    .stroke(color, style: StrokeStyle(lineWidth: diameter < 52 ? 5 : 7, lineCap: .round))
                     .rotationEffect(.degrees(135))
                 Text(String(format: "%.0f", value * 100))
-                    .font(.headline.weight(.bold))
+                    .font((diameter < 52 ? Font.subheadline : Font.headline).weight(.bold))
                     .foregroundStyle(Brand.textPrimary)
             }
-            .frame(width: 58, height: 58)
+            .frame(width: diameter, height: diameter)
             if let caption {
                 Text(caption)
                     .font(.caption2.weight(.semibold))
