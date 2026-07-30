@@ -14,7 +14,7 @@ struct TariffPlansView: View {
             Form {
                 Section {
                     if plans.isEmpty {
-                        Text(String(localized: "No tariff plans yet. Add one to price charges by time of day."))
+                        Text(L("No tariff plans yet. Add one to price charges by time of day."))
                             .font(.subheadline).foregroundStyle(Brand.textSecondary)
                     }
                     ForEach(plans) { plan in
@@ -28,19 +28,19 @@ struct TariffPlansView: View {
                     Button {
                         addPlan()
                     } label: {
-                        Label(String(localized: "Add plan"), systemImage: "plus.circle.fill")
+                        Label(L("Add plan"), systemImage: "plus.circle.fill")
                     }
                     .tint(Brand.crimson)
                 } header: {
-                    Text(String(localized: "Plans"))
+                    Text(L("Plans"))
                 } footer: {
-                    Text(String(localized: "Tap a plan to edit its bands. The selected plan prices any charging session TeslaMate did not record a cost for. Swipe to delete."))
+                    Text(L("Tap a plan to edit its bands. The selected plan prices any charging session TeslaMate did not record a cost for. Swipe to delete."))
                 }
             }
             .formStyle(.grouped)
             .scrollContentBackground(.hidden)
         }
-        .navigationTitle(String(localized: "Tariff plans"))
+        .navigationTitle(L("Tariff plans"))
         .navigationBarTitleDisplayModeInlineIfAvailable()
         .onAppear {
             // Bring a pre-plan band list into the new editor rather than stranding it.
@@ -66,11 +66,11 @@ struct TariffPlansView: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.borderless)
-            .accessibilityLabel(isActive(plan) ? String(localized: "Selected plan") : String(localized: "Use this plan"))
+            .accessibilityLabel(isActive(plan) ? L("Selected plan") : L("Use this plan"))
             VStack(alignment: .leading, spacing: 2) {
-                Text(plan.name.isEmpty ? String(localized: "Untitled plan") : plan.name)
+                Text(plan.name.isEmpty ? L("Untitled plan") : plan.name)
                     .foregroundStyle(Brand.textPrimary)
-                Text(String(localized: "\(plan.bands.count) bands"))
+                Text(L("\(plan.bands.count) bands"))
                     .font(.caption).foregroundStyle(Brand.textTertiary)
             }
         }
@@ -87,7 +87,7 @@ struct TariffPlansView: View {
 
     private func addPlan() {
         // A new plan starts as one all-day band; adding more splits the day automatically.
-        let plan = TariffPlan(name: String(localized: "New plan"),
+        let plan = TariffPlan(name: L("New plan"),
                               bands: [TariffBand(kind: .flat, startMinute: 0, endMinute: 0,
                                                  buyPricePerKwh: env.settings.config.chargePricePerKwh)])
             .normalized()
@@ -124,8 +124,8 @@ struct TariffPlanDetailView: View {
         ZStack {
             Brand.background.ignoresSafeArea()
             Form {
-                Section(String(localized: "Plan")) {
-                    TextField(String(localized: "Plan name"), text: nameBinding)
+                Section(L("Plan")) {
+                    TextField(L("Plan name"), text: nameBinding)
                         .foregroundStyle(Brand.textPrimary)
                 }
 
@@ -137,18 +137,18 @@ struct TariffPlanDetailView: View {
                     Button {
                         addBand()
                     } label: {
-                        Label(String(localized: "Add band"), systemImage: "plus.circle.fill")
+                        Label(L("Add band"), systemImage: "plus.circle.fill")
                     }
                     .tint(Brand.crimson)
                     .disabled(plan.bands.count >= 48)
                 } header: {
-                    Text(String(localized: "Price bands"))
+                    Text(L("Price bands"))
                 } footer: {
-                    Text(String(localized: "Set when each band starts — the app closes the day automatically, so the bands always add up to 24 hours. Leave the sell price empty to match the buy price. Swipe a band to delete it."))
+                    Text(L("Set when each band starts — the app closes the day automatically, so the bands always add up to 24 hours. Leave the sell price empty to match the buy price. Swipe a band to delete it."))
                 }
 
                 if !plan.bands.isEmpty {
-                    Section(String(localized: "Day coverage")) {
+                    Section(L("Day coverage")) {
                         TariffDayBar(bands: plan.normalized().bands)
                             .frame(height: 26)
                             .padding(.vertical, 4)
@@ -158,7 +158,7 @@ struct TariffPlanDetailView: View {
             .formStyle(.grouped)
             .scrollContentBackground(.hidden)
         }
-        .navigationTitle(plan.name.isEmpty ? String(localized: "Plan") : plan.name)
+        .navigationTitle(plan.name.isEmpty ? L("Plan") : plan.name)
         .navigationBarTitleDisplayModeInlineIfAvailable()
     }
 
@@ -173,20 +173,20 @@ struct TariffPlanDetailView: View {
                 .pickerStyle(.menu)
                 .tint(color(for: band.kind))
                 Spacer()
-                Text(String(localized: "\(timeLabel(band.startMinute)) – \(timeLabel(band.endMinute))"))
+                Text(L("\(timeLabel(band.startMinute)) – \(timeLabel(band.endMinute))"))
                     .font(.caption.weight(.medium))
                     .foregroundStyle(Brand.textTertiary)
                     .monospacedDigit()
             }
             HStack(spacing: 8) {
-                Text(String(localized: "Starts")).font(.caption).foregroundStyle(Brand.textSecondary)
+                Text(L("Starts")).font(.caption).foregroundStyle(Brand.textSecondary)
                 DatePicker("", selection: startBinding(band), displayedComponents: .hourAndMinute)
                     .labelsHidden().fixedSize()
                 Spacer()
             }
             HStack(spacing: 8) {
-                priceField(String(localized: "Buy"), value: buyBinding(band), placeholder: "0.10")
-                priceField(String(localized: "Sell"), value: sellBinding(band), placeholder: String(localized: "same"))
+                priceField(L("Buy"), value: buyBinding(band), placeholder: "0.10")
+                priceField(L("Sell"), value: sellBinding(band), placeholder: L("same"))
             }
         }
         .padding(.vertical, 2)
@@ -199,7 +199,7 @@ struct TariffPlanDetailView: View {
                 .multilineTextAlignment(.trailing)
                 .keyboardTypeDecimal()
                 .frame(width: 64)
-            Text(String(localized: "/kWh")).font(.caption2).foregroundStyle(Brand.textTertiary)
+            Text(L("/kWh")).font(.caption2).foregroundStyle(Brand.textTertiary)
         }
     }
 
@@ -295,7 +295,7 @@ struct TariffDayBar: View {
             }
             .clipShape(RoundedRectangle(cornerRadius: 5))
         }
-        .accessibilityLabel(String(localized: "Bands covering the 24 hour day"))
+        .accessibilityLabel(L("Bands covering the 24 hour day"))
     }
 
     private func color(for kind: TariffBandKind) -> Color {

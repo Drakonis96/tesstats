@@ -9,10 +9,10 @@ enum TripsBlock: String, SectionBlock {
 
     var title: String {
         switch self {
-        case .filters: String(localized: "Search & filters")
-        case .totals: String(localized: "Totals")
-        case .list: String(localized: "Trip list")
-        case .map: String(localized: "Route map")
+        case .filters: L("Search & filters")
+        case .totals: L("Totals")
+        case .list: L("Trip list")
+        case .map: L("Route map")
         }
     }
     var icon: String {
@@ -25,10 +25,10 @@ enum TripsBlock: String, SectionBlock {
     }
     var blurb: String {
         switch self {
-        case .filters: String(localized: "Search, tag filter and date range.")
-        case .totals: String(localized: "Energy, efficiency and trip count for the current filter.")
-        case .list: String(localized: "Your drives, newest first, grouped by day.")
-        case .map: String(localized: "All filtered drives drawn on one map.")
+        case .filters: L("Search, tag filter and date range.")
+        case .totals: L("Energy, efficiency and trip count for the current filter.")
+        case .list: L("Your drives, newest first, grouped by day.")
+        case .map: L("All filtered drives drawn on one map.")
         }
     }
     var canHide: Bool { self != .list }
@@ -39,11 +39,11 @@ enum ChargingBlock: String, SectionBlock {
 
     var title: String {
         switch self {
-        case .filters: String(localized: "Search & filters")
-        case .totals: String(localized: "Totals")
-        case .list: String(localized: "Session list")
-        case .map: String(localized: "Charging map")
-        case .places: String(localized: "Costs & places")
+        case .filters: L("Search & filters")
+        case .totals: L("Totals")
+        case .list: L("Session list")
+        case .map: L("Charging map")
+        case .places: L("Costs & places")
         }
     }
     var icon: String {
@@ -57,11 +57,11 @@ enum ChargingBlock: String, SectionBlock {
     }
     var blurb: String {
         switch self {
-        case .filters: String(localized: "Search, charger type and date range.")
-        case .totals: String(localized: "Energy, cost and AC/DC split for the current filter.")
-        case .list: String(localized: "Your charging sessions, newest first.")
-        case .map: String(localized: "Where you charged, on one map.")
-        case .places: String(localized: "Shortcut to per-location costs and prices.")
+        case .filters: L("Search, charger type and date range.")
+        case .totals: L("Energy, cost and AC/DC split for the current filter.")
+        case .list: L("Your charging sessions, newest first.")
+        case .map: L("Where you charged, on one map.")
+        case .places: L("Shortcut to per-location costs and prices.")
         }
     }
     var canHide: Bool { self != .list }
@@ -72,12 +72,12 @@ enum BatteryBlock: String, SectionBlock {
 
     var title: String {
         switch self {
-        case .current: String(localized: "Current")
-        case .timeline: String(localized: "Battery over time")
-        case .health: String(localized: "Battery health")
-        case .degradation: String(localized: "Degradation")
-        case .efficiency: String(localized: "Efficiency & totals")
-        case .updates: String(localized: "Software updates")
+        case .current: L("Current")
+        case .timeline: L("Battery over time")
+        case .health: L("Battery health")
+        case .degradation: L("Degradation")
+        case .efficiency: L("Efficiency & totals")
+        case .updates: L("Software updates")
         }
     }
     var icon: String {
@@ -92,12 +92,12 @@ enum BatteryBlock: String, SectionBlock {
     }
     var blurb: String {
         switch self {
-        case .current: String(localized: "Charge, usable capacity and range right now.")
-        case .timeline: String(localized: "State of charge over the last days.")
-        case .health: String(localized: "Capacity now versus when new.")
-        case .degradation: String(localized: "Max range trend across months.")
-        case .efficiency: String(localized: "Lifetime efficiency and charging totals.")
-        case .updates: String(localized: "Firmware versions installed over time.")
+        case .current: L("Charge, usable capacity and range right now.")
+        case .timeline: L("State of charge over the last days.")
+        case .health: L("Capacity now versus when new.")
+        case .degradation: L("Max range trend across months.")
+        case .efficiency: L("Lifetime efficiency and charging totals.")
+        case .updates: L("Firmware versions installed over time.")
         }
     }
 }
@@ -107,16 +107,16 @@ enum StatsBlock: String, SectionBlock {
 
     var title: String {
         switch self {
-        case .comparison: String(localized: "Month comparison")
-        case .cost: String(localized: "Cost")
-        case .trends: String(localized: "Trends over time")
-        case .charging: String(localized: "Where you charge")
-        case .usage: String(localized: "When you drive")
-        case .heatmap: String(localized: "Activity")
-        case .records: String(localized: "Records")
-        case .temperature: String(localized: "Consumption vs temperature")
-        case .drain: String(localized: "Phantom drain")
-        case .eco: String(localized: "Environmental impact")
+        case .comparison: L("Month comparison")
+        case .cost: L("Cost")
+        case .trends: L("Trends over time")
+        case .charging: L("Where you charge")
+        case .usage: L("When you drive")
+        case .heatmap: L("Activity")
+        case .records: L("Records")
+        case .temperature: L("Consumption vs temperature")
+        case .drain: L("Phantom drain")
+        case .eco: L("Environmental impact")
         }
     }
     var icon: String {
@@ -135,16 +135,16 @@ enum StatsBlock: String, SectionBlock {
     }
     var blurb: String {
         switch self {
-        case .comparison: String(localized: "This month against last month.")
-        case .cost: String(localized: "What charging costs you, per 100 km and projected.")
-        case .trends: String(localized: "Distance, energy and cost month by month.")
-        case .charging: String(localized: "Sessions and spend per location.")
-        case .usage: String(localized: "Which weekdays and hours you drive.")
-        case .heatmap: String(localized: "A calendar of driving activity.")
-        case .records: String(localized: "Longest trip, top speed, biggest charge…")
-        case .temperature: String(localized: "How cold weather changes consumption.")
-        case .drain: String(localized: "Standby battery loss while parked.")
-        case .eco: String(localized: "CO₂ and petrol avoided versus a combustion car.")
+        case .comparison: L("This month against last month.")
+        case .cost: L("What charging costs you, per 100 km and projected.")
+        case .trends: L("Distance, energy and cost month by month.")
+        case .charging: L("Sessions and spend per location.")
+        case .usage: L("Which weekdays and hours you drive.")
+        case .heatmap: L("A calendar of driving activity.")
+        case .records: L("Longest trip, top speed, biggest charge…")
+        case .temperature: L("How cold weather changes consumption.")
+        case .drain: L("Standby battery loss while parked.")
+        case .eco: L("CO₂ and petrol avoided versus a combustion car.")
         }
     }
 }

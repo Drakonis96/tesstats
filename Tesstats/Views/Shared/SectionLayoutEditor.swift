@@ -23,7 +23,7 @@ struct SectionLayoutEditor<Block: SectionBlock>: View {
                 List {
                     Section {
                         if shownBlocks.isEmpty {
-                            Text(String(localized: "Every block is hidden. Add one back below."))
+                            Text(L("Every block is hidden. Add one back below."))
                                 .font(.subheadline).foregroundStyle(Brand.textSecondary)
                         }
                         ForEach(shownBlocks) { block in
@@ -31,13 +31,13 @@ struct SectionLayoutEditor<Block: SectionBlock>: View {
                         }
                         .onMove(perform: move)
                     } header: {
-                        Text(String(localized: "Shown"))
+                        Text(L("Shown"))
                     } footer: {
-                        Text(String(localized: "Drag the handle to reorder. Blocks still only appear when they have data."))
+                        Text(L("Drag the handle to reorder. Blocks still only appear when they have data."))
                     }
 
                     if !hiddenBlocks.isEmpty {
-                        Section(String(localized: "Hidden")) {
+                        Section(L("Hidden")) {
                             ForEach(hiddenBlocks) { block in
                                 row(block, isHidden: true)
                             }
@@ -47,15 +47,15 @@ struct SectionLayoutEditor<Block: SectionBlock>: View {
                 .alwaysReorderable()
                 .scrollContentBackground(.hidden)
             }
-            .navigationTitle(String(localized: "Arrange \(section.title)"))
+            .navigationTitle(L("Arrange \(section.title)"))
             .toolbarTitleDisplayModeInline()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(String(localized: "Reset")) { apply(SectionLayoutState()) }
+                    Button(L("Reset")) { apply(SectionLayoutState()) }
                         .disabled(layout.isDefault)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(String(localized: "Done")) { dismiss() }.fontWeight(.semibold)
+                    Button(L("Done")) { dismiss() }.fontWeight(.semibold)
                 }
             }
         }
@@ -86,7 +86,7 @@ struct SectionLayoutEditor<Block: SectionBlock>: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.borderless)
-                .accessibilityLabel(isHidden ? String(localized: "Show") : String(localized: "Hide"))
+                .accessibilityLabel(isHidden ? L("Show") : L("Hide"))
             }
         }
     }
@@ -141,7 +141,7 @@ struct ArrangeSectionButton<Block: SectionBlock>: View {
             Image(systemName: "square.grid.2x2")
         }
         .tint(Brand.crimson)
-        .accessibilityLabel(String(localized: "Arrange section"))
+        .accessibilityLabel(L("Arrange section"))
         .sheet(isPresented: $presented) {
             SectionLayoutEditor(section: section, blockType: blockType)
         }

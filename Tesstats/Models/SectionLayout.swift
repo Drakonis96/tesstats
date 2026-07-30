@@ -29,11 +29,11 @@ enum SectionID: String, CaseIterable, Sendable {
 
     var title: String {
         switch self {
-        case .summary: String(localized: "Summary")
-        case .trips: String(localized: "Trips")
-        case .charging: String(localized: "Charging")
-        case .battery: String(localized: "Battery")
-        case .stats: String(localized: "Stats")
+        case .summary: L("Summary")
+        case .trips: L("Trips")
+        case .charging: L("Charging")
+        case .battery: L("Battery")
+        case .stats: L("Stats")
         }
     }
 }
