@@ -230,7 +230,7 @@ private struct TrendsCard: View {
                             .foregroundStyle(.clear)
                             .annotation(position: .top,
                                         overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
-                                Text("\(m.month, format: .dateTime.month(.abbreviated).year()) · \(scrubbedValueLabel(m))")
+                                Text("\(m.month, format: .dateTime.month(.abbreviated).year().appLanguage) · \(scrubbedValueLabel(m))")
                                     .font(.caption2.weight(.bold))
                                     .foregroundStyle(Brand.textPrimary)
                                     .padding(.horizontal, 6).padding(.vertical, 3)
@@ -240,7 +240,7 @@ private struct TrendsCard: View {
                 }
                 .chartXSelection(value: $scrubDate)
                 .chartYAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel() } }
-                .chartXAxis { AxisMarks(values: .stride(by: .month)) { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel(format: .dateTime.month(.narrow)) } }
+                .chartXAxis { AxisMarks(values: .stride(by: .month)) { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel(format: .dateTime.month(.narrow).appLanguage) } }
                 .frame(height: 200)
                 HStack {
                     Text(unitCaption).font(.caption2).foregroundStyle(Brand.textTertiary)
@@ -284,7 +284,7 @@ private struct TrendsCard: View {
                 AxisGridLine().foregroundStyle(Brand.hairline)
                 AxisValueLabel {
                     if let m = v.as(Int.self) {
-                        Text(Calendar.current.veryShortMonthSymbols[m - 1])
+                        Text(LanguageManager.calendar.veryShortMonthSymbols[m - 1])
                     }
                 }
             }
@@ -453,7 +453,7 @@ private struct UsageCard: View {
     let hours: [HourUsage]
     let units: Units
 
-    private var weekdaySymbols: [String] { Calendar.current.shortWeekdaySymbols }
+    private var weekdaySymbols: [String] { LanguageManager.calendar.shortWeekdaySymbols }
     /// Day labels in the same order as `weekdays` (which starts on the locale's first weekday),
     /// used to fix the chart's category order so it starts on Monday rather than alphabetically.
     private var weekdayOrder: [String] { weekdays.map { weekdaySymbols[($0.weekday - 1) % 7] } }
@@ -568,7 +568,7 @@ private struct HeatmapCard: View {
             Color.clear.frame(height: 12)
             ForEach(Array(weeks.enumerated()), id: \.offset) { idx, week in
                 if let first = week.first?.day, showsLabel(at: idx, calendar: cal) {
-                    Text(first, format: .dateTime.month(.abbreviated))
+                    Text(first, format: .dateTime.month(.abbreviated).appLanguage)
                         .font(.caption2.weight(.medium))
                         .foregroundStyle(Brand.textTertiary)
                         .fixedSize()
@@ -594,7 +594,7 @@ private struct HeatmapCard: View {
     private func selectionDetail(_ day: CalendarDay) -> some View {
         HStack(spacing: 8) {
             Image(systemName: "calendar").font(.caption).foregroundStyle(Brand.crimson)
-            Text(day.day, format: .dateTime.weekday(.abbreviated).day().month().year())
+            Text(day.day, format: .dateTime.weekday(.abbreviated).day().month().year().appLanguage)
                 .font(.caption.weight(.semibold)).foregroundStyle(Brand.textPrimary)
             Spacer()
             Text(day.driveCount == 0

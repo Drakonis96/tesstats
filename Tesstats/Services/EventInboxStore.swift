@@ -38,7 +38,7 @@ final class EventInboxStore {
         return DailyHistoryGrouper.group(filtered, calendar: calendar, date: \.date) { day in
             if calendar.isDateInToday(day) { return L("Today") }
             if calendar.isDateInYesterday(day) { return L("Yesterday") }
-            return DateFormatter.localizedString(from: day, dateStyle: .medium, timeStyle: .none)
+            return AppDate.mediumDate(day)
         } detail: { bucket in
             L("\(bucket.count) events")
         }

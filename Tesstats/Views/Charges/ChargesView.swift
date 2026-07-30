@@ -27,7 +27,7 @@ struct ChargesView: View {
         DailyHistoryGrouper.group(visibleFiltered, date: \.startDate) { day in
             if Calendar.current.isDateInToday(day) { return L("Today") }
             if Calendar.current.isDateInYesterday(day) { return L("Yesterday") }
-            return DateFormatter.localizedString(from: day, dateStyle: .medium, timeStyle: .none)
+            return units.shortDate(day)
         } detail: { bucket in
             let energy = bucket.reduce(0) { $0 + $1.energyAddedKwh }
             let cost = bucket.reduce(0) { $0 + effectiveCost($1) }
@@ -324,9 +324,9 @@ struct ChargeRow: View {
     }
 
     private var timeRange: String {
-        let start = DateFormatter.localizedString(from: charge.startDate, dateStyle: .none, timeStyle: .short)
+        let start = units.time(charge.startDate)
         guard let end = charge.endDate else { return start }
-        return "\(start) → \(DateFormatter.localizedString(from: end, dateStyle: .none, timeStyle: .short))"
+        return "\(start) → \(units.time(end))"
     }
 
     private func metric(_ icon: String, _ value: String) -> some View {

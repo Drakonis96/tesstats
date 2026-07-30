@@ -28,7 +28,7 @@ struct TripsView: View {
         DailyHistoryGrouper.group(visibleFiltered, date: \.startDate) { day in
             if Calendar.current.isDateInToday(day) { return L("Today") }
             if Calendar.current.isDateInYesterday(day) { return L("Yesterday") }
-            return DateFormatter.localizedString(from: day, dateStyle: .medium, timeStyle: .none)
+            return units.shortDate(day)
         } detail: { bucket in
             L("\(bucket.count) drives · \(units.distance(km: bucket.reduce(0) { $0 + $1.distanceKm }, digits: 1))")
         }
@@ -237,9 +237,9 @@ struct DriveRow: View {
     }
 
     private var timeRange: String {
-        let start = DateFormatter.localizedString(from: drive.startDate, dateStyle: .none, timeStyle: .short)
+        let start = units.time(drive.startDate)
         guard let end = drive.endDate else { return start }
-        return "\(start) → \(DateFormatter.localizedString(from: end, dateStyle: .none, timeStyle: .short))"
+        return "\(start) → \(units.time(end))"
     }
 
     private func metric(_ icon: String, _ value: String, _ color: Color) -> some View {

@@ -209,7 +209,7 @@ struct BatteryView: View {
                             .symbolSize(50)
                             .annotation(position: .top,
                                         overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
-                                Text("\(p.date, format: .dateTime.month(.abbreviated).year()) · \(units.range(km: rawRangeKm(for: p)))")
+                                Text("\(p.date, format: .dateTime.month(.abbreviated).year().appLanguage) · \(units.range(km: rawRangeKm(for: p)))")
                                     .font(.caption2.weight(.bold))
                                     .foregroundStyle(Brand.textPrimary)
                                     .padding(.horizontal, 6).padding(.vertical, 3)
@@ -220,7 +220,7 @@ struct BatteryView: View {
                 .chartXSelection(value: $scrubDate)
                 .chartYScale(domain: .automatic(includesZero: false))
                 .chartYAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel() } }
-                .chartXAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel(format: .dateTime.month(.abbreviated)) } }
+                .chartXAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel(format: .dateTime.month(.abbreviated).appLanguage) } }
                 .frame(height: 200)
                 Text(L("Touch and drag to inspect a month."))
                     .font(.caption2).foregroundStyle(Brand.textTertiary)
@@ -367,7 +367,7 @@ private struct SocTimelineCard: View {
                             .symbolSize(50)
                             .annotation(position: .top,
                                         overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
-                                Text("\(p.date, format: .dateTime.day().month(.abbreviated).hour().minute()) · \(p.soc)%")
+                                Text("\(p.date, format: .dateTime.day().month(.abbreviated).hour().minute().appLanguage) · \(p.soc)%")
                                     .font(.caption2.weight(.bold))
                                     .foregroundStyle(Brand.textPrimary)
                                     .padding(.horizontal, 6).padding(.vertical, 3)
@@ -381,7 +381,7 @@ private struct SocTimelineCard: View {
                     AxisGridLine().foregroundStyle(Brand.hairline)
                     AxisValueLabel { if let s = v.as(Int.self) { Text("\(s)%") } }
                 } }
-                .chartXAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel(format: days <= 7 ? .dateTime.weekday(.abbreviated) : .dateTime.day().month(.narrow)) } }
+                .chartXAxis { AxisMarks { _ in AxisGridLine().foregroundStyle(Brand.hairline); AxisValueLabel(format: days <= 7 ? .dateTime.weekday(.abbreviated).appLanguage : .dateTime.day().month(.narrow).appLanguage) } }
                 .frame(height: 170)
                 Text(L("Reconstructed from drive and charge boundaries — dots mark charging sessions."))
                     .font(.caption2).foregroundStyle(Brand.textTertiary)

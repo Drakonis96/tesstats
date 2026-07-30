@@ -23,7 +23,7 @@ struct ParkingView: View {
         DailyHistoryGrouper.group(sessions, date: \.startDate) { day in
             if Calendar.current.isDateInToday(day) { return L("Today") }
             if Calendar.current.isDateInYesterday(day) { return L("Yesterday") }
-            return DateFormatter.localizedString(from: day, dateStyle: .medium, timeStyle: .none)
+            return units.shortDate(day)
         } detail: { bucket in
             let energy = bucket.reduce(0) { $0 + $1.energyLostKwh }
             return L("\(bucket.count) idles · -\(String(format: "%.1f", energy)) kWh")
@@ -216,9 +216,9 @@ private struct ParkingRow: View {
     }
 
     private var timeRange: String {
-        let start = DateFormatter.localizedString(from: session.startDate, dateStyle: .none, timeStyle: .short)
+        let start = units.time(session.startDate)
         guard let end = session.endDate else { return "\(start) → \(L("now"))" }
-        return "\(start) → \(DateFormatter.localizedString(from: end, dateStyle: .none, timeStyle: .short))"
+        return "\(start) → \(units.time(end))"
     }
 }
 

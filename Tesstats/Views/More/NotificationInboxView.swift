@@ -107,7 +107,7 @@ private struct EventInboxRow: View {
                         .font(.headline.weight(.semibold))
                         .foregroundStyle(Brand.textPrimary)
                     Spacer()
-                    Text(DateFormatter.localizedString(from: item.date, dateStyle: .none, timeStyle: .short))
+                    Text(AppDate.shortTime(item.date))
                         .font(.caption.weight(.medium))
                         .foregroundStyle(Brand.textTertiary)
                 }

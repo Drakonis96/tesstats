@@ -761,7 +761,7 @@ struct SettingsView: View {
     private var cacheSizeText: String {
         let bytes = env.cache.sizeBytes()
         guard bytes > 0 else { return "—" }
-        return ByteCountFormatter.string(fromByteCount: Int64(bytes), countStyle: .file)
+        return Int64(bytes).formatted(.byteCount(style: .file).locale(LanguageManager.locale))
     }
 
     private func reloadSecretFields() {
