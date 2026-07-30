@@ -897,6 +897,22 @@
         }
       }
     },
+    "A plan splits the day into price bands, so a charging session TeslaMate did not cost is priced by when it happened. Without a plan every session uses the default price.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A plan splits the day into price bands, so a charging session TeslaMate did not cost is priced by when it happened. Without a plan every session uses the default price."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un plan divide el día en tramos de precio, de modo que una sesión de carga sin coste registrado por TeslaMate se valora según cuándo ocurrió. Sin plan, todas las sesiones usan el precio por defecto."
+          }
+        }
+      }
+    },
     "A/C": {
       "localizations": {
         "es": {
@@ -3089,6 +3105,22 @@
         }
       }
     },
+    "Default price": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Default price"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Precio por defecto"
+          }
+        }
+      }
+    },
     "Degradation": {
       "localizations": {
         "es": {
@@ -3565,6 +3597,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cada punto es un viaje: el frío suele aumentar el consumo (x: %@, y: %@)."
+          }
+        }
+      }
+    },
+    "Edit price per kWh": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit price per kWh"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar precio por kWh"
           }
         }
       }
@@ -8081,6 +8129,22 @@
         }
       }
     },
+    "Recorded by TeslaMate": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recorded by TeslaMate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registrado por TeslaMate"
+          }
+        }
+      }
+    },
     "Records": {
       "localizations": {
         "en": {
@@ -8561,6 +8625,22 @@
         }
       }
     },
+    "Selected plan": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selected plan"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan seleccionado"
+          }
+        }
+      }
+    },
     "Sell": {
       "localizations": {
         "en": {
@@ -8845,6 +8925,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sesiones y gasto por ubicación."
+          }
+        }
+      }
+    },
+    "Set price per kWh": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set price per kWh"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fijar precio por kWh"
           }
         }
       }
@@ -9761,6 +9857,22 @@
         }
       }
     },
+    "Tariff plan: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tariff plan: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan tarifario: %@"
+          }
+        }
+      }
+    },
     "Tariff plans": {
       "localizations": {
         "en": {
@@ -10157,6 +10269,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Este mes frente al anterior."
+          }
+        }
+      }
+    },
+    "This session uses the cost TeslaMate recorded. Your price applies to sessions here that have none.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This session uses the cost TeslaMate recorded. Your price applies to sessions here that have none."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta sesión usa el coste registrado por TeslaMate. Tu precio se aplica a las sesiones de aquí que no lo tengan."
           }
         }
       }
@@ -10977,6 +11105,38 @@
         }
       }
     },
+    "Use default price": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use default price"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usar el precio por defecto"
+          }
+        }
+      }
+    },
+    "Use this plan": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use this plan"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usar este plan"
+          }
+        }
+      }
+    },
     "Username": {
       "localizations": {
         "es": {
@@ -11549,6 +11709,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tus viajes, del más reciente al más antiguo, agrupados por día."
+          }
+        }
+      }
+    },
+    "Your price for this location": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your price for this location"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu precio para esta ubicación"
           }
         }
       }
