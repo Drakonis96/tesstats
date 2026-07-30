@@ -29,6 +29,7 @@ struct BatteryView: View {
                 ToolbarItem(placement: .principal) { ToolbarLogo() }
                 #endif
                 ToolbarItemGroup(placement: .trailingBar) {
+                    ArrangeSectionButton(section: .battery, blockType: BatteryBlock.self)
                     #if os(iOS)
                     SettingsGearButton(isPresented: $showSettings)
                     #endif
@@ -38,6 +39,20 @@ struct BatteryView: View {
             .settingsSheet(isPresented: $showSettings)
         }
         .task(id: carID) { await env.history.loadIfNeeded(carID: carID) }
+    }
+
+    @ViewBuilder
+    private func blockView(_ block: BatteryBlock) -> some View {
+        switch block {
+        case .current: if let state = env.live.currentState { liveHealthCard(state) }
+        case .timeline: SocTimelineCard(drives: env.history.drives,
+                                        charges: env.history.charges,
+                                        liveSoc: env.live.currentState?.batteryLevel)
+        case .health: officialHealthCard
+        case .degradation: degradationCard
+        case .efficiency: efficiencyCard
+        case .updates: updatesCard
+        }
     }
 
     @ViewBuilder
@@ -57,14 +72,9 @@ struct BatteryView: View {
     private var loaded: some View {
         ScrollView {
             VStack(spacing: Metrics.cardSpacing) {
-                if let state = env.live.currentState { liveHealthCard(state) }
-                SocTimelineCard(drives: env.history.drives,
-                                charges: env.history.charges,
-                                liveSoc: env.live.currentState?.batteryLevel)
-                officialHealthCard
-                degradationCard
-                efficiencyCard
-                updatesCard
+                ForEach(SectionLayout.visible(BatteryBlock.self, layout: env.settings.config.layout(for: .battery))) { block in
+                    blockView(block)
+                }
                 Text(degradationFootnote)
                     .font(.caption2).foregroundStyle(Brand.textTertiary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -89,7 +99,7 @@ struct BatteryView: View {
                     StatTile(title: L("Capacity now"), value: units.energy(kwh: cap, digits: 1), tint: Brand.crimson)
                 }
                 if let eff = env.history.carInfo?.efficiencyKwhPerKm, eff > 0 {
-                    StatTile(title: L("Rated eff."), value: "\(Int(eff * 1000)) Wh/km")
+                    UnitStatTile(title: L("Rated eff."), value: units.consumption(whPerKm: eff * 1000)) { UnitToggle.consumption(env) }
                 }
                 StatTile(title: L("Health"),
                          value: state.healthy == true ? L("OK") : (state.healthy == false ? L("Check") : "—"),

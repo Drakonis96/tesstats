@@ -1,5 +1,15 @@
 import SwiftUI
 
+/// Pre-computed contents of the Charging screen for one combination of filters.
+struct ChargesViewData {
+    var filtered: [ChargeRecord] = []
+    var groups: [DailyHistoryGroup<ChargeRecord>] = []
+    var aggregates: ChargeAggregates = .init()
+    var electricityCost: Double = 0
+    var locations: [ChargingLocation] = []
+    var fuelComparison: (evCost: Double, fuelCost: Double)?
+}
+
 struct ChargesView: View {
     @Environment(AppEnvironment.self) private var env
     @State private var search = ""
@@ -16,23 +26,71 @@ struct ChargesView: View {
     private var units: Units { Units(config: env.settings.config) }
     private var carID: Int { env.live.resolvedCarID ?? 1 }
 
-    private var filtered: [ChargeRecord] {
-        env.history.charges.filter { c in
+    /// Filtering, grouping and cost aggregation ran on every redraw and were read a dozen
+    /// times per body pass. Computed once per real change and held here.
+    @State private var view = ChargesViewData()
+
+    private var filtered: [ChargeRecord] { view.filtered }
+    private var groups: [DailyHistoryGroup<ChargeRecord>] { view.groups }
+
+    private struct ViewKey: Equatable {
+        var revision: Int
+        var search: String
+        var range: StatsRange
+        var typeFilter: ChargeTypeFilter
+        var visibleCount: Int
+        var pricing: ChargePricing
+        var unitsSignature: String
+        var efficiencyWhPerKm: Double
+        var fuelPricePerLiter: Double
+        var fuelConsumptionLPer100km: Double
+    }
+
+    private var viewKey: ViewKey {
+        ViewKey(revision: env.history.revision,
+                search: search,
+                range: range,
+                typeFilter: typeFilter,
+                visibleCount: visibleCount,
+                pricing: ChargePricing(config: env.settings.config),
+                unitsSignature: env.settings.config.unitsSignature,
+                efficiencyWhPerKm: env.history.efficiency.avgWhPerKm,
+                fuelPricePerLiter: env.settings.config.fuelPricePerLiter,
+                fuelConsumptionLPer100km: env.settings.config.fuelConsumptionLPer100km)
+    }
+
+    private func rebuild() {
+        let pricing = ChargePricing(config: env.settings.config)
+        let units = units
+        let filtered = env.history.charges.filter { c in
             typeFilter.matches(c) && range.contains(c.startDate) &&
             (search.isEmpty || c.locationName.localizedCaseInsensitiveContains(search))
         }
-    }
-    private var visibleFiltered: [ChargeRecord] { Array(filtered.prefix(visibleCount)) }
-    private var groups: [DailyHistoryGroup<ChargeRecord>] {
-        DailyHistoryGrouper.group(visibleFiltered, date: \.startDate) { day in
+        let groups = DailyHistoryGrouper.group(Array(filtered.prefix(visibleCount)), date: \.startDate) { day in
             if Calendar.current.isDateInToday(day) { return L("Today") }
             if Calendar.current.isDateInYesterday(day) { return L("Yesterday") }
             return units.shortDate(day)
         } detail: { bucket in
             let energy = bucket.reduce(0) { $0 + $1.energyAddedKwh }
-            let cost = bucket.reduce(0) { $0 + effectiveCost($1) }
+            let cost = bucket.reduce(0) { $0 + pricing.cost(for: $1) }
             return L("\(bucket.count) sessions · +\(String(format: "%.1f", energy)) kWh · \(units.money(cost))")
         }
+        let aggregates = ChargeAggregates.from(filtered)
+        let electricityCost = filtered.reduce(0) { $0 + pricing.cost(for: $1) }
+
+        // What the same kWh would have cost as petrol, using the fleet's real efficiency.
+        var fuelComparison: (evCost: Double, fuelCost: Double)?
+        let eff = env.history.efficiency.avgWhPerKm
+        if eff > 0, aggregates.totalEnergyKwh > 0 {
+            let km = (aggregates.totalEnergyKwh * 1000) / eff
+            let liters = km / 100 * env.settings.config.fuelConsumptionLPer100km
+            fuelComparison = (electricityCost, liters * env.settings.config.fuelPricePerLiter)
+        }
+
+        view = ChargesViewData(filtered: filtered, groups: groups, aggregates: aggregates,
+                               electricityCost: electricityCost,
+                               locations: StatsEngine.chargingLocations(filtered, pricing: pricing),
+                               fuelComparison: fuelComparison)
     }
 
     var body: some View {
@@ -53,6 +111,7 @@ struct ChargesView: View {
                         Button { showExport = true } label: { Image(systemName: "square.and.arrow.up") }
                             .tint(Brand.crimson)
                     }
+                    ArrangeSectionButton(section: .charging, blockType: ChargingBlock.self)
                     #if os(iOS)
                     SettingsGearButton(isPresented: $showSettings)
                     #endif
@@ -76,6 +135,7 @@ struct ChargesView: View {
             }
         }
         .task(id: carID) { await env.history.loadIfNeeded(carID: carID) }
+        .task(id: viewKey) { rebuild() }
         .onChange(of: search) { _, _ in visibleCount = pageSize }
         .onChange(of: typeFilter) { _, _ in visibleCount = pageSize }
         .onChange(of: range) { _, _ in visibleCount = pageSize }
@@ -115,38 +175,8 @@ struct ChargesView: View {
     private var list: some View {
         ScrollView {
             VStack(spacing: Metrics.cardSpacing) {
-                HistoryMapHeader(
-                    title: L("Charging"),
-                    subtitle: "\(range.summaryLabel) · \(filtered.count) \(L("sessions"))",
-                    metric: "+\(String(format: "%.0f", filtered.reduce(0) { $0 + $1.energyAddedKwh })) kWh",
-                    content: .charges(filtered)
-                )
-                quickLinks
-                ChargeAggregatesCard(aggregates: ChargeAggregates.from(filtered),
-                                     electricityCost: electricityCost,
-                                     costIsEstimated: costIsEstimated,
-                                     fuelComparison: fuelComparison, units: units)
-                LazyVStack(spacing: 10) {
-                    ForEach(groups) { group in
-                        HistoryDayHeader(title: group.title, detail: group.detail)
-                        ForEach(group.items) { charge in
-                            NavigationLink(value: charge) {
-                                ChargeRow(charge: charge, units: units, effectiveCost: effectiveCost(charge)) {
-                                    beginEditing(charge)
-                                }
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    if filtered.count > visibleCount {
-                        LoadMoreButton(remaining: filtered.count - visibleCount) {
-                            withAnimation { visibleCount += pageSize }
-                        }
-                    }
-                    if filtered.isEmpty {
-                        Text(L("No charges match your filters."))
-                            .font(.subheadline).foregroundStyle(Brand.textSecondary).padding(.top, 30)
-                    }
+                ForEach(SectionLayout.visible(ChargingBlock.self, layout: env.settings.config.layout(for: .charging))) { block in
+                    blockView(block)
                 }
             }
             .padding(.horizontal, Metrics.screenPadding)
@@ -154,6 +184,51 @@ struct ChargesView: View {
         }
         .scrollContentBackground(.hidden)
         .refreshable { await refresh() }
+    }
+
+    @ViewBuilder
+    private func blockView(_ block: ChargingBlock) -> some View {
+        switch block {
+        case .filters:
+            filterBar
+        case .map:
+            HistoryMapHeader(
+                title: L("Charging"),
+                subtitle: "\(range.summaryLabel) · \(filtered.count) \(L("sessions"))",
+                metric: "+\(String(format: "%.0f", view.aggregates.totalEnergyKwh)) kWh",
+                content: .charges(filtered)
+            )
+        case .places:
+            quickLinks
+        case .totals:
+            ChargeAggregatesCard(aggregates: view.aggregates,
+                                 electricityCost: electricityCost,
+                                 costIsEstimated: costIsEstimated,
+                                 fuelComparison: fuelComparison, units: units)
+        case .list:
+            LazyVStack(spacing: 10) {
+                ForEach(groups) { group in
+                    HistoryDayHeader(title: group.title, detail: group.detail)
+                    ForEach(group.items) { charge in
+                        NavigationLink(value: charge) {
+                            ChargeRow(charge: charge, units: units, effectiveCost: effectiveCost(charge)) {
+                                beginEditing(charge)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                if filtered.count > visibleCount {
+                    LoadMoreButton(remaining: filtered.count - visibleCount) {
+                        withAnimation { visibleCount += pageSize }
+                    }
+                }
+                if filtered.isEmpty {
+                    Text(L("No charges match your filters."))
+                        .font(.subheadline).foregroundStyle(Brand.textSecondary).padding(.top, 30)
+                }
+            }
+        }
     }
 
     private var quickLinks: some View {
@@ -166,34 +241,15 @@ struct ChargesView: View {
         .glassButtonStyle()
     }
 
-    private var electricityCost: Double {
-        // Sum each session's effective cost — recorded where present, otherwise the location's
-        // custom price, the time-of-use tariff, or the global default.
-        let pricing = ChargePricing(config: env.settings.config)
-        return filtered.reduce(0) { $0 + pricing.cost(for: $1) }
-    }
+    private var electricityCost: Double { view.electricityCost }
+    private var chargingLocations: [ChargingLocation] { view.locations }
+    private var costIsEstimated: Bool { view.aggregates.totalCost <= 0.01 }
+    private var fuelComparison: (evCost: Double, fuelCost: Double)? { view.fuelComparison }
 
-    private var chargingLocations: [ChargingLocation] {
-        StatsEngine.chargingLocations(filtered, pricing: ChargePricing(config: env.settings.config))
-    }
-
+    /// Effective cost of one session — recorded where present, otherwise the location's custom
+    /// price, the time-of-use tariff, or the global default.
     private func effectiveCost(_ charge: ChargeRecord) -> Double {
         ChargePricing(config: env.settings.config).cost(for: charge)
-    }
-
-    private var costIsEstimated: Bool {
-        ChargeAggregates.from(filtered).totalCost <= 0.01
-    }
-
-    private var fuelComparison: (evCost: Double, fuelCost: Double)? {
-        let agg = ChargeAggregates.from(filtered)
-        let eff = env.history.efficiency.avgWhPerKm
-        guard eff > 0, agg.totalEnergyKwh > 0 else { return nil }
-        // Distance those kWh would have covered, then the petrol cost for that distance.
-        let km = (agg.totalEnergyKwh * 1000) / eff
-        let liters = km / 100 * env.settings.config.fuelConsumptionLPer100km
-        let fuelCost = liters * env.settings.config.fuelPricePerLiter
-        return (electricityCost, fuelCost)
     }
 
     private func refresh() async {

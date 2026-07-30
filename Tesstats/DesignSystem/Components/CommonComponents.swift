@@ -235,31 +235,79 @@ struct ToolbarLogo: View {
     }
 }
 
-/// Consumption value that cycles units on tap: Wh/km → Wh/100km → kWh/100km.
-struct ConsumptionStat: View {
+// MARK: - Tappable unit values
+
+/// Flips a display unit that lives in `ServerConfig`, so tapping any consumption or pressure
+/// value anywhere in the app switches all of them at once and the choice survives a relaunch.
+enum UnitToggle {
+    @MainActor
+    static func consumption(_ env: AppEnvironment) {
+        env.settings.config.consumptionUnit = env.settings.config.consumptionUnit.next
+        env.settings.save()
+    }
+
+    @MainActor
+    static func pressure(_ env: AppEnvironment) {
+        env.settings.config.pressureIsPsi.toggle()
+        env.settings.save()
+    }
+}
+
+/// Small "these units are tappable" affordance.
+struct UnitSwapHint: View {
+    var body: some View {
+        Image(systemName: "arrow.left.arrow.right")
+            .font(.system(size: 8))
+            .foregroundStyle(Brand.textTertiary)
+            .accessibilityHidden(true)
+    }
+}
+
+/// A `StatTile` whose value flips units on tap.
+struct UnitStatTile: View {
     let title: String
-    let whPerKm: Double?
-    let units: Units
-    @State private var unit: ConsumptionUnit = .whPerKm
+    let value: String
+    var systemImage: String?
+    var tint: Color = Brand.textPrimary
+    let onTap: () -> Void
 
     var body: some View {
         Button {
-            withAnimation(.snappy) { unit = unit.next }
+            withAnimation(.snappy) { onTap() }
         } label: {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 5) {
-                    Image(systemName: "bolt").font(.caption).foregroundStyle(Brand.textTertiary)
+                    if let systemImage {
+                        Image(systemName: systemImage).font(.caption).foregroundStyle(Brand.textTertiary)
+                    }
                     Text(title).font(.caption).foregroundStyle(Brand.textTertiary).lineLimit(1)
-                    Image(systemName: "arrow.left.arrow.right").font(.system(size: 8)).foregroundStyle(Brand.textTertiary)
+                    UnitSwapHint()
                 }
-                Text(units.consumption(whPerKm: whPerKm, unit: unit))
+                Text(value)
                     .font(.title3.weight(.semibold))
-                    .foregroundStyle(Brand.crimson)
-                    .lineLimit(1).minimumScaleFactor(0.6)
+                    .foregroundStyle(tint)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                     .contentTransition(.numericText())
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(L("\(title): \(value). Tap to change unit."))
+    }
+}
+
+/// Consumption value that flips between Wh/km and kWh/100 km on tap.
+struct ConsumptionStat: View {
+    let title: String
+    let whPerKm: Double?
+    let units: Units
+    @Environment(AppEnvironment.self) private var env
+
+    var body: some View {
+        UnitStatTile(title: title,
+                     value: units.consumption(whPerKm: whPerKm),
+                     systemImage: "bolt",
+                     tint: Brand.crimson) { UnitToggle.consumption(env) }
     }
 }

@@ -17,6 +17,9 @@ final class HistoryViewModel {
     private(set) var carInfo: CarInfo?
     private(set) var phase: Phase = .idle
     private(set) var usingCache = false
+    /// Bumped whenever the record sets change. Views key their cached aggregations off this
+    /// so a redraw never re-derives analytics that did not change.
+    private(set) var revision = 0
 
     private let settings: SettingsStore
     private let cache: CacheStore
@@ -49,6 +52,7 @@ final class HistoryViewModel {
         usingCache = false
         loadedCarID = nil
         phase = .idle
+        revision += 1
     }
 
     /// Explicit user refresh (pull-to-refresh / toolbar): full re-download, so late edits to
@@ -68,6 +72,7 @@ final class HistoryViewModel {
             batteryHealthSummary = DemoDataProvider.batteryHealthSummary
             updates = DemoDataProvider.updates()
             carInfo = DemoDataProvider.carInfo
+            revision += 1
             phase = .loaded
             return
         }
@@ -80,6 +85,7 @@ final class HistoryViewModel {
             batteryHealthSummary = cache.loadBatteryHealth(carID: carID)
             updates = cache.loadUpdates(carID: carID)
             usingCache = !drives.isEmpty || !charges.isEmpty
+            revision += 1
             phase = usingCache ? .loaded
                 : .empty(L("Add a TeslaMateApi URL in Settings to see drives, charges and battery history."))
             return
@@ -115,6 +121,7 @@ final class HistoryViewModel {
                 updates = cache.loadUpdates(carID: carID)
             }
 
+            revision += 1
             phase = (dd.isEmpty && cc.isEmpty)
                 ? .empty(L("No history returned yet."))
                 : .loaded
@@ -125,6 +132,7 @@ final class HistoryViewModel {
             battery = Self.deriveBattery(charges: charges, drives: drives, efficiency: carInfo?.efficiencyKwhPerKm)
             batteryHealthSummary = cache.loadBatteryHealth(carID: carID)
             updates = cache.loadUpdates(carID: carID)
+            revision += 1
             if !drives.isEmpty || !charges.isEmpty {
                 usingCache = true
                 phase = .loaded

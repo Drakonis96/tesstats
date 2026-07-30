@@ -640,6 +640,10 @@ enum StatsEngine {
     /// idle is vampire drain. Aggregated to a daily rate.
     static func phantomDrain(drives: [DriveRecord], charges: [ChargeRecord]) -> PhantomDrain? {
         let ordered = drives.sorted { $0.startDate < $1.startDate }
+        // Sorted once so the "was it charged during this gap?" test below is a binary search
+        // instead of a full scan per gap — that scan was O(drives × charges) and dominated
+        // the whole Stats screen on multi-year histories.
+        let chargeStarts = charges.map(\.startDate).sorted()
         var pctPerDay: [Double] = []
         var kmPerDay: [Double] = []
         var totalIdle = 0.0
@@ -652,8 +656,7 @@ enum StatsEngine {
             // Require a real, sane parked gap: 2h … 14d.
             guard idle >= 7_200, idle <= 1_209_600 else { continue }
             // Skip if a charge happened during the gap (it would mask the drain).
-            let charged = charges.contains { $0.startDate > aEnd && $0.startDate < b.startDate }
-            if charged { continue }
+            if Self.containsDate(chargeStarts, after: aEnd, before: b.startDate) { continue }
             let idleDays = idle / 86_400
 
             if let ab = a.endBattery, let bb = b.startBattery, ab - bb >= 0, ab - bb <= 30 {
@@ -669,6 +672,17 @@ enum StatsEngine {
         let avgPct = pctPerDay.isEmpty ? 0 : pctPerDay.reduce(0, +) / Double(pctPerDay.count)
         let avgKm = kmPerDay.isEmpty ? 0 : kmPerDay.reduce(0, +) / Double(kmPerDay.count)
         return PhantomDrain(avgPercentPerDay: avgPct, avgRangeLossKmPerDay: avgKm, idleSamples: samples, totalIdleDays: totalIdle)
+    }
+
+    /// Is there any date in the ascending `sorted` strictly between `after` and `before`?
+    /// Binary search for the first element greater than `after`, then one comparison.
+    private static func containsDate(_ sorted: [Date], after: Date, before: Date) -> Bool {
+        var low = 0, high = sorted.count
+        while low < high {
+            let mid = (low + high) / 2
+            if sorted[mid] > after { high = mid } else { low = mid + 1 }
+        }
+        return low < sorted.count && sorted[low] < before
     }
 
     // Charging by location ---------------------------------------------------

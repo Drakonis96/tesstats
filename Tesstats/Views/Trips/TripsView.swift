@@ -1,5 +1,14 @@
 import SwiftUI
 
+/// Pre-computed contents of the Trips screen for one combination of filters.
+struct TripsViewData {
+    var filtered: [DriveRecord] = []
+    var groups: [DailyHistoryGroup<DriveRecord>] = []
+    var distanceKm: Double = 0
+    var energyKwh: Double = 0
+    var efficiencyWhPerKm: Double?
+}
+
 struct TripsView: View {
     @Environment(AppEnvironment.self) private var env
     @State private var search = ""
@@ -14,24 +23,55 @@ struct TripsView: View {
     private var units: Units { Units(config: env.settings.config) }
     private var carID: Int { env.live.resolvedCarID ?? 1 }
 
-    private var filtered: [DriveRecord] {
-        env.history.drives.filter { d in
+    /// Filtering + day grouping ran on every redraw and were read a dozen times per body pass.
+    /// Computed once per real change and held here.
+    @State private var view = TripsViewData()
+
+    private var filtered: [DriveRecord] { view.filtered }
+    private var groups: [DailyHistoryGroup<DriveRecord>] { view.groups }
+
+    private struct ViewKey: Equatable {
+        var revision: Int
+        var tagRevision: Int
+        var search: String
+        var range: StatsRange
+        var tagFilter: TripTagFilter
+        var visibleCount: Int
+        var unitsSignature: String
+    }
+
+    private var viewKey: ViewKey {
+        ViewKey(revision: env.history.revision,
+                tagRevision: env.tripTags.revision,
+                search: search,
+                range: range,
+                tagFilter: tagFilter,
+                visibleCount: visibleCount,
+                unitsSignature: env.settings.config.unitsSignature)
+    }
+
+    private func rebuild() {
+        let units = units
+        let tags = env.tripTags
+        let filtered = env.history.drives.filter { d in
             range.contains(d.startDate) &&
-            tagFilter.matches(env.tripTags.tag(for: d.id)) &&
+            tagFilter.matches(tags.tag(for: d.id)) &&
             (search.isEmpty
                 || d.originName.localizedCaseInsensitiveContains(search)
                 || d.destinationName.localizedCaseInsensitiveContains(search))
         }
-    }
-    private var visibleFiltered: [DriveRecord] { Array(filtered.prefix(visibleCount)) }
-    private var groups: [DailyHistoryGroup<DriveRecord>] {
-        DailyHistoryGrouper.group(visibleFiltered, date: \.startDate) { day in
+        let groups = DailyHistoryGrouper.group(Array(filtered.prefix(visibleCount)), date: \.startDate) { day in
             if Calendar.current.isDateInToday(day) { return L("Today") }
             if Calendar.current.isDateInYesterday(day) { return L("Yesterday") }
             return units.shortDate(day)
         } detail: { bucket in
             L("\(bucket.count) drives · \(units.distance(km: bucket.reduce(0) { $0 + $1.distanceKm }, digits: 1))")
         }
+        let distance = filtered.reduce(0) { $0 + $1.distanceKm }
+        let energy = filtered.reduce(0) { $0 + TripCostEngine.energyKwh(for: $1) }
+        view = TripsViewData(filtered: filtered, groups: groups,
+                             distanceKm: distance, energyKwh: energy,
+                             efficiencyWhPerKm: distance > 0 ? energy * 1000 / distance : nil)
     }
 
     var body: some View {
@@ -55,6 +95,7 @@ struct TripsView: View {
                         Button { showExport = true } label: { Image(systemName: "square.and.arrow.up") }
                             .tint(Brand.crimson)
                     }
+                    ArrangeSectionButton(section: .trips, blockType: TripsBlock.self)
                     #if os(iOS)
                     SettingsGearButton(isPresented: $showSettings)
                     #endif
@@ -70,6 +111,7 @@ struct TripsView: View {
             .settingsSheet(isPresented: $showSettings)
         }
         .task(id: carID) { await env.history.loadIfNeeded(carID: carID) }
+        .task(id: viewKey) { rebuild() }
         .onChange(of: search) { _, _ in visibleCount = pageSize }
         .onChange(of: range) { _, _ in visibleCount = pageSize }
         .onChange(of: tagFilter) { _, _ in visibleCount = pageSize }
@@ -111,35 +153,8 @@ struct TripsView: View {
     private var list: some View {
         ScrollView {
             VStack(spacing: Metrics.cardSpacing) {
-                filterBar
-                HistoryMapHeader(
-                    title: L("Trips"),
-                    subtitle: "\(range.summaryLabel) · \(filtered.count) \(L("drives"))",
-                    metric: units.distance(km: filtered.reduce(0) { $0 + $1.distanceKm }, digits: 0),
-                    content: .drives(filtered)
-                )
-                tripSummaryCard
-                LazyVStack(spacing: 10) {
-                    ForEach(groups) { group in
-                        HistoryDayHeader(title: group.title, detail: group.detail)
-                        ForEach(group.items) { drive in
-                            NavigationLink(value: drive) {
-                                DriveRow(drive: drive, units: units, cost: tripCost(drive),
-                                         tag: env.tripTags.tag(for: drive.id))
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    if filtered.count > visibleCount {
-                        LoadMoreButton(remaining: filtered.count - visibleCount) {
-                            withAnimation { visibleCount += pageSize }
-                        }
-                    }
-                    if filtered.isEmpty {
-                        Text(L("No trips match your filters."))
-                            .font(.subheadline).foregroundStyle(Brand.textSecondary)
-                            .padding(.top, 40)
-                    }
+                ForEach(SectionLayout.visible(TripsBlock.self, layout: env.settings.config.layout(for: .trips))) { block in
+                    blockView(block)
                 }
             }
             .padding(.horizontal, Metrics.screenPadding)
@@ -149,6 +164,46 @@ struct TripsView: View {
         .refreshable { await refresh() }
     }
 
+    @ViewBuilder
+    private func blockView(_ block: TripsBlock) -> some View {
+        switch block {
+        case .filters:
+            filterBar
+        case .map:
+            HistoryMapHeader(
+                title: L("Trips"),
+                subtitle: "\(range.summaryLabel) · \(filtered.count) \(L("drives"))",
+                metric: units.distance(km: view.distanceKm, digits: 0),
+                content: .drives(filtered)
+            )
+        case .totals:
+            tripSummaryCard
+        case .list:
+            LazyVStack(spacing: 10) {
+                ForEach(groups) { group in
+                    HistoryDayHeader(title: group.title, detail: group.detail)
+                    ForEach(group.items) { drive in
+                        NavigationLink(value: drive) {
+                            DriveRow(drive: drive, units: units, cost: tripCost(drive),
+                                     tag: env.tripTags.tag(for: drive.id))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                if filtered.count > visibleCount {
+                    LoadMoreButton(remaining: filtered.count - visibleCount) {
+                        withAnimation { visibleCount += pageSize }
+                    }
+                }
+                if filtered.isEmpty {
+                    Text(L("No trips match your filters."))
+                        .font(.subheadline).foregroundStyle(Brand.textSecondary)
+                        .padding(.top, 40)
+                }
+            }
+        }
+    }
+
     private func refresh() async {
         refreshing = true
         await env.history.refresh(carID: carID)
@@ -156,12 +211,10 @@ struct TripsView: View {
     }
 
     private var tripSummaryCard: some View {
-        let distance = filtered.reduce(0) { $0 + $1.distanceKm }
-        let energy = filtered.reduce(0) { $0 + TripCostEngine.energyKwh(for: $1) }
-        let efficiency = distance > 0 ? energy * 1000 / distance : nil
-        return HStack(spacing: 14) {
-            StatTile(title: L("Energy"), value: units.energy(kwh: energy, digits: 1), systemImage: "bolt.fill", tint: Brand.online)
-            StatTile(title: L("Efficiency"), value: efficiency.map { "\(Int($0)) Wh/km" } ?? "—", systemImage: "leaf.fill", tint: Brand.driving)
+        HStack(spacing: 14) {
+            StatTile(title: L("Energy"), value: units.energy(kwh: view.energyKwh, digits: 1), systemImage: "bolt.fill", tint: Brand.online)
+            UnitStatTile(title: L("Efficiency"), value: units.consumption(whPerKm: view.efficiencyWhPerKm),
+                         systemImage: "leaf.fill", tint: Brand.driving) { UnitToggle.consumption(env) }
             StatTile(title: L("Trips"), value: "\(filtered.count)", systemImage: "road.lanes")
         }
         .card()
