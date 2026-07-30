@@ -28,6 +28,8 @@ struct SettingsGearButton: View {
     var body: some View {
         Button { isPresented = true } label: { Image(systemName: "gearshape") }
             .tint(Brand.crimson)
+            .accessibilityLabel(L("Settings"))
+            .accessibilityIdentifier("Settings")
     }
 }
 

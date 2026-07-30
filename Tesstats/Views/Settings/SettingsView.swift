@@ -452,35 +452,37 @@ struct SettingsView: View {
         Section {
             Toggle(L("Time-of-use tariff"), isOn: settings.config.tariffEnabled)
                 .tint(Brand.crimson)
-            if settings.config.tariffEnabled.wrappedValue {
-                ForEach(settings.config.tariffPeriods) { $period in
-                    HStack(spacing: 6) {
-                        DatePicker("", selection: minuteOfDayBinding($period.startMinute), displayedComponents: .hourAndMinute)
-                            .labelsHidden().fixedSize()
-                        Text("–").foregroundStyle(Brand.textTertiary)
-                        DatePicker("", selection: minuteOfDayBinding($period.endMinute), displayedComponents: .hourAndMinute)
-                            .labelsHidden().fixedSize()
-                        Spacer()
-                        TextField("0.10", value: $period.pricePerKwh, format: .number)
-                            .multilineTextAlignment(.trailing)
-                            .keyboardTypeDecimal()
-                            .frame(width: 70)
-                        Text(L("/kWh")).font(.caption).foregroundStyle(Brand.textTertiary)
-                    }
+            // Always reachable: a plan can be built before switching pricing over to it.
+            NavigationLink {
+                TariffPlansView()
+            } label: {
+                HStack {
+                    Label(L("Tariff plans"), systemImage: "clock.badge.checkmark")
+                        .foregroundStyle(Brand.textPrimary)
+                    Spacer()
+                    Text(activePlanLabel)
+                        .font(.caption).foregroundStyle(Brand.textTertiary)
                 }
-                .onDelete { settings.config.tariffPeriods.wrappedValue.remove(atOffsets: $0) }
-                Button {
-                    settings.config.tariffPeriods.wrappedValue.append(TariffPeriod())
-                } label: {
-                    Label(L("Add price band"), systemImage: "plus.circle.fill")
-                }
-                .tint(Brand.crimson)
+            }
+            HStack {
+                Text(L("Default price")).foregroundStyle(Brand.textPrimary)
+                Spacer()
+                TextField("0.15", value: settings.config.chargePricePerKwh, format: .number)
+                    .multilineTextAlignment(.trailing)
+                    .keyboardTypeDecimal()
+                    .frame(width: 80)
+                Text(L("/kWh")).font(.caption).foregroundStyle(Brand.textTertiary)
             }
         } header: {
             Text(L("Electricity tariff"))
         } footer: {
-            Text(L("Price bands by time of day (bands may cross midnight, e.g. 22:00–06:00). Hours outside every band use the default charge price. Sessions are priced by how much of their duration falls in each band. Swipe a band to delete it."))
+            Text(L("A plan splits the day into price bands, so a charging session TeslaMate did not cost is priced by when it happened. Without a plan every session uses the default price."))
         }
+    }
+
+    private var activePlanLabel: String {
+        guard let plan = env.settings.config.activeTariff else { return L("None") }
+        return plan.name.isEmpty ? L("Untitled plan") : plan.name
     }
 
     /// Bridge a minutes-from-midnight Int to the hour-and-minute DatePicker.
@@ -970,6 +972,9 @@ struct SettingsTabBar: View {
                     .background(active ? Brand.crimson : Brand.elevatedSurface, in: Capsule())
                 }
                 .buttonStyle(.plain)
+                // An inactive tab is icon-only, so without this it has no accessible name.
+                .accessibilityLabel(sec.shortLabel)
+                .accessibilityAddTraits(active ? [.isSelected] : [])
             }
         }
     }

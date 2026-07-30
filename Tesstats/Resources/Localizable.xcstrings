@@ -1,6 +1,22 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%"
+          }
+        }
+      }
+    },
     "%@ armed Sentry Mode.": {
       "localizations": {
         "en": {
@@ -273,6 +289,38 @@
         }
       }
     },
+    "%@ · %lld%%": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %lld%%"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %lld%%"
+          }
+        }
+      }
+    },
+    "%@ – %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ – %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ – %@"
+          }
+        }
+      }
+    },
     "%@/kWh": {
       "localizations": {
         "en": {
@@ -321,6 +369,22 @@
         }
       }
     },
+    "%@: %@. Tap to change unit.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %@. Tap to change unit."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %@. Toca para cambiar de unidad."
+          }
+        }
+      }
+    },
     "%lld": {
       "localizations": {
         "en": {
@@ -333,6 +397,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld"
+          }
+        }
+      }
+    },
+    "%lld / %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld / %lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld / %lld"
+          }
+        }
+      }
+    },
+    "%lld bands": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld bands"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld tramos"
           }
         }
       }
@@ -353,6 +449,54 @@
         }
       }
     },
+    "%lld events": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld events"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld eventos"
+          }
+        }
+      }
+    },
+    "%lld fast sessions": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld fast sessions"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld sesiones rápidas"
+          }
+        }
+      }
+    },
+    "%lld idles · -%@ kWh": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld idles · -%@ kWh"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld paradas · -%@ kWh"
+          }
+        }
+      }
+    },
     "%lld sessions · %@": {
       "localizations": {
         "en": {
@@ -365,6 +509,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld sesiones · %@"
+          }
+        }
+      }
+    },
+    "%lld sessions · +%@ kWh · %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld sessions · +%@ kWh · %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld sesiones · +%@ kWh · %@"
           }
         }
       }
@@ -401,6 +561,22 @@
         }
       }
     },
+    "%lld%% · %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%% · %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%% · %@"
+          }
+        }
+      }
+    },
     "%lldh": {
       "localizations": {
         "en": {
@@ -413,6 +589,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lldh"
+          }
+        }
+      }
+    },
+    "+%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%@"
+          }
+        }
+      }
+    },
+    "-24h": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "-24h"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "-24h"
+          }
+        }
+      }
+    },
+    "-48h": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "-48h"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "-48h"
           }
         }
       }
@@ -433,6 +657,22 @@
         }
       }
     },
+    "0.10": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0.10"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0.10"
+          }
+        }
+      }
+    },
     "0.15": {
       "localizations": {
         "en": {
@@ -445,6 +685,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "0.15"
+          }
+        }
+      }
+    },
+    "0.20": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0.20"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0.20"
           }
         }
       }
@@ -609,6 +865,22 @@
         }
       }
     },
+    "A calendar of driving activity.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A calendar of driving activity."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un calendario de actividad de conducción."
+          }
+        }
+      }
+    },
     "A door, window, frunk or trunk on %@ is open.": {
       "localizations": {
         "en": {
@@ -769,6 +1041,54 @@
         }
       }
     },
+    "Add band": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add band"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir tramo"
+          }
+        }
+      }
+    },
+    "Add plan": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add plan"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir plan"
+          }
+        }
+      }
+    },
+    "Add price": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add price"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir precio"
+          }
+        }
+      }
+    },
     "Add price band": {
       "localizations": {
         "en": {
@@ -861,6 +1181,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "All"
+          }
+        }
+      }
+    },
+    "All filtered drives drawn on one map.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All filtered drives drawn on one map."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todos los viajes filtrados en un solo mapa."
           }
         }
       }
@@ -977,6 +1313,22 @@
         }
       }
     },
+    "Areas": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Areas"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Áreas"
+          }
+        }
+      }
+    },
     "Armed": {
       "localizations": {
         "en": {
@@ -989,6 +1341,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Armado"
+          }
+        }
+      }
+    },
+    "Arrange %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrange %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Organizar %@"
+          }
+        }
+      }
+    },
+    "Arrange section": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrange section"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Organizar sección"
           }
         }
       }
@@ -1037,6 +1421,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Med. / kWh"
+          }
+        }
+      }
+    },
+    "Avg / trip": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avg / trip"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Media / viaje"
           }
         }
       }
@@ -1101,6 +1501,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Copia y restauración"
+          }
+        }
+      }
+    },
+    "Bands covering the 24 hour day": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bands covering the 24 hour day"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tramos que cubren las 24 horas del día"
           }
         }
       }
@@ -1265,6 +1681,22 @@
         }
       }
     },
+    "Battery, range and location now start from a live map-first overview.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Battery, range and location now start from a live map-first overview."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La batería, la autonomía y la ubicación parten ahora de una vista general con mapa en vivo."
+          }
+        }
+      }
+    },
     "Biggest charge": {
       "localizations": {
         "en": {
@@ -1313,6 +1745,22 @@
         }
       }
     },
+    "Buy": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buy"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compra"
+          }
+        }
+      }
+    },
     "By hour of day": {
       "localizations": {
         "en": {
@@ -1345,6 +1793,22 @@
         }
       }
     },
+    "CO₂ and petrol avoided versus a combustion car.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CO₂ and petrol avoided versus a combustion car."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CO₂ y gasolina evitados frente a un coche de combustión."
+          }
+        }
+      }
+    },
     "CO₂ avoided": {
       "localizations": {
         "en": {
@@ -1373,6 +1837,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "CSV se abre en cualquier hoja de cálculo; JSON conserva todos los datos estructurados."
+          }
+        }
+      }
+    },
+    "Cabin": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cabin"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Habitáculo"
           }
         }
       }
@@ -1453,6 +1933,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Capacity now"
+          }
+        }
+      }
+    },
+    "Capacity now versus when new.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Capacity now versus when new."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Capacidad actual frente a la de nuevo."
           }
         }
       }
@@ -1649,6 +2145,22 @@
         }
       }
     },
+    "Charge, usable capacity and range right now.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charge, usable capacity and range right now."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carga, capacidad utilizable y autonomía ahora mismo."
+          }
+        }
+      }
+    },
     "Charging": {
       "localizations": {
         "es": {
@@ -1757,6 +2269,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pérdidas de carga"
+          }
+        }
+      }
+    },
+    "Charging map": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charging map"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mapa de cargas"
           }
         }
       }
@@ -2017,6 +2545,54 @@
         }
       }
     },
+    "Connect": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectar"
+          }
+        }
+      }
+    },
+    "Connect TeslaMateApi to show vehicle details.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect TeslaMateApi to show vehicle details."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conecta TeslaMateApi para ver los detalles del vehículo."
+          }
+        }
+      }
+    },
+    "Connect your TeslaMate server to see your car.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect your TeslaMate server to see your car."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conecta tu servidor TeslaMate para ver tu coche."
+          }
+        }
+      }
+    },
     "Connected — waiting for the first MQTT messages from your car.": {
       "localizations": {
         "es": {
@@ -2193,6 +2769,22 @@
         }
       }
     },
+    "Costs & places": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Costs & places"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Costes y ubicaciones"
+          }
+        }
+      }
+    },
     "Couldn't derive the encryption key.": {
       "localizations": {
         "en": {
@@ -2337,6 +2929,22 @@
         }
       }
     },
+    "Current location": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current location"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubicación actual"
+          }
+        }
+      }
+    },
     "Custom": {
       "localizations": {
         "en": {
@@ -2445,6 +3053,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Día"
+          }
+        }
+      }
+    },
+    "Day coverage": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Day coverage"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cobertura del día"
           }
         }
       }
@@ -2609,6 +3233,22 @@
         }
       }
     },
+    "Deriving parking sessions…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deriving parking sessions…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calculando sesiones de aparcamiento…"
+          }
+        }
+      }
+    },
     "Destination": {
       "localizations": {
         "es": {
@@ -2621,6 +3261,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Destination"
+          }
+        }
+      }
+    },
+    "Destination, ETA and arrival charge.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Destination, ETA and arrival charge."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Destino, hora de llegada y carga al llegar."
+          }
+        }
+      }
+    },
+    "Details": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Details"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detalles"
           }
         }
       }
@@ -2673,6 +3345,22 @@
         }
       }
     },
+    "Distance, energy and cost month by month.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distance, energy and cost month by month."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distancia, energía y coste mes a mes."
+          }
+        }
+      }
+    },
     "Do not disturb": {
       "localizations": {
         "en": {
@@ -2717,6 +3405,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hecho"
+          }
+        }
+      }
+    },
+    "Drag the handle to reorder. Blocks still only appear when they have data.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag the handle to reorder. Blocks still only appear when they have data."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrastra el asa para reordenar. Los bloques solo aparecen si tienen datos."
           }
         }
       }
@@ -2897,6 +3601,38 @@
         }
       }
     },
+    "Efficiency 30d": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Efficiency 30d"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Efic. 30d"
+          }
+        }
+      }
+    },
+    "Electric": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Electric"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eléctrico"
+          }
+        }
+      }
+    },
     "Electricity": {
       "localizations": {
         "es": {
@@ -3057,6 +3793,22 @@
         }
       }
     },
+    "Ended": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ended"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fin"
+          }
+        }
+      }
+    },
     "Energy": {
       "localizations": {
         "es": {
@@ -3089,6 +3841,22 @@
         }
       }
     },
+    "Energy remaining": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Energy remaining"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Energía restante"
+          }
+        }
+      }
+    },
     "Energy used": {
       "localizations": {
         "es": {
@@ -3101,6 +3869,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Energy used"
+          }
+        }
+      }
+    },
+    "Energy, cost and AC/DC split for the current filter.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Energy, cost and AC/DC split for the current filter."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Energía, coste y reparto AC/DC del filtro actual."
+          }
+        }
+      }
+    },
+    "Energy, efficiency and trip count for the current filter.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Energy, efficiency and trip count for the current filter."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Energía, eficiencia y número de viajes del filtro actual."
           }
         }
       }
@@ -3201,6 +4001,38 @@
         }
       }
     },
+    "Estimated with the configured default energy and fuel prices.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estimated with the configured default energy and fuel prices."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estimado con los precios de energía y combustible configurados por defecto."
+          }
+        }
+      }
+    },
+    "Every block is hidden. Add one back below.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every block is hidden. Add one back below."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todos los bloques están ocultos. Añade alguno abajo."
+          }
+        }
+      }
+    },
     "Everything closed": {
       "localizations": {
         "es": {
@@ -3213,6 +4045,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Everything closed"
+          }
+        }
+      }
+    },
+    "Explore": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Explore"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Explorar"
           }
         }
       }
@@ -3377,6 +4225,22 @@
         }
       }
     },
+    "Fast charging places appear here after TeslaMate records them.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fast charging places appear here after TeslaMate records them."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los lugares de carga rápida aparecen aquí cuando TeslaMate los registra."
+          }
+        }
+      }
+    },
     "Fastest charge": {
       "localizations": {
         "en": {
@@ -3421,6 +4285,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Filtra viajes, cargas y estadísticas a un periodo concreto."
+          }
+        }
+      }
+    },
+    "Firmware versions installed over time.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Firmware versions installed over time."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versiones de firmware instaladas a lo largo del tiempo."
           }
         }
       }
@@ -3537,6 +4417,22 @@
         }
       }
     },
+    "Fuel equivalent": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuel equivalent"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Equivalente en combustible"
+          }
+        }
+      }
+    },
     "Fuel price / L": {
       "localizations": {
         "es": {
@@ -3649,6 +4545,38 @@
         }
       }
     },
+    "Hidden": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hidden"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ocultos"
+          }
+        }
+      }
+    },
+    "Hide": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ocultar"
+          }
+        }
+      }
+    },
     "Highest avg power": {
       "localizations": {
         "en": {
@@ -3757,6 +4685,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hora"
+          }
+        }
+      }
+    },
+    "How cold weather changes consumption.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How cold weather changes consumption."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cómo cambia el consumo con el frío."
           }
         }
       }
@@ -3889,6 +4833,22 @@
         }
       }
     },
+    "Inside and outside temperature.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inside and outside temperature."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temperatura interior y exterior."
+          }
+        }
+      }
+    },
     "Installed": {
       "localizations": {
         "es": {
@@ -3901,6 +4861,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Installed"
+          }
+        }
+      }
+    },
+    "Installed firmware and pending updates.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installed firmware and pending updates."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Firmware instalado y actualizaciones pendientes."
           }
         }
       }
@@ -3937,6 +4913,22 @@
         }
       }
     },
+    "Last %@ · %lld idles · %lld places": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last %@ · %lld idles · %lld places"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Últimos %@ · %lld paradas · %lld lugares"
+          }
+        }
+      }
+    },
     "Last 12 months": {
       "localizations": {
         "en": {
@@ -3949,6 +4941,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Últimos 12 meses"
+          }
+        }
+      }
+    },
+    "Last 48h": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last 48h"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Últimas 48h"
           }
         }
       }
@@ -4013,6 +5021,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Let's Encrypt works out of the box. For self-hosted certs, trust your CA or pin its key. TLS is required by default."
+          }
+        }
+      }
+    },
+    "Lifetime efficiency and charging totals.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lifetime efficiency and charging totals."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eficiencia total y totales de carga."
           }
         }
       }
@@ -4093,6 +5117,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Live Activity"
+          }
+        }
+      }
+    },
+    "Live now": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live now"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En curso"
+          }
+        }
+      }
+    },
+    "Live power, time to full and limit while charging.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live power, time to full and limit while charging."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Potencia, tiempo hasta completar y límite durante la carga."
           }
         }
       }
@@ -4209,6 +5265,22 @@
         }
       }
     },
+    "Locks, windows, doors and trunks.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Locks, windows, doors and trunks."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cierres, ventanas, puertas y maleteros."
+          }
+        }
+      }
+    },
     "Longest trip": {
       "localizations": {
         "en": {
@@ -4221,6 +5293,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Viaje más largo"
+          }
+        }
+      }
+    },
+    "Longest trip, top speed, biggest charge…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Longest trip, top speed, biggest charge…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viaje más largo, velocidad máxima, carga mayor…"
           }
         }
       }
@@ -4417,6 +5505,22 @@
         }
       }
     },
+    "Map": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Map"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mapa"
+          }
+        }
+      }
+    },
     "Map unavailable": {
       "localizations": {
         "es": {
@@ -4461,6 +5565,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Max range now"
+          }
+        }
+      }
+    },
+    "Max range trend across months.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Max range trend across months."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Evolución de la autonomía máxima por meses."
           }
         }
       }
@@ -4545,6 +5665,38 @@
         }
       }
     },
+    "Mileage": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mileage"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kilometraje"
+          }
+        }
+      }
+    },
+    "Mileage tracking": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mileage tracking"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seguimiento de kilometraje"
+          }
+        }
+      }
+    },
     "Miles": {
       "localizations": {
         "es": {
@@ -4561,6 +5713,54 @@
         }
       }
     },
+    "Minute": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minute"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minuto"
+          }
+        }
+      }
+    },
+    "Model": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelo"
+          }
+        }
+      }
+    },
+    "Model, VIN, colour and wheels.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model, VIN, colour and wheels."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelo, VIN, color y llantas."
+          }
+        }
+      }
+    },
     "Month": {
       "localizations": {
         "en": {
@@ -4573,6 +5773,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mes"
+          }
+        }
+      }
+    },
+    "Month comparison": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Month comparison"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comparativa mensual"
           }
         }
       }
@@ -4641,6 +5857,22 @@
         }
       }
     },
+    "My tariff": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My tariff"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mi tarifa"
+          }
+        }
+      }
+    },
     "Name": {
       "localizations": {
         "en": {
@@ -4673,6 +5905,38 @@
         }
       }
     },
+    "New plan": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New plan"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan nuevo"
+          }
+        }
+      }
+    },
+    "Next": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siguiente"
+          }
+        }
+      }
+    },
     "No": {
       "localizations": {
         "es": {
@@ -4701,6 +5965,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "No GPS trace"
+          }
+        }
+      }
+    },
+    "No Supercharger locations": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Supercharger locations"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin ubicaciones de Supercharger"
           }
         }
       }
@@ -4765,6 +6045,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aún no hay datos de carga."
+          }
+        }
+      }
+    },
+    "No charging places": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No charging places"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin lugares de carga"
           }
         }
       }
@@ -4881,6 +6177,22 @@
         }
       }
     },
+    "No energy data available for this trip.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No energy data available for this trip."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay datos de energía para este viaje."
+          }
+        }
+      }
+    },
     "No history API URL configured (optional).": {
       "localizations": {
         "es": {
@@ -4909,6 +6221,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "No history returned yet."
+          }
+        }
+      }
+    },
+    "No notifications": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No notifications"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin notificaciones"
+          }
+        }
+      }
+    },
+    "No parking history": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No parking history"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin historial de aparcamiento"
+          }
+        }
+      }
+    },
+    "No parking sessions in this period": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No parking sessions in this period"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin sesiones de aparcamiento en este periodo"
           }
         }
       }
@@ -5009,6 +6369,38 @@
         }
       }
     },
+    "No tariff plans yet. Add one to price charges by time of day.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No tariff plans yet. Add one to price charges by time of day."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no hay planes tarifarios. Añade uno para valorar las cargas según la hora."
+          }
+        }
+      }
+    },
+    "No tire data": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No tire data"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin datos de neumáticos"
+          }
+        }
+      }
+    },
     "No trips": {
       "localizations": {
         "es": {
@@ -5041,6 +6433,22 @@
         }
       }
     },
+    "No vehicle specs": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No vehicle specs"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin ficha del vehículo"
+          }
+        }
+      }
+    },
     "No vehicles detected yet. Connect to discover them automatically.": {
       "localizations": {
         "es": {
@@ -5069,6 +6477,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ninguna"
+          }
+        }
+      }
+    },
+    "Not available from TeslaMate": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not available from TeslaMate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No disponible desde TeslaMate"
           }
         }
       }
@@ -5217,6 +6641,22 @@
         }
       }
     },
+    "Now": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Now"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ahora"
+          }
+        }
+      }
+    },
     "OK": {
       "localizations": {
         "es": {
@@ -5277,6 +6717,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Off"
+          }
+        }
+      }
+    },
+    "Off-peak": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Off-peak"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valle"
           }
         }
       }
@@ -5553,6 +7009,22 @@
         }
       }
     },
+    "Parked cost": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parked cost"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coste aparcado"
+          }
+        }
+      }
+    },
     "Parking": {
       "localizations": {
         "en": {
@@ -5629,6 +7101,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Las contraseñas no coinciden."
+          }
+        }
+      }
+    },
+    "Peak": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peak"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Punta"
           }
         }
       }
@@ -5809,6 +7297,54 @@
         }
       }
     },
+    "Plan": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan"
+          }
+        }
+      }
+    },
+    "Plan name": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan name"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombre del plan"
+          }
+        }
+      }
+    },
+    "Plans": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plans"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planes"
+          }
+        }
+      }
+    },
     "Plugged in": {
       "localizations": {
         "es": {
@@ -5965,6 +7501,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Prefs"
+          }
+        }
+      }
+    },
+    "Pressure for each tyre.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pressure for each tyre."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Presión de cada neumático."
+          }
+        }
+      }
+    },
+    "Price bands": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Price bands"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tramos de precio"
           }
         }
       }
@@ -6177,6 +7745,38 @@
         }
       }
     },
+    "Range efficiency": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Range efficiency"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eficiencia de autonomía"
+          }
+        }
+      }
+    },
+    "Range lost": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Range lost"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autonomía perdida"
+          }
+        }
+      }
+    },
     "Range shown": {
       "localizations": {
         "es": {
@@ -6205,6 +7805,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Range used"
+          }
+        }
+      }
+    },
+    "Rate": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ritmo"
           }
         }
       }
@@ -6257,6 +7873,22 @@
         }
       }
     },
+    "Read-only insights": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read-only insights"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Información de solo lectura"
+          }
+        }
+      }
+    },
     "Read-only · TLS only · No telemetry": {
       "localizations": {
         "es": {
@@ -6301,6 +7933,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Listo para desbloquear"
+          }
+        }
+      }
+    },
+    "Real": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real"
           }
         }
       }
@@ -6397,6 +8045,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tema recibido: %@"
+          }
+        }
+      }
+    },
+    "Recent activity": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recent activity"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actividad reciente"
           }
         }
       }
@@ -6513,6 +8177,22 @@
         }
       }
     },
+    "Reset": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restablecer"
+          }
+        }
+      }
+    },
     "Restore": {
       "localizations": {
         "en": {
@@ -6593,6 +8273,22 @@
         }
       }
     },
+    "Route map": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Route map"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mapa de rutas"
+          }
+        }
+      }
+    },
     "SW updates": {
       "localizations": {
         "es": {
@@ -6605,6 +8301,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "SW updates"
+          }
+        }
+      }
+    },
+    "Sample data": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sample data"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datos de muestra"
           }
         }
       }
@@ -6705,6 +8417,22 @@
         }
       }
     },
+    "Savings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Savings"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ahorro"
+          }
+        }
+      }
+    },
     "Scheduled start": {
       "localizations": {
         "es": {
@@ -6717,6 +8445,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Scheduled start"
+          }
+        }
+      }
+    },
+    "Search & filters": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search & filters"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Búsqueda y filtros"
           }
         }
       }
@@ -6753,6 +8497,38 @@
         }
       }
     },
+    "Search, charger type and date range.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search, charger type and date range."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Búsqueda, tipo de cargador y rango de fechas."
+          }
+        }
+      }
+    },
+    "Search, tag filter and date range.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search, tag filter and date range."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Búsqueda, filtro de etiquetas y rango de fechas."
+          }
+        }
+      }
+    },
     "Security": {
       "localizations": {
         "es": {
@@ -6781,6 +8557,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Security & certificates"
+          }
+        }
+      }
+    },
+    "Sell": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sell"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Venta"
           }
         }
       }
@@ -6861,6 +8653,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Banner Sentry"
+          }
+        }
+      }
+    },
+    "Sentry banner detected on the car's screen.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sentry banner detected on the car's screen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aviso de Sentry detectado en la pantalla del coche."
           }
         }
       }
@@ -6993,6 +8801,22 @@
         }
       }
     },
+    "Session list": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Session list"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lista de sesiones"
+          }
+        }
+      }
+    },
     "Sessions": {
       "localizations": {
         "es": {
@@ -7005,6 +8829,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sessions"
+          }
+        }
+      }
+    },
+    "Sessions and spend per location.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessions and spend per location."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sesiones y gasto por ubicación."
+          }
+        }
+      }
+    },
+    "Set the price for %@. It will be reused for future sessions at this location.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set the price for %@. It will be reused for future sessions at this location."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fija el precio de %@. Se reutilizará en futuras sesiones de esta ubicación."
           }
         }
       }
@@ -7037,6 +8893,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Set up your server"
+          }
+        }
+      }
+    },
+    "Set when each band starts — the app closes the day automatically, so the bands always add up to 24 hours. Leave the sell price empty to match the buy price. Swipe a band to delete it.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set when each band starts — the app closes the day automatically, so the bands always add up to 24 hours. Leave the sell price empty to match the buy price. Swipe a band to delete it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indica cuándo empieza cada tramo: la app cierra el día automáticamente, así que los tramos siempre suman 24 horas. Deja el precio de venta vacío para igualarlo al de compra. Desliza un tramo para eliminarlo."
           }
         }
       }
@@ -7121,6 +8993,38 @@
         }
       }
     },
+    "Shortcut to per-location costs and prices.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortcut to per-location costs and prices."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acceso a costes y precios por ubicación."
+          }
+        }
+      }
+    },
+    "Show": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar"
+          }
+        }
+      }
+    },
     "Show setup QR code": {
       "localizations": {
         "en": {
@@ -7133,6 +9037,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mostrar código QR de configuración"
+          }
+        }
+      }
+    },
+    "Shown": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shown"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visibles"
           }
         }
       }
@@ -7169,6 +9089,22 @@
         }
       }
     },
+    "Skip tutorial": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skip tutorial"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saltar tutorial"
+          }
+        }
+      }
+    },
     "SoC": {
       "localizations": {
         "en": {
@@ -7181,6 +9117,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "SoC"
+          }
+        }
+      }
+    },
+    "SoC change": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SoC change"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cambio de SoC"
           }
         }
       }
@@ -7265,6 +9217,102 @@
         }
       }
     },
+    "Span": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Span"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duración"
+          }
+        }
+      }
+    },
+    "Specs & warranty": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Specs & warranty"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ficha y garantía"
+          }
+        }
+      }
+    },
+    "Speed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Velocidad"
+          }
+        }
+      }
+    },
+    "Speed, power and consumption while driving.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speed, power and consumption while driving."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Velocidad, potencia y consumo mientras conduces."
+          }
+        }
+      }
+    },
+    "Standard": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standard"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Llano"
+          }
+        }
+      }
+    },
+    "Standby battery loss while parked.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standby battery loss while parked."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pérdida de batería en reposo mientras está aparcado."
+          }
+        }
+      }
+    },
     "Start": {
       "localizations": {
         "es": {
@@ -7281,6 +9329,22 @@
         }
       }
     },
+    "Started": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Started"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inicio"
+          }
+        }
+      }
+    },
     "Starting": {
       "localizations": {
         "es": {
@@ -7293,6 +9357,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Starting"
+          }
+        }
+      }
+    },
+    "Starts": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starts"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empieza"
           }
         }
       }
@@ -7325,6 +9405,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "State of charge"
+          }
+        }
+      }
+    },
+    "State of charge over the last days.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "State of charge over the last days."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estado de carga en los últimos días."
           }
         }
       }
@@ -7441,6 +9537,38 @@
         }
       }
     },
+    "Supercharger map": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supercharger map"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mapa de Superchargers"
+          }
+        }
+      }
+    },
+    "Superchargers": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Superchargers"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Superchargers"
+          }
+        }
+      }
+    },
     "Suspended": {
       "localizations": {
         "es": {
@@ -7553,6 +9681,22 @@
         }
       }
     },
+    "TPMS readings arrive when the car is awake.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TPMS readings arrive when the car is awake."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las lecturas del TPMS llegan cuando el coche está despierto."
+          }
+        }
+      }
+    },
     "Tag": {
       "localizations": {
         "en": {
@@ -7601,6 +9745,38 @@
         }
       }
     },
+    "Tap a plan to edit its bands. The selected plan prices any charging session TeslaMate did not record a cost for. Swipe to delete.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap a plan to edit its bands. The selected plan prices any charging session TeslaMate did not record a cost for. Swipe to delete."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toca un plan para editar sus tramos. El plan seleccionado valora las sesiones de carga sin coste registrado por TeslaMate. Desliza para eliminar."
+          }
+        }
+      }
+    },
+    "Tariff plans": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tariff plans"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planes tarifarios"
+          }
+        }
+      }
+    },
     "Teal": {
       "localizations": {
         "en": {
@@ -7613,6 +9789,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Verde azulado"
+          }
+        }
+      }
+    },
+    "Telemetry": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Telemetry"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Telemetría"
           }
         }
       }
@@ -7645,6 +9837,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Temperature"
+          }
+        }
+      }
+    },
+    "Tesla": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tesla"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tesla"
           }
         }
       }
@@ -7741,6 +9949,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ese archivo no es una copia válida de Tesstats."
+          }
+        }
+      }
+    },
+    "The 48-hour timeline highlights driving and charging without sending commands to the car.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The 48-hour timeline highlights driving and charging without sending commands to the car."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La línea temporal de 48 horas destaca la conducción y la carga sin enviar órdenes al coche."
           }
         }
       }
@@ -7873,6 +10097,22 @@
         }
       }
     },
+    "This is your dashboard": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is your dashboard"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este es tu panel"
+          }
+        }
+      }
+    },
     "This month": {
       "localizations": {
         "en": {
@@ -7905,6 +10145,22 @@
         }
       }
     },
+    "This month against last month.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This month against last month."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este mes frente al anterior."
+          }
+        }
+      }
+    },
     "This week": {
       "localizations": {
         "en": {
@@ -7933,6 +10189,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Este año"
+          }
+        }
+      }
+    },
+    "Time": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiempo"
           }
         }
       }
@@ -8001,6 +10273,22 @@
         }
       }
     },
+    "Tires": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tires"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neumáticos"
+          }
+        }
+      }
+    },
     "To": {
       "localizations": {
         "en": {
@@ -8013,6 +10301,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hasta"
+          }
+        }
+      }
+    },
+    "Today": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Today"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoy"
           }
         }
       }
@@ -8109,6 +10413,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Total charges"
+          }
+        }
+      }
+    },
+    "Total distance": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total distance"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distancia total"
           }
         }
       }
@@ -8241,6 +10561,54 @@
         }
       }
     },
+    "Trip cost": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trip cost"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coste del viaje"
+          }
+        }
+      }
+    },
+    "Trip list": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trip list"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lista de viajes"
+          }
+        }
+      }
+    },
+    "Trip telemetry": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trip telemetry"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Telemetría del viaje"
+          }
+        }
+      }
+    },
     "Trips": {
       "localizations": {
         "es": {
@@ -8253,6 +10621,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Trips"
+          }
+        }
+      }
+    },
+    "Trips, charges, parking and notifications are derived from TeslaMate data.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trips, charges, parking and notifications are derived from TeslaMate data."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los viajes, las cargas, el aparcamiento y las notificaciones se derivan de los datos de TeslaMate."
           }
         }
       }
@@ -8433,6 +10817,22 @@
         }
       }
     },
+    "Untitled plan": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Untitled plan"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan sin nombre"
+          }
+        }
+      }
+    },
     "Up to date": {
       "localizations": {
         "es": {
@@ -8609,6 +11009,22 @@
         }
       }
     },
+    "Vehicle events generated on this device will appear here.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vehicle events generated on this device will appear here."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los eventos del vehículo generados en este dispositivo aparecerán aquí."
+          }
+        }
+      }
+    },
     "Vehicle unlocked": {
       "localizations": {
         "es": {
@@ -8737,6 +11153,38 @@
         }
       }
     },
+    "Warranty": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warranty"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Garantía"
+          }
+        }
+      }
+    },
+    "Weather": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weather"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meteorología"
+          }
+        }
+      }
+    },
     "WebSocket Secure (wss)": {
       "localizations": {
         "es": {
@@ -8769,6 +11217,22 @@
         }
       }
     },
+    "Welcome to Tesstats": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Welcome to Tesstats"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bienvenido a Tesstats"
+          }
+        }
+      }
+    },
     "Wh": {
       "localizations": {
         "en": {
@@ -8781,6 +11245,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wh"
+          }
+        }
+      }
+    },
+    "What charging costs you, per 100 km and projected.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What charging costs you, per 100 km and projected."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lo que te cuesta cargar, por 100 km y proyectado."
           }
         }
       }
@@ -8833,6 +11313,22 @@
         }
       }
     },
+    "Where the car is parked, on a map.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Where the car is parked, on a map."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dónde está aparcado el coche, en un mapa."
+          }
+        }
+      }
+    },
     "Where you charge": {
       "localizations": {
         "en": {
@@ -8845,6 +11341,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dónde cargas"
+          }
+        }
+      }
+    },
+    "Where you charged, on one map.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Where you charged, on one map."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dónde has cargado, en un solo mapa."
+          }
+        }
+      }
+    },
+    "Which weekdays and hours you drive.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Which weekdays and hours you drive."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qué días y horas conduces."
           }
         }
       }
@@ -8945,6 +11473,22 @@
         }
       }
     },
+    "Yesterday": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yesterday"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ayer"
+          }
+        }
+      }
+    },
     "You saved": {
       "localizations": {
         "es": {
@@ -8973,6 +11517,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Has gastado %@ cargando en %lld sesiones este mes (%@)."
+          }
+        }
+      }
+    },
+    "Your charging sessions, newest first.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your charging sessions, newest first."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tus sesiones de carga, de la más reciente a la más antigua."
+          }
+        }
+      }
+    },
+    "Your drives, newest first, grouped by day.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your drives, newest first, grouped by day."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tus viajes, del más reciente al más antiguo, agrupados por día."
           }
         }
       }
@@ -9009,6 +11585,22 @@
         }
       }
     },
+    "drives": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "drives"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "viajes"
+          }
+        }
+      }
+    },
     "its location": {
       "localizations": {
         "es": {
@@ -9041,6 +11633,22 @@
         }
       }
     },
+    "kWh": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kWh"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kWh"
+          }
+        }
+      }
+    },
     "m": {
       "localizations": {
         "en": {
@@ -9057,6 +11665,22 @@
         }
       }
     },
+    "now": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "now"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ahora"
+          }
+        }
+      }
+    },
     "psi": {
       "localizations": {
         "en": {
@@ -9069,6 +11693,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "psi"
+          }
+        }
+      }
+    },
+    "same": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "same"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "igual"
+          }
+        }
+      }
+    },
+    "sessions": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sessions"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sesiones"
           }
         }
       }
@@ -9105,6 +11761,22 @@
         }
       }
     },
+    "–": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "–"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "–"
+          }
+        }
+      }
+    },
     "—": {
       "localizations": {
         "es": {
@@ -9133,6 +11805,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "«Borrar caché» elimina el historial descargado guardado sin conexión. «Borrar todos los datos» también borra tu servidor, credenciales, perfiles y preferencias."
+          }
+        }
+      }
+    },
+    "→ %lld%%": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "→ %lld%%"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "→ %lld%%"
           }
         }
       }

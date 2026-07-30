@@ -55,9 +55,18 @@ struct TariffPlansView: View {
 
     private func planRow(_ plan: TariffPlan) -> some View {
         HStack(spacing: 10) {
-            Image(systemName: isActive(plan) ? "checkmark.circle.fill" : "circle")
-                .foregroundStyle(isActive(plan) ? Brand.crimson : Brand.textTertiary)
-                .onTapGesture { select(plan) }
+            // A bare .onTapGesture here swallowed the row's tap, so the plan could never be
+            // opened. A borderless Button keeps its own hit area inside the NavigationLink.
+            Button {
+                select(plan)
+            } label: {
+                Image(systemName: isActive(plan) ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(isActive(plan) ? Brand.crimson : Brand.textTertiary)
+                    .frame(width: 30, height: 30)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.borderless)
+            .accessibilityLabel(isActive(plan) ? String(localized: "Selected plan") : String(localized: "Use this plan"))
             VStack(alignment: .leading, spacing: 2) {
                 Text(plan.name.isEmpty ? String(localized: "Untitled plan") : plan.name)
                     .foregroundStyle(Brand.textPrimary)
